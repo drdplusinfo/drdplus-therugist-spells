@@ -1,0 +1,14 @@
+formula,modifiers
+barrier,color;filter;camouflage;invisibility;movement;transposition;release
+smoke,color;invisibility;movement;transposition;release;scent
+illusion,interactive_illusion;receptor;watcher
+metamorphosis,breach;receptor;release
+fire,color;explosion;invisibility;movement;transposition;release
+portal,gate
+light,color;invisibility;movement;transposition;release
+flow_of_time,movement;breach;transposition;release
+tsunami_from_clay_and_stones,transposition;release
+hit,transposition
+great_massacre,movement;transposition;release
+discharge,color;thunder;hammer;invisibility;movement;transposition;release
+lock,transposition;watcher;breach
