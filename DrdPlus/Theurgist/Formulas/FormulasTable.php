@@ -58,7 +58,7 @@ class FormulasTable extends AbstractFileTable
 
     /**
      * @param FormulaCode $formulaCode
-     * @return array|ModifierCode[]
+     * @return array|ProfileCode[]
      * @throws \DrdPlus\Theurgist\Formulas\Exceptions\UnknownFormulaToGetProfilesFor
      */
     public function getProfilesForFormula(FormulaCode $formulaCode): array
