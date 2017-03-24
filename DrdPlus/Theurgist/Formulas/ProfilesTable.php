@@ -56,7 +56,7 @@ class ProfilesTable extends AbstractFileTable
 
     /**
      * @param ProfileCode $profileCode
-     * @return array|ProfileCode[]
+     * @return array|ModifierCode[]
      * @throws \DrdPlus\Theurgist\Formulas\Exceptions\UnknownProfileToGetModifiersFor
      */
     public function getModifiersForProfile(ProfileCode $profileCode): array

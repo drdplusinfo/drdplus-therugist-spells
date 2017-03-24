@@ -7,9 +7,8 @@ use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ProfileCode;
 use DrdPlus\Theurgist\Formulas\FormulasTable;
 use DrdPlus\Theurgist\Formulas\ProfilesTable;
-use Granam\Tests\Tools\TestWithMockery;
 
-class ProfilesTableTest extends TestWithMockery
+class ProfilesTableTest extends AbstractTheurgistTableTest
 {
     /**
      * @var FormulasTable
@@ -65,11 +64,7 @@ class ProfilesTableTest extends TestWithMockery
      */
     private function getExpectedFormulas(string $profileValue): array
     {
-        $oppositeProfile = str_replace('♀', '♂', $profileValue, $countOfReplaced);
-        if ($countOfReplaced === 0) {
-            $oppositeProfile = str_replace('♂', '♀', $profileValue, $countOfReplaced);
-        }
-        self::assertSame(1, $countOfReplaced);
+        $oppositeProfile = $this->reverseProfileGender($profileValue);
         $possibleFormulas = [];
         foreach (FormulaCode::getPossibleValues() as $formulaValue) {
             $profileCodes = $this->formulasTable->getProfilesForFormula(FormulaCode::getIt($formulaValue));

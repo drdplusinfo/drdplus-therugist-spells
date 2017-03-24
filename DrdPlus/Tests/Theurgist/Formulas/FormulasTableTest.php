@@ -1,13 +1,14 @@
 <?php
+
 namespace DrdPlus\Tests\Theurgist\Formulas;
 
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ProfileCode;
 use DrdPlus\Theurgist\Formulas\FormulasTable;
-use Granam\Tests\Tools\TestWithMockery;
+use DrdPlus\Theurgist\Formulas\ProfilesTable;
 
-class FormulasTableTest extends TestWithMockery
+class FormulasTableTest extends AbstractTheurgistTableTest
 {
     /**
      * @test
@@ -20,6 +21,7 @@ class FormulasTableTest extends TestWithMockery
             self::assertTrue(is_array($modifierCodes));
             self::assertNotEmpty($modifierCodes);
             $modifierValues = [];
+            /** @var ModifierCode $modifierCode */
             foreach ($modifierCodes as $modifierCode) {
                 self::assertInstanceOf(ModifierCode::class, $modifierCode);
                 $modifierValues[] = $modifierCode->getValue();
@@ -29,6 +31,14 @@ class FormulasTableTest extends TestWithMockery
             sort($expectedModifiers);
             self::assertEquals(
                 $expectedModifiers,
+                $modifierValues,
+                'Expected different modifiers for formula ' . $formulaValue
+            );
+
+            $matchingModifierValues = $this->getModifiersFromProfilesTable($formulaValue);
+            sort($matchingModifierValues);
+            self::assertEquals(
+                $matchingModifierValues,
                 $modifierValues,
                 'Expected different modifiers for formula ' . $formulaValue
             );
@@ -61,6 +71,24 @@ class FormulasTableTest extends TestWithMockery
     }
 
     /**
+     * @param string $formulaValue
+     * @return array
+     */
+    private function getModifiersFromProfilesTable(string $formulaValue): array
+    {
+        $matchingProfileValues = $this->getProfilesByProfileTable($formulaValue);
+        $t = new ProfilesTable();
+        $matchingModifierValues = [];
+        foreach ($matchingProfileValues as $matchingProfileValue) {
+            foreach ($t->getModifiersForProfile(ProfileCode::getIt($matchingProfileValue)) as $modifierCode) {
+                $matchingModifierValues[] = $modifierCode->getValue();
+            }
+        }
+
+        return array_unique($matchingModifierValues);
+    }
+
+    /**
      * @test
      * @expectedException \DrdPlus\Theurgist\Formulas\Exceptions\UnknownFormulaToGetModifiersFor
      * @expectedExceptionMessageRegExp ~Abraka dabra~
@@ -90,7 +118,6 @@ class FormulasTableTest extends TestWithMockery
      */
     public function I_can_get_profiles_for_formula()
     {
-        // TODO check against ProfilesTable
         $formulasTable = new FormulasTable();
         foreach (FormulaCode::getPossibleValues() as $formulaValue) {
             $profileCodes = $formulasTable->getProfilesForFormula(FormulaCode::getIt($formulaValue));
@@ -106,6 +133,13 @@ class FormulasTableTest extends TestWithMockery
             sort($expectedProfiles);
             self::assertEquals(
                 $expectedProfiles,
+                $profileValues,
+                "Expected different profiles for formula '{$formulaValue}'"
+            );
+            $profilesByProfileTable = $this->getProfilesByProfileTable($formulaValue);
+            sort($profilesByProfileTable);
+            self::assertEquals(
+                $profilesByProfileTable,
                 $profileValues,
                 "Expected different profiles for formula '{$formulaValue}'"
             );
@@ -152,6 +186,27 @@ class FormulasTableTest extends TestWithMockery
                 return strpos($profileValue, '♂') !== false;
             }
         );
+    }
+
+    /**
+     * @param string $formulaValue
+     * @return array|string[]
+     */
+    private function getProfilesByProfileTable(string $formulaValue): array
+    {
+        $profilesTable = new ProfilesTable();
+        $matchingProfiles = [];
+        foreach (ProfileCode::getPossibleValues() as $profileValue) {
+            foreach ($profilesTable->getFormulasForProfile(ProfileCode::getIt($profileValue)) as $formulaCode) {
+                if ($formulaCode->getValue() === $formulaValue) {
+                    $oppositeProfile = $this->reverseProfileGender($profileValue);
+                    $matchingProfiles[] = $oppositeProfile;
+                    break;
+                }
+            }
+        }
+
+        return array_unique($matchingProfiles);
     }
 
     /**
