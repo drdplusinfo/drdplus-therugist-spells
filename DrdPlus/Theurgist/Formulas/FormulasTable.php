@@ -44,15 +44,13 @@ class FormulasTable extends AbstractFileTable
         try {
             /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
             return array_map(
-                function (string $modifierName) {
-                    return ModifierCode::getIt($modifierName);
+                function (string $modifierValue) {
+                    return ModifierCode::getIt($modifierValue);
                 },
                 $this->getValue($formulaCode, self::MODIFIERS)
             );
         } catch (RequiredRowNotFound $requiredRowNotFound) {
-            throw new Exceptions\UnknownFormulaToGetModifiersFor(
-                "Given formula code '{$formulaCode}' is unknown"
-            );
+            throw new Exceptions\UnknownFormulaToGetModifiersFor("Given formula code '{$formulaCode}' is unknown");
         }
     }
 
@@ -66,8 +64,8 @@ class FormulasTable extends AbstractFileTable
         try {
             /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
             return array_map(
-                function (string $profileName) {
-                    return ProfileCode::getIt($profileName);
+                function (string $profileValue) {
+                    return ProfileCode::getIt($profileValue);
                 },
                 $this->getValue($formulaCode, self::PROFILES)
             );

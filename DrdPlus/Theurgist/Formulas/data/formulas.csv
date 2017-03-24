@@ -1,6 +1,6 @@
 formula,modifiers,profiles
 barrier,color;filter;camouflage;invisibility;movement;transposition;release,barrier_♀;spark_♀;release_♀
-smoke,color;invisibility;movement;transposition;release;scent,spark_♀;scent_♀;release_♀
+smoke,color;invisibility;movement;transposition;release;fragrance,spark_♀;scent_♀;release_♀
 illusion,interactive_illusion;receptor;watcher,illusion_♀;receptor_♀;watcher_♀
 metamorphosis,breach;receptor;release,breach_♀;receptor_♀;release_♀
 fire,color;explosion;invisibility;movement;transposition;release,spark_♀;fire_♀;release_♀
