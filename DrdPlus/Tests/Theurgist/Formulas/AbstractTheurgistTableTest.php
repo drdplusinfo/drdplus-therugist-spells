@@ -1,5 +1,4 @@
 <?php
-
 namespace DrdPlus\Tests\Theurgist\Formulas;
 
 use Granam\Tests\Tools\TestWithMockery;
