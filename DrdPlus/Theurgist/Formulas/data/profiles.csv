@@ -27,5 +27,5 @@ watcher_venus,watcher,
 watcher_mars,gate;hammer,illusion;lock
 look_venus,color;invisibility,
 look_mars,explosion,
-time_venus,step_to_future_or_past,
+time_venus,step_to_future;step_to_past,
 time_mars,gate,
