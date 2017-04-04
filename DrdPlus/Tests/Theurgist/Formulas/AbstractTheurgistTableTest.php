@@ -11,11 +11,11 @@ abstract class AbstractTheurgistTableTest extends TestWithMockery
      */
     protected function reverseProfileGender(string $profile): string
     {
-        $oppositeProfile = str_replace('♀', '♂', $profile, $countOfReplaced);
+        $oppositeProfile = str_replace('venus', 'mars', $profile, $countOfReplaced);
         if ($countOfReplaced === 1) {
             return $oppositeProfile;
         }
-        $oppositeProfile = str_replace('♂', '♀', $profile, $countOfReplaced);
+        $oppositeProfile = str_replace('mars', 'venus', $profile, $countOfReplaced);
         self::assertSame(1, $countOfReplaced);
 
         return $oppositeProfile;

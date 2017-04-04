@@ -182,7 +182,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         return array_filter(
             ProfileCode::getPossibleValues(),
             function (string $profileValue) {
-                return strpos($profileValue, '♂') !== false;
+                return strpos($profileValue, '_mars') !== false;
             }
         );
     }
