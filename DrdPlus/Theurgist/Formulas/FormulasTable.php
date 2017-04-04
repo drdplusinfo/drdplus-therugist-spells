@@ -50,9 +50,7 @@ class FormulasTable extends AbstractFileTable
                 $this->getValue($formulaCode, self::PROFILES)
             );
         } catch (RequiredRowNotFound $requiredRowNotFound) {
-            throw new Exceptions\UnknownFormulaToGetProfilesFor(
-                "Given formula code '{$formulaCode}' is unknown"
-            );
+            throw new Exceptions\UnknownFormulaToGetProfilesFor("Given formula code '{$formulaCode}' is unknown");
         }
     }
 
