@@ -28,7 +28,9 @@ class ProfilesTableTest extends AbstractTheurgistTableTest
         foreach (ProfileCode::getPossibleValues() as $profileValue) {
             $formulaCodes = $profilesTable->getFormulasForProfile(ProfileCode::getIt($profileValue));
             self::assertTrue(is_array($formulaCodes));
-            if ($profileValue === 'look_mars' || strpos($profileValue, 'venus')) {
+            if (strpos($profileValue, 'venus')
+                || in_array($profileValue, ['look_mars', 'time_mars'], true)
+            ) {
                 self::assertCount(0, $formulaCodes);
             } else {
                 self::assertNotEmpty($formulaCodes, 'Expected some formulas for profile ' . $profileValue);
@@ -165,6 +167,8 @@ class ProfilesTableTest extends AbstractTheurgistTableTest
         'watcher_mars' => [ModifierCode::COLOR, ModifierCode::EXPLOSION, ModifierCode::FILTER, ModifierCode::WATCHER, ModifierCode::THUNDER, ModifierCode::INTERACTIVE_ILLUSION, ModifierCode::CAMOUFLAGE, ModifierCode::INVISIBILITY, ModifierCode::MOVEMENT, ModifierCode::BREACH, ModifierCode::RECEPTOR, ModifierCode::STEP_TO_FUTURE_OR_PAST, ModifierCode::TRANSPOSITION, ModifierCode::RELEASE, ModifierCode::FRAGRANCE],
         'look_venus' => [ModifierCode::GATE, ModifierCode::EXPLOSION, ModifierCode::FILTER, ModifierCode::WATCHER, ModifierCode::THUNDER, ModifierCode::INTERACTIVE_ILLUSION, ModifierCode::HAMMER, ModifierCode::CAMOUFLAGE, ModifierCode::MOVEMENT, ModifierCode::BREACH, ModifierCode::RECEPTOR, ModifierCode::STEP_TO_FUTURE_OR_PAST, ModifierCode::TRANSPOSITION, ModifierCode::RELEASE, ModifierCode::FRAGRANCE],
         'look_mars' => [ModifierCode::COLOR, ModifierCode::GATE, ModifierCode::FILTER, ModifierCode::WATCHER, ModifierCode::THUNDER, ModifierCode::INTERACTIVE_ILLUSION, ModifierCode::HAMMER, ModifierCode::CAMOUFLAGE, ModifierCode::INVISIBILITY, ModifierCode::MOVEMENT, ModifierCode::BREACH, ModifierCode::RECEPTOR, ModifierCode::STEP_TO_FUTURE_OR_PAST, ModifierCode::TRANSPOSITION, ModifierCode::RELEASE, ModifierCode::FRAGRANCE],
+        'time_venus' => [ModifierCode::COLOR, ModifierCode::GATE, ModifierCode::FILTER, ModifierCode::WATCHER, ModifierCode::EXPLOSION, ModifierCode::THUNDER, ModifierCode::INTERACTIVE_ILLUSION, ModifierCode::HAMMER, ModifierCode::CAMOUFLAGE, ModifierCode::INVISIBILITY, ModifierCode::MOVEMENT, ModifierCode::BREACH, ModifierCode::RECEPTOR, ModifierCode::TRANSPOSITION, ModifierCode::RELEASE, ModifierCode::FRAGRANCE],
+        'time_mars' => [ModifierCode::COLOR, ModifierCode::FILTER, ModifierCode::WATCHER, ModifierCode::EXPLOSION, ModifierCode::THUNDER, ModifierCode::INTERACTIVE_ILLUSION, ModifierCode::HAMMER, ModifierCode::CAMOUFLAGE, ModifierCode::INVISIBILITY, ModifierCode::MOVEMENT, ModifierCode::BREACH, ModifierCode::RECEPTOR, ModifierCode::STEP_TO_FUTURE_OR_PAST, ModifierCode::TRANSPOSITION, ModifierCode::RELEASE, ModifierCode::FRAGRANCE],
     ];
 
     /**

@@ -14,14 +14,14 @@ class ProfilesTable extends AbstractFileTable
         return __DIR__ . '/data/profiles.csv';
     }
 
-    const FORMULAS = 'formulas';
     const MODIFIERS = 'modifiers';
+    const FORMULAS = 'formulas';
 
     protected function getExpectedDataHeaderNamesToTypes(): array
     {
         return [
-            self::FORMULAS => self::ARRAY,
             self::MODIFIERS => self::ARRAY,
+            self::FORMULAS => self::ARRAY,
         ];
     }
 
@@ -32,26 +32,6 @@ class ProfilesTable extends AbstractFileTable
         return [
             self::PROFILE,
         ];
-    }
-
-    /**
-     * @param ProfileCode $profileCode
-     * @return array|FormulaCode[]
-     * @throws \DrdPlus\Theurgist\Formulas\Exceptions\UnknownProfileToGetFormulasFor
-     */
-    public function getFormulasForProfile(ProfileCode $profileCode): array
-    {
-        try {
-            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-            return array_map(
-                function (string $formulaValue) {
-                    return FormulaCode::getIt($formulaValue);
-                },
-                $this->getValue($profileCode, self::FORMULAS)
-            );
-        } catch (RequiredRowNotFound $requiredRowNotFound) {
-            throw new Exceptions\UnknownProfileToGetFormulasFor("Given profile code '{$profileCode}' is unknown");
-        }
     }
 
     /**
@@ -71,6 +51,26 @@ class ProfilesTable extends AbstractFileTable
             );
         } catch (RequiredRowNotFound $requiredRowNotFound) {
             throw new Exceptions\UnknownProfileToGetModifiersFor("Given profile code '{$profileCode}' is unknown");
+        }
+    }
+
+    /**
+     * @param ProfileCode $profileCode
+     * @return array|FormulaCode[]
+     * @throws \DrdPlus\Theurgist\Formulas\Exceptions\UnknownProfileToGetFormulasFor
+     */
+    public function getFormulasForProfile(ProfileCode $profileCode): array
+    {
+        try {
+            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+            return array_map(
+                function (string $formulaValue) {
+                    return FormulaCode::getIt($formulaValue);
+                },
+                $this->getValue($profileCode, self::FORMULAS)
+            );
+        } catch (RequiredRowNotFound $requiredRowNotFound) {
+            throw new Exceptions\UnknownProfileToGetFormulasFor("Given profile code '{$profileCode}' is unknown");
         }
     }
 

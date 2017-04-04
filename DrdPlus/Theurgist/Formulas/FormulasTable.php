@@ -14,14 +14,14 @@ class FormulasTable extends AbstractFileTable
         return __DIR__ . '/data/formulas.csv';
     }
 
-    const MODIFIERS = 'modifiers';
     const PROFILES = 'profiles';
+    const MODIFIERS = 'modifiers';
 
     protected function getExpectedDataHeaderNamesToTypes(): array
     {
         return [
-            self::MODIFIERS => self::ARRAY,
             self::PROFILES => self::ARRAY,
+            self::MODIFIERS => self::ARRAY,
         ];
     }
 
@@ -32,26 +32,6 @@ class FormulasTable extends AbstractFileTable
         return [
             self::FORMULA,
         ];
-    }
-
-    /**
-     * @param FormulaCode $formulaCode
-     * @return array|ModifierCode[]
-     * @throws \DrdPlus\Theurgist\Formulas\Exceptions\UnknownFormulaToGetModifiersFor
-     */
-    public function getModifiersForFormula(FormulaCode $formulaCode): array
-    {
-        try {
-            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-            return array_map(
-                function (string $modifierValue) {
-                    return ModifierCode::getIt($modifierValue);
-                },
-                $this->getValue($formulaCode, self::MODIFIERS)
-            );
-        } catch (RequiredRowNotFound $requiredRowNotFound) {
-            throw new Exceptions\UnknownFormulaToGetModifiersFor("Given formula code '{$formulaCode}' is unknown");
-        }
     }
 
     /**
@@ -76,4 +56,23 @@ class FormulasTable extends AbstractFileTable
         }
     }
 
+    /**
+     * @param FormulaCode $formulaCode
+     * @return array|ModifierCode[]
+     * @throws \DrdPlus\Theurgist\Formulas\Exceptions\UnknownFormulaToGetModifiersFor
+     */
+    public function getModifiersForFormula(FormulaCode $formulaCode): array
+    {
+        try {
+            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+            return array_map(
+                function (string $modifierValue) {
+                    return ModifierCode::getIt($modifierValue);
+                },
+                $this->getValue($formulaCode, self::MODIFIERS)
+            );
+        } catch (RequiredRowNotFound $requiredRowNotFound) {
+            throw new Exceptions\UnknownFormulaToGetModifiersFor("Given formula code '{$formulaCode}' is unknown");
+        }
+    }
 }
