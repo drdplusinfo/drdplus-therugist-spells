@@ -6,6 +6,7 @@ use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ProfileCode;
 use DrdPlus\Theurgist\Formulas\FormulasTable;
 use DrdPlus\Theurgist\Formulas\ModifiersTable;
+use DrdPlus\Theurgist\Formulas\ProfilesTable;
 
 class ModifiersTableTest extends AbstractTheurgistTableTest
 {
@@ -14,10 +15,15 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
      * @var FormulasTable
      */
     private $formulasTable;
+    /**
+     * @var ProfilesTable
+     */
+    private $profilesTable;
 
     protected function setUp()
     {
         $this->formulasTable = new FormulasTable();
+        $this->profilesTable = new ProfilesTable();
     }
 
     /**
@@ -164,7 +170,33 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
      */
     private function getExpectedProfileValues(string $modifierValue): array
     {
-        return array_diff(ProfileCode::getPossibleValues(), self::$impossibleProfiles[$modifierValue]);
+        $expectedProfileValues = array_diff(ProfileCode::getPossibleValues(), self::$impossibleProfiles[$modifierValue]);
+        sort($expectedProfileValues);
+        $profileValuesFromProfilesTable = $this->getProfileValuesFromProfilesTable($modifierValue);
+        sort($profileValuesFromProfilesTable);
+        self::assertSame($expectedProfileValues, $profileValuesFromProfilesTable);
+
+        return $expectedProfileValues;
+    }
+
+    /**
+     * @param string $modifierValue
+     * @return array
+     */
+    private function getProfileValuesFromProfilesTable(string $modifierValue): array
+    {
+        $expectedProfileValues = [];
+        foreach (ProfileCode::getPossibleValues() as $profileValue) {
+            $modifierCodes = $this->profilesTable->getModifiersForProfile(ProfileCode::getIt($profileValue));
+            foreach ($modifierCodes as $modifierCode) {
+                if ($modifierCode->getValue() === $modifierValue) {
+                    $expectedProfileValues[] = $this->reverseProfileGender($profileValue);
+                    break;
+                }
+            }
+        }
+
+        return $expectedProfileValues;
     }
 
     /**
