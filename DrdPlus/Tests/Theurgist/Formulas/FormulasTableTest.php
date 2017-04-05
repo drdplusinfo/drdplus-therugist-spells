@@ -19,18 +19,18 @@ class FormulasTableTest extends AbstractTheurgistTableTest
             $modifierCodes = $formulasTable->getModifiersForFormula(FormulaCode::getIt($formulaValue));
             self::assertTrue(is_array($modifierCodes));
             self::assertNotEmpty($modifierCodes);
-            $modifierValues = [];
+            $collectedModifierValues = [];
             /** @var ModifierCode $modifierCode */
             foreach ($modifierCodes as $modifierCode) {
                 self::assertInstanceOf(ModifierCode::class, $modifierCode);
-                $modifierValues[] = $modifierCode->getValue();
+                $collectedModifierValues[] = $modifierCode->getValue();
             }
-            sort($modifierValues);
-            $expectedModifiers = $this->getPossibleModifiersFor($formulaValue);
-            sort($expectedModifiers);
+            sort($collectedModifierValues);
+            $possibleModifierValues = $this->getExpectedModifierValues($formulaValue);
+            sort($possibleModifierValues);
             self::assertEquals(
-                $expectedModifiers,
-                $modifierValues,
+                $possibleModifierValues,
+                $collectedModifierValues,
                 'Expected different modifiers for formula ' . $formulaValue
             );
 
@@ -38,7 +38,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
             sort($matchingModifierValues);
             self::assertEquals(
                 $matchingModifierValues,
-                $modifierValues,
+                $collectedModifierValues,
                 'Expected different modifiers for formula ' . $formulaValue
             );
         }
@@ -64,7 +64,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
      * @param string $formulaValue
      * @return array|string[]
      */
-    private function getPossibleModifiersFor(string $formulaValue): array
+    private function getExpectedModifierValues(string $formulaValue): array
     {
         return array_diff(ModifierCode::getPossibleValues(), self::$impossibleModifiers[$formulaValue]);
     }
@@ -128,7 +128,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
                 $profileValues[] = $profileCode->getValue();
             }
             sort($profileValues);
-            $expectedProfiles = $this->getPossibleProfilesFor($formulaValue);
+            $expectedProfiles = $this->getExpectedProfilesFor($formulaValue);
             sort($expectedProfiles);
             self::assertEquals(
                 $expectedProfiles,
@@ -165,7 +165,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
      * @param string $formulaValue
      * @return array|string[]
      */
-    private function getPossibleProfilesFor(string $formulaValue): array
+    private function getExpectedProfilesFor(string $formulaValue): array
     {
         return array_diff(
             ProfileCode::getPossibleValues(),
