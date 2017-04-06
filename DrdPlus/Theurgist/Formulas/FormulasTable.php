@@ -1,6 +1,7 @@
 <?php
 namespace DrdPlus\Theurgist\Formulas;
 
+use DrdPlus\Tables\Measurements\Distance\DistanceTable;
 use DrdPlus\Tables\Measurements\Time\TimeTable;
 use DrdPlus\Tables\Partials\AbstractFileTable;
 use DrdPlus\Tables\Partials\Exceptions\RequiredRowNotFound;
@@ -9,7 +10,9 @@ use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ProfileCode;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Difficulty;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Duration;
+use DrdPlus\Theurgist\Formulas\CastingParameters\Power;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Radius;
+use DrdPlus\Theurgist\Formulas\CastingParameters\SizeChange;
 use Granam\Integer\NegativeInteger;
 use Granam\Integer\NegativeIntegerObject;
 use Granam\Integer\PositiveInteger;
@@ -114,9 +117,10 @@ class FormulasTable extends AbstractFileTable
 
     /**
      * @param FormulaCode $formulaCode
+     * @param DistanceTable $distanceTable
      * @return Radius|null
      */
-    public function getRadius(FormulaCode $formulaCode)
+    public function getRadius(FormulaCode $formulaCode, DistanceTable $distanceTable)
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         $radiusValues = $this->getValue($formulaCode, self::RADIUS);
@@ -125,7 +129,7 @@ class FormulasTable extends AbstractFileTable
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new Radius($radiusValues);
+        return new Radius($radiusValues, $distanceTable);
     }
 
     /**
@@ -137,6 +141,38 @@ class FormulasTable extends AbstractFileTable
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new Duration($this->getValue($formulaCode, self::DURATION), $timeTable);
+    }
+
+    /**
+     * @param FormulaCode $formulaCode
+     * @return Power|null
+     */
+    public function getPower(FormulaCode $formulaCode)
+    {
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        $powerValues = $this->getValue($formulaCode, self::POWER);
+        if (!$powerValues) {
+            return null;
+        }
+
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new Power($powerValues);
+    }
+
+    /**
+     * @param FormulaCode $formulaCode
+     * @return SizeChange|null
+     */
+    public function getSizeChange(FormulaCode $formulaCode)
+    {
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        $sizeChangeValues = $this->getValue($formulaCode, self::SIZE_CHANGE);
+        if (!$sizeChangeValues) {
+            return null;
+        }
+
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new SizeChange($sizeChangeValues);
     }
 
     /**

@@ -100,4 +100,12 @@ class AdditionByRealm extends StrictObject
         return $this->addition;
     }
 
+    /**
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return "{$this->getRealmsNumber()}/{$this->getAddition()}";
+    }
+
 }

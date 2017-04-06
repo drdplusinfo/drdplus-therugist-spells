@@ -3,10 +3,11 @@ namespace DrdPlus\Theurgist\Formulas\CastingParameters;
 
 use DrdPlus\Tables\Measurements\Time\TimeBonus;
 use DrdPlus\Tables\Measurements\Time\TimeTable;
+use Granam\Integer\PositiveInteger;
 use Granam\Integer\Tools\ToInteger;
 use Granam\Tools\ValueDescriber;
 
-class Duration extends CastingParameter
+class Duration extends CastingParameter implements PositiveInteger
 {
     /**
      * @var TimeBonus
@@ -18,6 +19,9 @@ class Duration extends CastingParameter
      * @param TimeTable $timeTable
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidValueForDuration
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\MissingValueForAdditionByRealm
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfRealmsNumber
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAddition
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\UnexpectedFormatOfAdditionByRealm
      */
     public function __construct(array $values, TimeTable $timeTable)
     {
@@ -39,4 +43,21 @@ class Duration extends CastingParameter
     {
         return $this->duration;
     }
+
+    /**
+     * @return int
+     */
+    public function getValue(): int
+    {
+        return $this->duration->getValue();
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return "{$this->getValue()}/{$this->getAdditionByRealm()}";
+    }
+
 }
