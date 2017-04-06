@@ -69,6 +69,7 @@ class ProfilesTableTest extends AbstractTheurgistTableTest
         $expectedFormulaValues = [];
         foreach (FormulaCode::getPossibleValues() as $formulaValue) {
             $profileCodes = $this->formulasTable->getProfilesForFormula(FormulaCode::getIt($formulaValue));
+            /** @var ProfileCode $profileCode */
             foreach ($profileCodes as $profileCode) {
                 if ($profileCode->getValue() === $oppositeProfile) {
                     $expectedFormulaValues[] = $formulaValue;

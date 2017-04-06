@@ -5,10 +5,21 @@ use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ProfileCode;
 use DrdPlus\Theurgist\Formulas\FormulasTable;
+use DrdPlus\Theurgist\Formulas\ModifiersTable;
 use DrdPlus\Theurgist\Formulas\ProfilesTable;
 
 class FormulasTableTest extends AbstractTheurgistTableTest
 {
+    /**
+     * @var ModifiersTable
+     */
+    private $modifiersTable;
+
+    protected function setUp()
+    {
+        $this->modifiersTable = new ModifiersTable();
+    }
+
     /**
      * @test
      */
@@ -66,7 +77,33 @@ class FormulasTableTest extends AbstractTheurgistTableTest
      */
     private function getExpectedModifierValues(string $formulaValue): array
     {
-        return array_diff(ModifierCode::getPossibleValues(), self::$impossibleModifiers[$formulaValue]);
+        $expectedModifierValues = array_diff(ModifierCode::getPossibleValues(), self::$impossibleModifiers[$formulaValue]);
+        sort($expectedModifierValues);
+        $modifierValuesFromModifiersTable = $this->getModifierValuesFromModifiersTable($formulaValue);
+        sort($modifierValuesFromModifiersTable);
+        self::assertSame($expectedModifierValues, $modifierValuesFromModifiersTable);
+
+        return $expectedModifierValues;
+    }
+
+    /**
+     * @param string $formulaValue
+     * @return array
+     */
+    private function getModifierValuesFromModifiersTable(string $formulaValue): array
+    {
+        $modifierValues = [];
+        foreach (ModifierCode::getPossibleValues() as $modifierValue) {
+            $formulaCodes = $this->modifiersTable->getFormulasForModifier(ModifierCode::getIt($modifierValue));
+            foreach ($formulaCodes as $formulaCode) {
+                if ($formulaCode->getValue() === $formulaValue) {
+                    $modifierValues[] = $modifierValue;
+                    break;
+                }
+            }
+        }
+
+        return $modifierValues;
     }
 
     /**
