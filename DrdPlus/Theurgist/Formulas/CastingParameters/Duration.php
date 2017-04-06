@@ -17,7 +17,7 @@ class Duration extends CastingParameter
      * @param array $values
      * @param TimeTable $timeTable
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidValueForDuration
-     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidValueForAdditionByRealm
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\MissingValueForAdditionByRealm
      */
     public function __construct(array $values, TimeTable $timeTable)
     {
