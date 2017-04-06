@@ -5,7 +5,7 @@ use Granam\Integer\PositiveInteger;
 use Granam\Integer\Tools\ToInteger;
 use Granam\Tools\ValueDescriber;
 
-class SizeChange extends CastingParameter implements PositiveInteger
+class Attack extends CastingParameter implements PositiveInteger
 {
     /**
      * @var int
@@ -14,7 +14,7 @@ class SizeChange extends CastingParameter implements PositiveInteger
 
     /**
      * @param array $values
-     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidValueForSizeChange
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidValueForAttack
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\MissingValueForAdditionByRealm
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\MissingValueForAdditionByRealm
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfRealmsNumber
@@ -26,8 +26,8 @@ class SizeChange extends CastingParameter implements PositiveInteger
         try {
             $this->value = ToInteger::toPositiveInteger($values[0] ?? null);
         } catch (\Granam\Integer\Tools\Exceptions\Exception $exception) {
-            throw new Exceptions\InvalidValueForSizeChange(
-                'Expected positive integer for size change, got '
+            throw new Exceptions\InvalidValueForAttack(
+                'Expected positive integer for attack, got '
                 . (array_key_exists(0, $values) ? ValueDescriber::describe($values[0], true) : 'nothing')
             );
         }

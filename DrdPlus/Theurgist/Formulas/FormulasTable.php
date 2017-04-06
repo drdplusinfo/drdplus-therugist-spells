@@ -8,11 +8,16 @@ use DrdPlus\Tables\Partials\Exceptions\RequiredRowNotFound;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ProfileCode;
+use DrdPlus\Theurgist\Formulas\CastingParameters\Attack;
+use DrdPlus\Theurgist\Formulas\CastingParameters\Brightness;
+use DrdPlus\Theurgist\Formulas\CastingParameters\DetailLevel;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Difficulty;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Duration;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Power;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Radius;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SizeChange;
+use DrdPlus\Theurgist\Formulas\CastingParameters\Speed;
+use DrdPlus\Theurgist\Formulas\CastingParameters\Transposition;
 use Granam\Integer\NegativeInteger;
 use Granam\Integer\NegativeIntegerObject;
 use Granam\Integer\PositiveInteger;
@@ -173,6 +178,86 @@ class FormulasTable extends AbstractFileTable
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new SizeChange($sizeChangeValues);
+    }
+
+    /**
+     * @param FormulaCode $formulaCode
+     * @return DetailLevel|null
+     */
+    public function getDetailLevel(FormulaCode $formulaCode)
+    {
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        $detailLevelValues = $this->getValue($formulaCode, self::DETAIL_LEVEL);
+        if (!$detailLevelValues) {
+            return null;
+        }
+
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new DetailLevel($detailLevelValues);
+    }
+
+    /**
+     * @param FormulaCode $formulaCode
+     * @return Brightness|null
+     */
+    public function getBrightness(FormulaCode $formulaCode)
+    {
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        $brightnessValues = $this->getValue($formulaCode, self::BRIGHTNESS);
+        if (!$brightnessValues) {
+            return null;
+        }
+
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new Brightness($brightnessValues);
+    }
+
+    /**
+     * @param FormulaCode $formulaCode
+     * @return Speed|null
+     */
+    public function getSpeed(FormulaCode $formulaCode)
+    {
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        $speedValues = $this->getValue($formulaCode, self::SPEED);
+        if (!$speedValues) {
+            return null;
+        }
+
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new Speed($speedValues);
+    }
+
+    /**
+     * @param FormulaCode $formulaCode
+     * @return Attack|null
+     */
+    public function getAttack(FormulaCode $formulaCode)
+    {
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        $attackValues = $this->getValue($formulaCode, self::ATTACK);
+        if (!$attackValues) {
+            return null;
+        }
+
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new Attack($attackValues);
+    }
+
+    /**
+     * @param FormulaCode $formulaCode
+     * @return Transposition|null
+     */
+    public function getTransposition(FormulaCode $formulaCode)
+    {
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        $transpositionValues = $this->getValue($formulaCode, self::TRANSPOSITION);
+        if (!$transpositionValues) {
+            return null;
+        }
+
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new Transposition($transpositionValues);
     }
 
     /**
