@@ -3,7 +3,7 @@ namespace DrdPlus\Theurgist\Formulas\CastingParameters;
 
 use DrdPlus\Codes\Properties\PropertyCode;
 
-class Trap extends CastingParameter
+class Trap extends IntegerCastingParameter
 {
     /**
      * @var PropertyCode
@@ -13,6 +13,7 @@ class Trap extends CastingParameter
     /**
      * @param array $values
      * @param PropertyCode $propertyCode
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidValueForIntegerCastingParameter
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\MissingValueForAdditionByRealm
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfRealmsNumber
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAddition
@@ -20,7 +21,7 @@ class Trap extends CastingParameter
      */
     public function __construct(array $values, PropertyCode $propertyCode)
     {
-        parent::__construct($values, 1);
+        parent::__construct($values);
         $this->propertyCode = $propertyCode;
     }
 
