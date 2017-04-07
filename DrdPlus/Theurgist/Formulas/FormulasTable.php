@@ -5,9 +5,11 @@ use DrdPlus\Tables\Measurements\Distance\DistanceTable;
 use DrdPlus\Tables\Measurements\Time\TimeTable;
 use DrdPlus\Tables\Partials\AbstractFileTable;
 use DrdPlus\Tables\Partials\Exceptions\RequiredRowNotFound;
+use DrdPlus\Theurgist\Codes\FormCode;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ProfileCode;
+use DrdPlus\Theurgist\Codes\TraitCode;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Attack;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Brightness;
 use DrdPlus\Theurgist\Formulas\CastingParameters\DetailLevel;
@@ -258,6 +260,36 @@ class FormulasTable extends AbstractFileTable
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new Transposition($transpositionValues);
+    }
+
+    /**
+     * @param FormulaCode $formulaCode
+     * @return array|FormCode[]
+     */
+    public function getForms(FormulaCode $formulaCode): array
+    {
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return array_map(
+            function (string $formValue) {
+                return FormCode::getIt($formValue);
+            },
+            $this->getValue($formulaCode, self::FORMS)
+        );
+    }
+
+    /**
+     * @param FormulaCode $formulaCode
+     * @return array|TraitCode[]
+     */
+    public function getTraits(FormulaCode $formulaCode): array
+    {
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return array_map(
+            function (string $traitValue) {
+                return TraitCode::getIt($traitValue);
+            },
+            $this->getValue($formulaCode, self::TRAITS)
+        );
     }
 
     /**
