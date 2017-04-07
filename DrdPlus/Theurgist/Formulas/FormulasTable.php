@@ -285,9 +285,9 @@ class FormulasTable extends AbstractFileTable
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return array_map(
-            function (string $traitValue) {
+            function (string $spellTraitAnnotation) {
                 /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-                return new SpellTrait($traitValue);
+                return new SpellTrait($spellTraitAnnotation);
             },
             $this->getValue($formulaCode, self::TRAITS)
         );

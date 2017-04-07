@@ -8,7 +8,6 @@ use DrdPlus\Theurgist\Codes\FormCode;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ProfileCode;
-use DrdPlus\Theurgist\Codes\TraitCode;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Attack;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Conditions;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Difficulty;
@@ -20,6 +19,7 @@ use DrdPlus\Theurgist\Formulas\CastingParameters\Quality;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Radius;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Situations;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Speed;
+use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Threshold;
 use Granam\Integer\NegativeInteger;
 use Granam\Integer\NegativeIntegerObject;
@@ -344,14 +344,15 @@ class ModifiersTable extends AbstractFileTable
 
     /**
      * @param ModifierCode $modifierCode
-     * @return array|TraitCode[]
+     * @return array|SpellTrait[]
      */
-    public function getTraits(ModifierCode $modifierCode): array
+    public function getSpellTraits(ModifierCode $modifierCode): array
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return array_map(
-            function (string $traitValue) {
-                return TraitCode::getIt($traitValue);
+            function (string $spellTraitAnnotation) {
+                /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+                return new SpellTrait($spellTraitAnnotation);
             },
             $this->getValue($modifierCode, self::TRAITS)
         );

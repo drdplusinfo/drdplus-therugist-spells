@@ -1,11 +1,11 @@
 modifier,realm,affection,affection_type,casting,difficulty,radius,power,attack,grafts,speed,points,invisibility,quality,conditions,resistance,situations,threshold,forms,traits,profiles,formulas
-color,1,,,,1,,,,,,,,,,,,,,affecting=6,look_mars;spark_mars,barrier;smoke;fire;light;discharge
+color,1,,,,1,,,,,,,,,,,,,,,look_mars;spark_mars,barrier;smoke;fire;light;discharge
 gate,4,-1,,4,2,-6;3,,,,,,,,,,,0;-1,direct;planar;tangible;visible,bidirectional=1,gate_mars;spark_venus;breach_venus;watcher_venus;time_venus;release_venus,portal
 explosion,2,,,,3,0;2=3,6,,,,,,0;2,,,,,,,look_venus;fire_mars,fire
 filter,1,,,,2,,,,,,,,,,,,,,,barrier_mars,barrier
 watcher,1,,,,3,,,,,,,,,1;3=1,,,,,,watcher_mars,illusion;lock
 thunder,1,,,,1,,10;5,,,,,,,,,,,indirect;volume;intangible;invisible,,discharge_mars,discharge
-interactive_illusion,1,,,,4,,-3;1,,,,,,,,-3;1,1;2=1,,,,illusion_mars,illusion
+interactive_illusion,1,,,,4,,-3;1,,,,,,,,-3;1,1;2=1,,,affecting=6,illusion_mars,illusion
 hammer,1,,,,6,,0;2=3,,,,,,,,,,,,,discharge_mars;watcher_venus,discharge
 camouflage,1,,,,0,,,,,,,,,,,,,,invisible=3;silent=3;odorless=3,barrier_mars,barrier
 invisibility,1,,,,1,,,,,,,2;2,,,,,,,,look_mars;spark_mars,barrier;smoke;fire;light;discharge

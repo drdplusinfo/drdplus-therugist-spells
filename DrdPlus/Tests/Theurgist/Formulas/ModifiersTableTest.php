@@ -4,6 +4,8 @@ namespace DrdPlus\Tests\Theurgist\Formulas;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ProfileCode;
+use DrdPlus\Theurgist\Codes\TraitCode;
+use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
 use DrdPlus\Theurgist\Formulas\FormulasTable;
 use DrdPlus\Theurgist\Formulas\ModifiersTable;
 use DrdPlus\Theurgist\Formulas\ProfilesTable;
@@ -24,6 +26,63 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
     {
         $this->formulasTable = new FormulasTable();
         $this->profilesTable = new ProfilesTable();
+    }
+
+    /**
+     * @test
+     */
+    public function I_can_get_traits()
+    {
+        $modifiersTable = new ModifiersTable();
+        foreach (ModifierCode::getPossibleValues() as $modifierValue) {
+            $spellTraits = $modifiersTable->getSpellTraits(ModifierCode::getIt($modifierValue));
+            /** @var array|string[] $expectedTraitValues */
+            $expectedTraitValues = $this->getValueFromTable($modifiersTable, $modifierValue, 'traits');
+            $expectedSpellTraits = [];
+            foreach ($expectedTraitValues as $expectedTraitValue) {
+                $expectedSpellTraits[] = new SpellTrait($expectedTraitValue);
+            }
+            self::assertEquals($expectedSpellTraits, $spellTraits);
+
+            $spellTraitCodeValues = [];
+            foreach ($spellTraits as $spellTrait) {
+                self::assertInstanceOf(SpellTrait::class, $spellTrait);
+                $spellTraitCodeValues[] = $spellTrait->getTraitCode()->getValue();
+            }
+            self::assertSame($spellTraitCodeValues, array_unique($spellTraitCodeValues));
+            sort($spellTraitCodeValues);
+            $expectedTraitCodeValues = $this->getExpectedTraitCodeValues($modifierValue);
+            sort($expectedTraitCodeValues);
+            self::assertEquals($expectedTraitCodeValues, $spellTraitCodeValues, "Expected different traits for '{$modifierValue}'");
+        }
+    }
+
+    private static $excludedTraitValues = [
+        ModifierCode::COLOR => [TraitCode::AFFECTING, TraitCode::INVISIBLE, TraitCode::SILENT, TraitCode::ODORLESS, TraitCode::CYCLIC, TraitCode::MEMORY, TraitCode::DEFORMATION, TraitCode::UNIDIRECTIONAL, TraitCode::BIDIRECTIONAL, TraitCode::INACRID, TraitCode::EVERY_SENSE, TraitCode::SITUATIONAL, TraitCode::SHAPESHIFT, TraitCode::STATE_CHANGE, TraitCode::NATURE_CHANGE, TraitCode::NO_SMOKE, TraitCode::TRANSPARENCY, TraitCode::MULTIPLE_ENTRY, TraitCode::OMNIPRESENT, TraitCode::ACTIVE],
+        ModifierCode::GATE => [TraitCode::AFFECTING, TraitCode::INVISIBLE, TraitCode::SILENT, TraitCode::ODORLESS, TraitCode::CYCLIC, TraitCode::MEMORY, TraitCode::DEFORMATION, TraitCode::UNIDIRECTIONAL, TraitCode::INACRID, TraitCode::EVERY_SENSE, TraitCode::SITUATIONAL, TraitCode::SHAPESHIFT, TraitCode::STATE_CHANGE, TraitCode::NATURE_CHANGE, TraitCode::NO_SMOKE, TraitCode::TRANSPARENCY, TraitCode::MULTIPLE_ENTRY, TraitCode::OMNIPRESENT, TraitCode::ACTIVE],
+        ModifierCode::EXPLOSION => [TraitCode::AFFECTING, TraitCode::INVISIBLE, TraitCode::SILENT, TraitCode::ODORLESS, TraitCode::CYCLIC, TraitCode::MEMORY, TraitCode::DEFORMATION, TraitCode::UNIDIRECTIONAL, TraitCode::BIDIRECTIONAL, TraitCode::INACRID, TraitCode::EVERY_SENSE, TraitCode::SITUATIONAL, TraitCode::SHAPESHIFT, TraitCode::STATE_CHANGE, TraitCode::NATURE_CHANGE, TraitCode::NO_SMOKE, TraitCode::TRANSPARENCY, TraitCode::MULTIPLE_ENTRY, TraitCode::OMNIPRESENT, TraitCode::ACTIVE],
+        ModifierCode::FILTER => [TraitCode::AFFECTING, TraitCode::INVISIBLE, TraitCode::SILENT, TraitCode::ODORLESS, TraitCode::CYCLIC, TraitCode::MEMORY, TraitCode::DEFORMATION, TraitCode::UNIDIRECTIONAL, TraitCode::BIDIRECTIONAL, TraitCode::INACRID, TraitCode::EVERY_SENSE, TraitCode::SITUATIONAL, TraitCode::SHAPESHIFT, TraitCode::STATE_CHANGE, TraitCode::NATURE_CHANGE, TraitCode::NO_SMOKE, TraitCode::TRANSPARENCY, TraitCode::MULTIPLE_ENTRY, TraitCode::OMNIPRESENT, TraitCode::ACTIVE],
+        ModifierCode::WATCHER => [TraitCode::AFFECTING, TraitCode::INVISIBLE, TraitCode::SILENT, TraitCode::ODORLESS, TraitCode::CYCLIC, TraitCode::MEMORY, TraitCode::DEFORMATION, TraitCode::UNIDIRECTIONAL, TraitCode::BIDIRECTIONAL, TraitCode::INACRID, TraitCode::EVERY_SENSE, TraitCode::SITUATIONAL, TraitCode::SHAPESHIFT, TraitCode::STATE_CHANGE, TraitCode::NATURE_CHANGE, TraitCode::NO_SMOKE, TraitCode::TRANSPARENCY, TraitCode::MULTIPLE_ENTRY, TraitCode::OMNIPRESENT, TraitCode::ACTIVE],
+        ModifierCode::THUNDER => [TraitCode::AFFECTING, TraitCode::INVISIBLE, TraitCode::SILENT, TraitCode::ODORLESS, TraitCode::CYCLIC, TraitCode::MEMORY, TraitCode::DEFORMATION, TraitCode::UNIDIRECTIONAL, TraitCode::BIDIRECTIONAL, TraitCode::INACRID, TraitCode::EVERY_SENSE, TraitCode::SITUATIONAL, TraitCode::SHAPESHIFT, TraitCode::STATE_CHANGE, TraitCode::NATURE_CHANGE, TraitCode::NO_SMOKE, TraitCode::TRANSPARENCY, TraitCode::MULTIPLE_ENTRY, TraitCode::OMNIPRESENT, TraitCode::ACTIVE],
+        ModifierCode::INTERACTIVE_ILLUSION => [TraitCode::INVISIBLE, TraitCode::SILENT, TraitCode::ODORLESS, TraitCode::CYCLIC, TraitCode::MEMORY, TraitCode::DEFORMATION, TraitCode::UNIDIRECTIONAL, TraitCode::BIDIRECTIONAL, TraitCode::INACRID, TraitCode::EVERY_SENSE, TraitCode::SITUATIONAL, TraitCode::SHAPESHIFT, TraitCode::STATE_CHANGE, TraitCode::NATURE_CHANGE, TraitCode::NO_SMOKE, TraitCode::TRANSPARENCY, TraitCode::MULTIPLE_ENTRY, TraitCode::OMNIPRESENT, TraitCode::ACTIVE],
+        ModifierCode::HAMMER => [TraitCode::AFFECTING, TraitCode::INVISIBLE, TraitCode::SILENT, TraitCode::ODORLESS, TraitCode::CYCLIC, TraitCode::MEMORY, TraitCode::DEFORMATION, TraitCode::UNIDIRECTIONAL, TraitCode::BIDIRECTIONAL, TraitCode::INACRID, TraitCode::EVERY_SENSE, TraitCode::SITUATIONAL, TraitCode::SHAPESHIFT, TraitCode::STATE_CHANGE, TraitCode::NATURE_CHANGE, TraitCode::NO_SMOKE, TraitCode::TRANSPARENCY, TraitCode::MULTIPLE_ENTRY, TraitCode::OMNIPRESENT, TraitCode::ACTIVE],
+        ModifierCode::CAMOUFLAGE => [TraitCode::AFFECTING, TraitCode::CYCLIC, TraitCode::MEMORY, TraitCode::DEFORMATION, TraitCode::UNIDIRECTIONAL, TraitCode::BIDIRECTIONAL, TraitCode::INACRID, TraitCode::EVERY_SENSE, TraitCode::SITUATIONAL, TraitCode::SHAPESHIFT, TraitCode::STATE_CHANGE, TraitCode::NATURE_CHANGE, TraitCode::NO_SMOKE, TraitCode::TRANSPARENCY, TraitCode::MULTIPLE_ENTRY, TraitCode::OMNIPRESENT, TraitCode::ACTIVE],
+        ModifierCode::INVISIBILITY => [TraitCode::AFFECTING, TraitCode::INVISIBLE, TraitCode::SILENT, TraitCode::ODORLESS, TraitCode::CYCLIC, TraitCode::MEMORY, TraitCode::DEFORMATION, TraitCode::UNIDIRECTIONAL, TraitCode::BIDIRECTIONAL, TraitCode::INACRID, TraitCode::EVERY_SENSE, TraitCode::SITUATIONAL, TraitCode::SHAPESHIFT, TraitCode::STATE_CHANGE, TraitCode::NATURE_CHANGE, TraitCode::NO_SMOKE, TraitCode::TRANSPARENCY, TraitCode::MULTIPLE_ENTRY, TraitCode::OMNIPRESENT, TraitCode::ACTIVE],
+        ModifierCode::MOVEMENT => [TraitCode::AFFECTING, TraitCode::INVISIBLE, TraitCode::SILENT, TraitCode::ODORLESS, TraitCode::MEMORY, TraitCode::DEFORMATION, TraitCode::UNIDIRECTIONAL, TraitCode::BIDIRECTIONAL, TraitCode::INACRID, TraitCode::EVERY_SENSE, TraitCode::SITUATIONAL, TraitCode::SHAPESHIFT, TraitCode::STATE_CHANGE, TraitCode::NATURE_CHANGE, TraitCode::NO_SMOKE, TraitCode::TRANSPARENCY, TraitCode::MULTIPLE_ENTRY, TraitCode::OMNIPRESENT, TraitCode::ACTIVE],
+        ModifierCode::BREACH => [TraitCode::AFFECTING, TraitCode::INVISIBLE, TraitCode::SILENT, TraitCode::ODORLESS, TraitCode::CYCLIC, TraitCode::MEMORY, TraitCode::DEFORMATION, TraitCode::UNIDIRECTIONAL, TraitCode::BIDIRECTIONAL, TraitCode::INACRID, TraitCode::EVERY_SENSE, TraitCode::SITUATIONAL, TraitCode::SHAPESHIFT, TraitCode::STATE_CHANGE, TraitCode::NATURE_CHANGE, TraitCode::NO_SMOKE, TraitCode::TRANSPARENCY, TraitCode::MULTIPLE_ENTRY, TraitCode::OMNIPRESENT, TraitCode::ACTIVE],
+        ModifierCode::RECEPTOR => [TraitCode::AFFECTING, TraitCode::INVISIBLE, TraitCode::SILENT, TraitCode::ODORLESS, TraitCode::CYCLIC, TraitCode::MEMORY, TraitCode::DEFORMATION, TraitCode::UNIDIRECTIONAL, TraitCode::BIDIRECTIONAL, TraitCode::INACRID, TraitCode::EVERY_SENSE, TraitCode::SITUATIONAL, TraitCode::SHAPESHIFT, TraitCode::STATE_CHANGE, TraitCode::NATURE_CHANGE, TraitCode::NO_SMOKE, TraitCode::TRANSPARENCY, TraitCode::MULTIPLE_ENTRY, TraitCode::OMNIPRESENT, TraitCode::ACTIVE],
+        ModifierCode::STEP_TO_FUTURE => [TraitCode::AFFECTING, TraitCode::INVISIBLE, TraitCode::SILENT, TraitCode::ODORLESS, TraitCode::CYCLIC, TraitCode::MEMORY, TraitCode::DEFORMATION, TraitCode::UNIDIRECTIONAL, TraitCode::BIDIRECTIONAL, TraitCode::INACRID, TraitCode::EVERY_SENSE, TraitCode::SITUATIONAL, TraitCode::SHAPESHIFT, TraitCode::STATE_CHANGE, TraitCode::NATURE_CHANGE, TraitCode::NO_SMOKE, TraitCode::TRANSPARENCY, TraitCode::MULTIPLE_ENTRY, TraitCode::OMNIPRESENT, TraitCode::ACTIVE],
+        ModifierCode::STEP_TO_PAST => [TraitCode::AFFECTING, TraitCode::INVISIBLE, TraitCode::SILENT, TraitCode::ODORLESS, TraitCode::CYCLIC, TraitCode::DEFORMATION, TraitCode::UNIDIRECTIONAL, TraitCode::BIDIRECTIONAL, TraitCode::INACRID, TraitCode::EVERY_SENSE, TraitCode::SITUATIONAL, TraitCode::SHAPESHIFT, TraitCode::STATE_CHANGE, TraitCode::NATURE_CHANGE, TraitCode::NO_SMOKE, TraitCode::TRANSPARENCY, TraitCode::MULTIPLE_ENTRY, TraitCode::OMNIPRESENT, TraitCode::ACTIVE],
+        ModifierCode::TRANSPOSITION => [TraitCode::AFFECTING, TraitCode::INVISIBLE, TraitCode::SILENT, TraitCode::ODORLESS, TraitCode::CYCLIC, TraitCode::MEMORY, TraitCode::DEFORMATION, TraitCode::UNIDIRECTIONAL, TraitCode::BIDIRECTIONAL, TraitCode::INACRID, TraitCode::EVERY_SENSE, TraitCode::SITUATIONAL, TraitCode::SHAPESHIFT, TraitCode::STATE_CHANGE, TraitCode::NATURE_CHANGE, TraitCode::NO_SMOKE, TraitCode::TRANSPARENCY, TraitCode::MULTIPLE_ENTRY, TraitCode::OMNIPRESENT, TraitCode::ACTIVE],
+        ModifierCode::RELEASE => [TraitCode::AFFECTING, TraitCode::INVISIBLE, TraitCode::SILENT, TraitCode::ODORLESS, TraitCode::CYCLIC, TraitCode::MEMORY, TraitCode::UNIDIRECTIONAL, TraitCode::BIDIRECTIONAL, TraitCode::INACRID, TraitCode::EVERY_SENSE, TraitCode::SITUATIONAL, TraitCode::SHAPESHIFT, TraitCode::STATE_CHANGE, TraitCode::NATURE_CHANGE, TraitCode::NO_SMOKE, TraitCode::TRANSPARENCY, TraitCode::MULTIPLE_ENTRY, TraitCode::OMNIPRESENT, TraitCode::ACTIVE],
+        ModifierCode::FRAGRANCE => [TraitCode::AFFECTING, TraitCode::INVISIBLE, TraitCode::SILENT, TraitCode::ODORLESS, TraitCode::CYCLIC, TraitCode::MEMORY, TraitCode::DEFORMATION, TraitCode::UNIDIRECTIONAL, TraitCode::BIDIRECTIONAL, TraitCode::INACRID, TraitCode::EVERY_SENSE, TraitCode::SITUATIONAL, TraitCode::SHAPESHIFT, TraitCode::STATE_CHANGE, TraitCode::NATURE_CHANGE, TraitCode::NO_SMOKE, TraitCode::TRANSPARENCY, TraitCode::MULTIPLE_ENTRY, TraitCode::OMNIPRESENT, TraitCode::ACTIVE],
+    ];
+
+    private function getExpectedTraitCodeValues(string $formulaValue)
+    {
+        $excludedTraitValues = self::$excludedTraitValues[$formulaValue];
+
+        return array_diff(TraitCode::getPossibleValues(), $excludedTraitValues);
     }
 
     /**

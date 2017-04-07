@@ -3,7 +3,6 @@ namespace DrdPlus\Tests\Theurgist\Formulas;
 
 use DrdPlus\Tables\Measurements\Distance\DistanceTable;
 use DrdPlus\Tables\Measurements\Time\TimeTable;
-use DrdPlus\Tables\Partials\AbstractTable;
 use DrdPlus\Theurgist\Codes\FormCode;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
@@ -51,11 +50,6 @@ class FormulasTableTest extends AbstractTheurgistTableTest
                 $realm
             );
         }
-    }
-
-    private function getValueFromTable(AbstractTable $table, string $formulaName, string $parameterName)
-    {
-        return $table->getIndexedValues()[$formulaName][$parameterName];
     }
 
     /**

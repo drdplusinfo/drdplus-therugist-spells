@@ -1,6 +1,7 @@
 <?php
 namespace DrdPlus\Tests\Theurgist\Formulas;
 
+use DrdPlus\Tables\Partials\AbstractTable;
 use Granam\Tests\Tools\TestWithMockery;
 
 abstract class AbstractTheurgistTableTest extends TestWithMockery
@@ -19,5 +20,16 @@ abstract class AbstractTheurgistTableTest extends TestWithMockery
         self::assertSame(1, $countOfReplaced);
 
         return $oppositeProfile;
+    }
+
+    /**
+     * @param AbstractTable $table
+     * @param string $formulaName
+     * @param string $parameterName
+     * @return mixed
+     */
+    protected function getValueFromTable(AbstractTable $table, string $formulaName, string $parameterName)
+    {
+        return $table->getIndexedValues()[$formulaName][$parameterName];
     }
 }
