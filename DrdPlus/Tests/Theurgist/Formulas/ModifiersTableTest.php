@@ -1,6 +1,7 @@
 <?php
 namespace DrdPlus\Tests\Theurgist\Formulas;
 
+use DrdPlus\Theurgist\Codes\FormCode;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ProfileCode;
@@ -31,7 +32,56 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
     /**
      * @test
      */
-    public function I_can_get_traits()
+    public function I_can_get_forms()
+    {
+        $modifiersTable = new ModifiersTable();
+        foreach (ModifierCode::getPossibleValues() as $modifierValue) {
+            $forms = $modifiersTable->getForms(ModifierCode::getIt($modifierValue));
+            $formValues = [];
+            foreach ($forms as $form) {
+                self::assertInstanceOf(FormCode::class, $form);
+                $formValues[] = $form->getValue();
+            }
+            self::assertSame($formValues, array_unique($formValues));
+            sort($formValues);
+            $expectedFormValues = $this->getExpectedFormValues($modifierValue);
+            sort($expectedFormValues);
+            self::assertEquals($expectedFormValues, $formValues, "Expected different forms for '{$modifierValue}'");
+        }
+    }
+
+    private static $excludedFormValues = [
+        ModifierCode::COLOR => ['direct', 'indirect', 'volume', 'planar', 'beam', 'tangible', 'intangible', 'visible', 'invisible', 'by_formula'],
+        ModifierCode::GATE => ['indirect', 'volume', 'beam', 'intangible', 'invisible', 'by_formula'],
+        ModifierCode::EXPLOSION => ['direct', 'indirect', 'volume', 'planar', 'beam', 'tangible', 'intangible', 'visible', 'invisible', 'by_formula'],
+        ModifierCode::FILTER => ['direct', 'indirect', 'volume', 'planar', 'beam', 'tangible', 'intangible', 'visible', 'invisible', 'by_formula'],
+        ModifierCode::WATCHER => ['direct', 'indirect', 'volume', 'planar', 'beam', 'tangible', 'intangible', 'visible', 'invisible', 'by_formula'],
+        ModifierCode::THUNDER => ['direct', 'planar', 'beam', 'tangible', 'visible', 'by_formula'],
+        ModifierCode::INTERACTIVE_ILLUSION => ['direct', 'indirect', 'volume', 'planar', 'beam', 'tangible', 'intangible', 'visible', 'invisible', 'by_formula'],
+        ModifierCode::HAMMER => ['direct', 'indirect', 'volume', 'planar', 'beam', 'tangible', 'intangible', 'visible', 'invisible', 'by_formula'],
+        ModifierCode::CAMOUFLAGE => ['direct', 'indirect', 'volume', 'planar', 'beam', 'tangible', 'intangible', 'visible', 'invisible', 'by_formula'],
+        ModifierCode::INVISIBILITY => ['direct', 'indirect', 'volume', 'planar', 'beam', 'tangible', 'intangible', 'visible', 'invisible', 'by_formula'],
+        ModifierCode::MOVEMENT => ['direct', 'indirect', 'volume', 'planar', 'beam', 'tangible', 'intangible', 'visible', 'invisible', 'by_formula'],
+        ModifierCode::BREACH => ['direct', 'indirect', 'volume', 'planar', 'beam', 'tangible', 'intangible', 'visible', 'invisible', 'by_formula'],
+        ModifierCode::RECEPTOR => ['direct', 'indirect', 'volume', 'planar', 'beam', 'tangible', 'intangible', 'visible', 'invisible', 'by_formula'],
+        ModifierCode::STEP_TO_FUTURE => ['indirect', 'volume', 'planar', 'beam', 'tangible', 'intangible', 'visible', 'invisible'],
+        ModifierCode::STEP_TO_PAST => ['indirect', 'volume', 'planar', 'beam', 'tangible', 'intangible', 'visible', 'invisible'],
+        ModifierCode::TRANSPOSITION => ['direct', 'planar', 'beam', 'tangible', 'visible', 'by_formula'],
+        ModifierCode::RELEASE => ['direct', 'indirect', 'volume', 'planar', 'beam', 'tangible', 'intangible', 'visible', 'invisible', 'by_formula'],
+        ModifierCode::FRAGRANCE => ['direct', 'indirect', 'volume', 'planar', 'beam', 'tangible', 'intangible', 'visible', 'invisible', 'by_formula'],
+    ];
+
+    private function getExpectedFormValues(string $modifierValue)
+    {
+        $excludedFormValues = self::$excludedFormValues[$modifierValue];
+
+        return array_diff(FormCode::getPossibleValues(), $excludedFormValues);
+    }
+
+    /**
+     * @test
+     */
+    public function I_can_get_spell_traits()
     {
         $modifiersTable = new ModifiersTable();
         foreach (ModifierCode::getPossibleValues() as $modifierValue) {

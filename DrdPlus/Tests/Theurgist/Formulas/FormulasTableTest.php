@@ -264,19 +264,19 @@ class FormulasTableTest extends AbstractTheurgistTableTest
     }
 
     private static $excludedFormValues = [
-        FormulaCode::BARRIER => ['direct', 'volume', 'beam', 'intangible', 'invisible'],
-        FormulaCode::SMOKE => ['direct', 'planar', 'beam', 'intangible', 'invisible'],
-        FormulaCode::ILLUSION => ['direct', 'planar', 'beam', 'intangible', 'invisible'],
-        FormulaCode::METAMORPHOSIS => ['indirect', 'planar', 'beam', 'tangible', 'visible'],
-        FormulaCode::FIRE => ['direct', 'planar', 'beam', 'intangible', 'invisible'],
-        FormulaCode::PORTAL => ['direct', 'planar', 'beam', 'tangible', 'visible'],
-        FormulaCode::LIGHT => ['direct', 'planar', 'beam', 'intangible', 'invisible'],
-        FormulaCode::FLOW_OF_TIME => ['indirect', 'planar', 'beam', 'tangible', 'visible'],
-        FormulaCode::TSUNAMI_FROM_CLAY_AND_STONES => ['direct', 'planar', 'beam', 'tangible', 'visible'],
-        FormulaCode::HIT => ['direct', 'volume', 'planar', 'intangible', 'visible'],
-        FormulaCode::GREAT_MASSACRE => ['direct', 'planar', 'beam', 'intangible', 'invisible'],
-        FormulaCode::DISCHARGE => ['direct', 'volume', 'planar', 'intangible', 'invisible'],
-        FormulaCode::LOCK => ['indirect', 'volume', 'planar', 'tangible', 'visible'],
+        FormulaCode::BARRIER => ['direct', 'volume', 'beam', 'intangible', 'invisible', 'by_formula'],
+        FormulaCode::SMOKE => ['direct', 'planar', 'beam', 'intangible', 'invisible', 'by_formula'],
+        FormulaCode::ILLUSION => ['direct', 'planar', 'beam', 'intangible', 'invisible', 'by_formula'],
+        FormulaCode::METAMORPHOSIS => ['indirect', 'planar', 'beam', 'tangible', 'visible', 'by_formula'],
+        FormulaCode::FIRE => ['direct', 'planar', 'beam', 'intangible', 'invisible', 'by_formula'],
+        FormulaCode::PORTAL => ['direct', 'planar', 'beam', 'tangible', 'visible', 'by_formula'],
+        FormulaCode::LIGHT => ['direct', 'planar', 'beam', 'intangible', 'invisible', 'by_formula'],
+        FormulaCode::FLOW_OF_TIME => ['indirect', 'planar', 'beam', 'tangible', 'visible', 'by_formula'],
+        FormulaCode::TSUNAMI_FROM_CLAY_AND_STONES => ['direct', 'planar', 'beam', 'tangible', 'visible', 'by_formula'],
+        FormulaCode::HIT => ['direct', 'volume', 'planar', 'intangible', 'visible', 'by_formula'],
+        FormulaCode::GREAT_MASSACRE => ['direct', 'planar', 'beam', 'intangible', 'invisible', 'by_formula'],
+        FormulaCode::DISCHARGE => ['direct', 'volume', 'planar', 'intangible', 'invisible', 'by_formula'],
+        FormulaCode::LOCK => ['indirect', 'volume', 'planar', 'tangible', 'visible', 'by_formula'],
     ];
 
     private function getExpectedFormValues(string $formulaValue): array
@@ -289,7 +289,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
     /**
      * @test
      */
-    public function I_can_get_traits()
+    public function I_can_get_spell_traits()
     {
         $formulasTable = new FormulasTable();
         foreach (FormulaCode::getPossibleValues() as $formulaValue) {
