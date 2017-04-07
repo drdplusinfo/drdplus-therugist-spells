@@ -65,7 +65,7 @@ class AdditionByRealm extends StrictObject
             return ToInteger::toPositiveInteger($realmsNumber);
         } catch (\Granam\Integer\Tools\Exceptions\Exception $exception) {
             throw new Exceptions\InvalidFormatOfRealmsNumber(
-                'For \'realms\' number expected positive number, got ' . ValueDescriber::describe($realmsNumber)
+                'For \'realms\' number expected positive integer, got ' . ValueDescriber::describe($realmsNumber)
             );
         }
     }
@@ -78,10 +78,10 @@ class AdditionByRealm extends StrictObject
     private function sanitizeAddition($addition): int
     {
         try {
-            return ToInteger::toPositiveInteger($addition);
+            return ToInteger::toInteger($addition);
         } catch (\Granam\Integer\Tools\Exceptions\Exception $exception) {
             throw new Exceptions\InvalidFormatOfAddition(
-                'For \'addition\' expected positive number, got ' . ValueDescriber::describe($addition)
+                'For \'addition\' expected integer, got ' . ValueDescriber::describe($addition)
             );
         }
     }

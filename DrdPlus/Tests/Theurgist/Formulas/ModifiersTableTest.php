@@ -7,6 +7,7 @@ use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ProfileCode;
 use DrdPlus\Theurgist\Codes\TraitCode;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
+use DrdPlus\Theurgist\Formulas\CastingParameters\Threshold;
 use DrdPlus\Theurgist\Formulas\FormulasTable;
 use DrdPlus\Theurgist\Formulas\ModifiersTable;
 use DrdPlus\Theurgist\Formulas\ProfilesTable;
@@ -27,6 +28,22 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
     {
         $this->formulasTable = new FormulasTable();
         $this->profilesTable = new ProfilesTable();
+    }
+
+    /**
+     * @test
+     */
+    public function I_can_get_threshold()
+    {
+        $modifiersTable = new ModifiersTable();
+        foreach (ModifierCode::getPossibleValues() as $modifierCode) {
+            $threshold = $modifiersTable->getThreshold(ModifierCode::getIt($modifierCode));
+            $expectedThresholdValue = $this->getValueFromTable($modifiersTable, $modifierCode, 'threshold');
+            $expectedThreshold = count($expectedThresholdValue) !== 0
+                ? new Threshold($expectedThresholdValue)
+                : null;
+            self::assertEquals($expectedThreshold, $threshold);
+        }
     }
 
     /**
