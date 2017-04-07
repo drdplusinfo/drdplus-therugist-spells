@@ -39,11 +39,11 @@ class FormulasTable extends AbstractFileTable
     const RADIUS = 'radius';
     const DURATION = 'duration';
     const POWER = 'power';
+    const ATTACK = 'attack';
     const SIZE_CHANGE = 'size_change';
     const DETAIL_LEVEL = 'detail_level';
     const BRIGHTNESS = 'brightness';
     const SPEED = 'speed';
-    const ATTACK = 'attack';
     const TRANSPOSITION = 'transposition';
     const FORMS = 'forms';
     const TRAITS = 'traits';
@@ -60,11 +60,11 @@ class FormulasTable extends AbstractFileTable
             self::RADIUS => self::ARRAY,
             self::DURATION => self::ARRAY,
             self::POWER => self::ARRAY,
+            self::ATTACK => self::ARRAY,
             self::SIZE_CHANGE => self::ARRAY,
             self::DETAIL_LEVEL => self::ARRAY,
             self::BRIGHTNESS => self::ARRAY,
             self::SPEED => self::ARRAY,
-            self::ATTACK => self::ARRAY,
             self::TRANSPOSITION => self::ARRAY,
             self::FORMS => self::ARRAY,
             self::TRAITS => self::ARRAY,
@@ -168,6 +168,22 @@ class FormulasTable extends AbstractFileTable
 
     /**
      * @param FormulaCode $formulaCode
+     * @return Attack|null
+     */
+    public function getAttack(FormulaCode $formulaCode)
+    {
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        $attackValues = $this->getValue($formulaCode, self::ATTACK);
+        if (!$attackValues) {
+            return null;
+        }
+
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new Attack($attackValues);
+    }
+
+    /**
+     * @param FormulaCode $formulaCode
      * @return SizeChange|null
      */
     public function getSizeChange(FormulaCode $formulaCode)
@@ -228,22 +244,6 @@ class FormulasTable extends AbstractFileTable
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new Speed($speedValues);
-    }
-
-    /**
-     * @param FormulaCode $formulaCode
-     * @return Attack|null
-     */
-    public function getAttack(FormulaCode $formulaCode)
-    {
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        $attackValues = $this->getValue($formulaCode, self::ATTACK);
-        if (!$attackValues) {
-            return null;
-        }
-
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new Attack($attackValues);
     }
 
     /**
