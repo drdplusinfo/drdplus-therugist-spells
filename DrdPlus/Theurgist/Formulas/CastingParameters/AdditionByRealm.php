@@ -21,10 +21,10 @@ class AdditionByRealm extends StrictObject
         $parts = $this->parseParts($additionByRealmNotation);
         if (count($parts) === 1) {
             $this->realmsNumber = 1;
-            $this->addition = $this->setAddition($parts[0]);
+            $this->addition = $this->sanitizeAddition($parts[0]);
         } else if (count($parts) === 2) {
-            $this->realmsNumber = $this->setRealmsNumber($parts[0]);
-            $this->addition = $this->setAddition($parts[1]);
+            $this->realmsNumber = $this->sanitizeRealmsNumber($parts[0]);
+            $this->addition = $this->sanitizeAddition($parts[1]);
         } else {
             throw new Exceptions\UnexpectedFormatOfAdditionByRealm(
                 "Expected format of addition by realm as 'number' or 'number=number', got "
@@ -56,12 +56,13 @@ class AdditionByRealm extends StrictObject
 
     /**
      * @param $realmsNumber
+     * @return int
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfRealmsNumber
      */
-    private function setRealmsNumber($realmsNumber)
+    private function sanitizeRealmsNumber($realmsNumber): int
     {
         try {
-            $this->realmsNumber = ToInteger::toPositiveInteger($realmsNumber);
+            return ToInteger::toPositiveInteger($realmsNumber);
         } catch (\Granam\Integer\Tools\Exceptions\Exception $exception) {
             throw new Exceptions\InvalidFormatOfRealmsNumber(
                 'For \'realms\' number expected positive number, got ' . ValueDescriber::describe($realmsNumber)
@@ -71,12 +72,13 @@ class AdditionByRealm extends StrictObject
 
     /**
      * @param $addition
+     * @return int
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAddition
      */
-    private function setAddition($addition)
+    private function sanitizeAddition($addition): int
     {
         try {
-            $this->addition = ToInteger::toPositiveInteger($addition);
+            return ToInteger::toPositiveInteger($addition);
         } catch (\Granam\Integer\Tools\Exceptions\Exception $exception) {
             throw new Exceptions\InvalidFormatOfAddition(
                 'For \'addition\' expected positive number, got ' . ValueDescriber::describe($addition)
