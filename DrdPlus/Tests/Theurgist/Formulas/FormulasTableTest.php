@@ -4,6 +4,7 @@ namespace DrdPlus\Tests\Theurgist\Formulas;
 use DrdPlus\Tables\Measurements\Distance\DistanceTable;
 use DrdPlus\Tables\Measurements\Time\TimeTable;
 use DrdPlus\Tables\Partials\AbstractTable;
+use DrdPlus\Theurgist\Codes\FormCode;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ProfileCode;
@@ -243,6 +244,50 @@ class FormulasTableTest extends AbstractTheurgistTableTest
                 : null;
             self::assertEquals($expectedTransposition, $transposition);
         }
+    }
+
+    /**
+     * @test
+     */
+    public function I_can_get_forms()
+    {
+        $formulasTable = new FormulasTable();
+        foreach (FormulaCode::getPossibleValues() as $formulaValue) {
+            $forms = $formulasTable->getForms(FormulaCode::getIt($formulaValue));
+            $formValues = [];
+            foreach ($forms as $form) {
+                self::assertInstanceOf(FormCode::class, $form);
+                $formValues[] = $form->getValue();
+            }
+            self::assertSame($formValues, array_unique($formValues));
+            sort($formValues);
+            $expectedFormValues = $this->getExpectedFormValues($formulaValue);
+            sort($expectedFormValues);
+            self::assertEquals($expectedFormValues, $formValues, "Expected different forms for '{$formulaValue}'");
+        }
+    }
+
+    private static $excludedFormValues = [
+        FormulaCode::BARRIER => ['direct', 'volume', 'beam', 'intangible', 'invisible'],
+        FormulaCode::SMOKE => ['direct', 'planar', 'beam', 'intangible', 'invisible'],
+        FormulaCode::ILLUSION => ['direct', 'planar', 'beam', 'intangible', 'invisible'],
+        FormulaCode::METAMORPHOSIS => ['indirect', 'planar', 'beam', 'tangible', 'visible'],
+        FormulaCode::FIRE => ['direct', 'planar', 'beam', 'intangible', 'invisible'],
+        FormulaCode::PORTAL => ['direct', 'planar', 'beam', 'tangible', 'visible'],
+        FormulaCode::LIGHT => ['direct', 'planar', 'beam', 'intangible', 'invisible'],
+        FormulaCode::FLOW_OF_TIME => ['indirect', 'planar', 'beam', 'tangible', 'visible'],
+        FormulaCode::TSUNAMI_FROM_CLAY_AND_STONES => ['direct', 'planar', 'beam', 'tangible', 'visible'],
+        FormulaCode::HIT => ['direct', 'volume', 'planar', 'intangible', 'visible'],
+        FormulaCode::GREAT_MASSACRE => ['direct', 'planar', 'beam', 'intangible', 'invisible'],
+        FormulaCode::DISCHARGE => ['direct', 'volume', 'planar', 'intangible', 'invisible'],
+        FormulaCode::LOCK => ['indirect', 'volume', 'planar', 'tangible', 'visible'],
+    ];
+
+    private function getExpectedFormValues(string $formulaValue): array
+    {
+        $excludedFormValues = self::$excludedFormValues[$formulaValue];
+
+        return array_diff(FormCode::getPossibleValues(), $excludedFormValues);
     }
 
     /**
