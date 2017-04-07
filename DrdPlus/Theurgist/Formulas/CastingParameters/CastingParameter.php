@@ -13,18 +13,18 @@ abstract class CastingParameter extends StrictObject
 
     /**
      * @param array $values
-     * @param int $index
+     * @param int $additionByRealmIndex
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\MissingValueForAdditionByRealm
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfRealmsNumber
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAddition
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\UnexpectedFormatOfAdditionByRealm
      */
-    protected function __construct(array $values, int $index)
+    protected function __construct(array $values, int $additionByRealmIndex)
     {
-        if (!array_key_exists($index, $values)) {
+        if (!array_key_exists($additionByRealmIndex, $values)) {
             throw new Exceptions\MissingValueForAdditionByRealm('Missing value for addition by realm');
         }
-        $this->additionByRealm = new AdditionByRealm($values[$index]);
+        $this->additionByRealm = new AdditionByRealm($values[$additionByRealmIndex]);
     }
 
     /**

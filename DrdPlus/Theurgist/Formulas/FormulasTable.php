@@ -9,7 +9,6 @@ use DrdPlus\Theurgist\Codes\FormCode;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ProfileCode;
-use DrdPlus\Theurgist\Codes\TraitCode;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Attack;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Brightness;
 use DrdPlus\Theurgist\Formulas\CastingParameters\DetailLevel;
@@ -19,6 +18,7 @@ use DrdPlus\Theurgist\Formulas\CastingParameters\Power;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Radius;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SizeChange;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Speed;
+use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Transposition;
 use Granam\Integer\NegativeInteger;
 use Granam\Integer\NegativeIntegerObject;
@@ -279,14 +279,15 @@ class FormulasTable extends AbstractFileTable
 
     /**
      * @param FormulaCode $formulaCode
-     * @return array|TraitCode[]
+     * @return array|SpellTrait[]
      */
-    public function getTraits(FormulaCode $formulaCode): array
+    public function getSpellTraits(FormulaCode $formulaCode): array
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return array_map(
             function (string $traitValue) {
-                return TraitCode::getIt($traitValue);
+                /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+                return new SpellTrait($traitValue);
             },
             $this->getValue($formulaCode, self::TRAITS)
         );

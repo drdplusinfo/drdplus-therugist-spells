@@ -8,6 +8,7 @@ use DrdPlus\Theurgist\Codes\FormCode;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ProfileCode;
+use DrdPlus\Theurgist\Codes\TraitCode;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Attack;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Brightness;
 use DrdPlus\Theurgist\Formulas\CastingParameters\DetailLevel;
@@ -17,6 +18,7 @@ use DrdPlus\Theurgist\Formulas\CastingParameters\Power;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Radius;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SizeChange;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Speed;
+use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Transposition;
 use DrdPlus\Theurgist\Formulas\FormulasTable;
 use DrdPlus\Theurgist\Formulas\ModifiersTable;
@@ -288,6 +290,58 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $excludedFormValues = self::$excludedFormValues[$formulaValue];
 
         return array_diff(FormCode::getPossibleValues(), $excludedFormValues);
+    }
+
+    /**
+     * @test
+     */
+    public function I_can_get_traits()
+    {
+        $formulasTable = new FormulasTable();
+        foreach (FormulaCode::getPossibleValues() as $formulaValue) {
+            $spellTraits = $formulasTable->getSpellTraits(FormulaCode::getIt($formulaValue));
+            /** @var array|string[] $expectedTraitValues */
+            $expectedTraitValues = $this->getValueFromTable($formulasTable, $formulaValue, 'traits');
+            $expectedSpellTraits = [];
+            foreach ($expectedTraitValues as $expectedTraitValue) {
+                $expectedSpellTraits[] = new SpellTrait($expectedTraitValue);
+            }
+            self::assertEquals($expectedSpellTraits, $spellTraits);
+
+            $spellTraitCodeValues = [];
+            foreach ($spellTraits as $spellTrait) {
+                self::assertInstanceOf(SpellTrait::class, $spellTrait);
+                $spellTraitCodeValues[] = $spellTrait->getTraitCode()->getValue();
+            }
+            self::assertSame($spellTraitCodeValues, array_unique($spellTraitCodeValues));
+            sort($spellTraitCodeValues);
+            $expectedTraitCodeValues = $this->getExpectedTraitCodeValues($formulaValue);
+            sort($expectedTraitCodeValues);
+            self::assertEquals($expectedTraitCodeValues, $spellTraitCodeValues, "Expected different traits for '{$formulaValue}'");
+        }
+    }
+
+    private static $excludedTraitValues = [
+        FormulaCode::BARRIER => [TraitCode::AFFECTING, TraitCode::INVISIBLE, TraitCode::SILENT, TraitCode::ODORLESS, TraitCode::CYCLIC, TraitCode::MEMORY, TraitCode::DEFORMATION, TraitCode::BIDIRECTIONAL, TraitCode::INACRID, TraitCode::EVERY_SENSE, TraitCode::SITUATIONAL, TraitCode::SHAPESHIFT, TraitCode::STATE_CHANGE, TraitCode::NATURE_CHANGE, TraitCode::NO_SMOKE, TraitCode::TRANSPARENCY, TraitCode::MULTIPLE_ENTRY, TraitCode::OMNIPRESENT, TraitCode::ACTIVE],
+        FormulaCode::SMOKE => [TraitCode::AFFECTING, TraitCode::INVISIBLE, TraitCode::SILENT, TraitCode::ODORLESS, TraitCode::CYCLIC, TraitCode::MEMORY, TraitCode::DEFORMATION, TraitCode::UNIDIRECTIONAL, TraitCode::BIDIRECTIONAL, TraitCode::EVERY_SENSE, TraitCode::SITUATIONAL, TraitCode::SHAPESHIFT, TraitCode::STATE_CHANGE, TraitCode::NATURE_CHANGE, TraitCode::NO_SMOKE, TraitCode::TRANSPARENCY, TraitCode::MULTIPLE_ENTRY, TraitCode::OMNIPRESENT, TraitCode::ACTIVE],
+        FormulaCode::ILLUSION => [TraitCode::AFFECTING, TraitCode::INVISIBLE, TraitCode::SILENT, TraitCode::ODORLESS, TraitCode::CYCLIC, TraitCode::MEMORY, TraitCode::DEFORMATION, TraitCode::UNIDIRECTIONAL, TraitCode::BIDIRECTIONAL, TraitCode::INACRID, TraitCode::SHAPESHIFT, TraitCode::STATE_CHANGE, TraitCode::NATURE_CHANGE, TraitCode::NO_SMOKE, TraitCode::TRANSPARENCY, TraitCode::MULTIPLE_ENTRY, TraitCode::OMNIPRESENT, TraitCode::ACTIVE],
+        FormulaCode::METAMORPHOSIS => [TraitCode::AFFECTING, TraitCode::INVISIBLE, TraitCode::SILENT, TraitCode::ODORLESS, TraitCode::CYCLIC, TraitCode::MEMORY, TraitCode::DEFORMATION, TraitCode::UNIDIRECTIONAL, TraitCode::BIDIRECTIONAL, TraitCode::INACRID, TraitCode::EVERY_SENSE, TraitCode::SITUATIONAL, TraitCode::NO_SMOKE, TraitCode::TRANSPARENCY, TraitCode::MULTIPLE_ENTRY, TraitCode::OMNIPRESENT, TraitCode::ACTIVE],
+        FormulaCode::FIRE => [TraitCode::AFFECTING, TraitCode::INVISIBLE, TraitCode::SILENT, TraitCode::ODORLESS, TraitCode::CYCLIC, TraitCode::MEMORY, TraitCode::DEFORMATION, TraitCode::UNIDIRECTIONAL, TraitCode::BIDIRECTIONAL, TraitCode::INACRID, TraitCode::EVERY_SENSE, TraitCode::SITUATIONAL, TraitCode::SHAPESHIFT, TraitCode::STATE_CHANGE, TraitCode::NATURE_CHANGE, TraitCode::TRANSPARENCY, TraitCode::MULTIPLE_ENTRY, TraitCode::OMNIPRESENT, TraitCode::ACTIVE],
+        FormulaCode::PORTAL => [TraitCode::AFFECTING, TraitCode::INVISIBLE, TraitCode::SILENT, TraitCode::ODORLESS, TraitCode::CYCLIC, TraitCode::MEMORY, TraitCode::DEFORMATION, TraitCode::UNIDIRECTIONAL, TraitCode::BIDIRECTIONAL, TraitCode::INACRID, TraitCode::EVERY_SENSE, TraitCode::SITUATIONAL, TraitCode::SHAPESHIFT, TraitCode::STATE_CHANGE, TraitCode::NATURE_CHANGE, TraitCode::NO_SMOKE, TraitCode::OMNIPRESENT, TraitCode::ACTIVE],
+        FormulaCode::LIGHT => [TraitCode::AFFECTING, TraitCode::INVISIBLE, TraitCode::SILENT, TraitCode::ODORLESS, TraitCode::CYCLIC, TraitCode::MEMORY, TraitCode::DEFORMATION, TraitCode::UNIDIRECTIONAL, TraitCode::BIDIRECTIONAL, TraitCode::INACRID, TraitCode::EVERY_SENSE, TraitCode::SITUATIONAL, TraitCode::SHAPESHIFT, TraitCode::STATE_CHANGE, TraitCode::NATURE_CHANGE, TraitCode::NO_SMOKE, TraitCode::TRANSPARENCY, TraitCode::MULTIPLE_ENTRY, TraitCode::ACTIVE],
+        FormulaCode::FLOW_OF_TIME => [TraitCode::AFFECTING, TraitCode::INVISIBLE, TraitCode::SILENT, TraitCode::ODORLESS, TraitCode::CYCLIC, TraitCode::MEMORY, TraitCode::DEFORMATION, TraitCode::UNIDIRECTIONAL, TraitCode::BIDIRECTIONAL, TraitCode::INACRID, TraitCode::EVERY_SENSE, TraitCode::SITUATIONAL, TraitCode::SHAPESHIFT, TraitCode::STATE_CHANGE, TraitCode::NATURE_CHANGE, TraitCode::NO_SMOKE, TraitCode::TRANSPARENCY, TraitCode::MULTIPLE_ENTRY, TraitCode::OMNIPRESENT, TraitCode::ACTIVE],
+        FormulaCode::TSUNAMI_FROM_CLAY_AND_STONES => [TraitCode::AFFECTING, TraitCode::INVISIBLE, TraitCode::SILENT, TraitCode::ODORLESS, TraitCode::CYCLIC, TraitCode::MEMORY, TraitCode::DEFORMATION, TraitCode::UNIDIRECTIONAL, TraitCode::BIDIRECTIONAL, TraitCode::INACRID, TraitCode::EVERY_SENSE, TraitCode::SITUATIONAL, TraitCode::SHAPESHIFT, TraitCode::STATE_CHANGE, TraitCode::NATURE_CHANGE, TraitCode::NO_SMOKE, TraitCode::TRANSPARENCY, TraitCode::MULTIPLE_ENTRY, TraitCode::OMNIPRESENT, TraitCode::ACTIVE],
+        FormulaCode::HIT => [TraitCode::AFFECTING, TraitCode::INVISIBLE, TraitCode::SILENT, TraitCode::ODORLESS, TraitCode::CYCLIC, TraitCode::MEMORY, TraitCode::DEFORMATION, TraitCode::UNIDIRECTIONAL, TraitCode::BIDIRECTIONAL, TraitCode::INACRID, TraitCode::EVERY_SENSE, TraitCode::SITUATIONAL, TraitCode::SHAPESHIFT, TraitCode::STATE_CHANGE, TraitCode::NATURE_CHANGE, TraitCode::NO_SMOKE, TraitCode::TRANSPARENCY, TraitCode::MULTIPLE_ENTRY, TraitCode::OMNIPRESENT, TraitCode::ACTIVE],
+        FormulaCode::GREAT_MASSACRE => [TraitCode::AFFECTING, TraitCode::INVISIBLE, TraitCode::SILENT, TraitCode::ODORLESS, TraitCode::CYCLIC, TraitCode::MEMORY, TraitCode::DEFORMATION, TraitCode::UNIDIRECTIONAL, TraitCode::BIDIRECTIONAL, TraitCode::INACRID, TraitCode::EVERY_SENSE, TraitCode::SITUATIONAL, TraitCode::SHAPESHIFT, TraitCode::STATE_CHANGE, TraitCode::NATURE_CHANGE, TraitCode::NO_SMOKE, TraitCode::TRANSPARENCY, TraitCode::MULTIPLE_ENTRY, TraitCode::OMNIPRESENT, TraitCode::ACTIVE],
+        FormulaCode::DISCHARGE => [TraitCode::AFFECTING, TraitCode::INVISIBLE, TraitCode::SILENT, TraitCode::ODORLESS, TraitCode::CYCLIC, TraitCode::MEMORY, TraitCode::DEFORMATION, TraitCode::UNIDIRECTIONAL, TraitCode::BIDIRECTIONAL, TraitCode::INACRID, TraitCode::EVERY_SENSE, TraitCode::SITUATIONAL, TraitCode::SHAPESHIFT, TraitCode::STATE_CHANGE, TraitCode::NATURE_CHANGE, TraitCode::NO_SMOKE, TraitCode::TRANSPARENCY, TraitCode::MULTIPLE_ENTRY, TraitCode::OMNIPRESENT, TraitCode::ACTIVE],
+        FormulaCode::LOCK => [TraitCode::AFFECTING, TraitCode::INVISIBLE, TraitCode::SILENT, TraitCode::ODORLESS, TraitCode::CYCLIC, TraitCode::MEMORY, TraitCode::DEFORMATION, TraitCode::UNIDIRECTIONAL, TraitCode::BIDIRECTIONAL, TraitCode::INACRID, TraitCode::EVERY_SENSE, TraitCode::SITUATIONAL, TraitCode::SHAPESHIFT, TraitCode::STATE_CHANGE, TraitCode::NATURE_CHANGE, TraitCode::NO_SMOKE, TraitCode::TRANSPARENCY, TraitCode::MULTIPLE_ENTRY, TraitCode::OMNIPRESENT],
+    ];
+
+    private function getExpectedTraitCodeValues(string $formulaValue)
+    {
+        $excludedTraitValues = self::$excludedTraitValues[$formulaValue];
+
+        return array_diff(TraitCode::getPossibleValues(), $excludedTraitValues);
     }
 
     /**
