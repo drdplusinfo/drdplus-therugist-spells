@@ -17,6 +17,7 @@ use DrdPlus\Theurgist\Formulas\CastingParameters\Points;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Power;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Quality;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Radius;
+use DrdPlus\Theurgist\Formulas\CastingParameters\Resistance;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Situations;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Speed;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
@@ -139,7 +140,7 @@ class ModifiersTable extends AbstractFileTable
      * @param DistanceTable $distanceTable
      * @return Radius|null
      */
-    public function getRadius(FormulaCode $modifierCode, DistanceTable $distanceTable)
+    public function getRadius(ModifierCode $modifierCode, DistanceTable $distanceTable)
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         $radiusValues = $this->getValue($modifierCode, self::RADIUS);
@@ -281,7 +282,7 @@ class ModifiersTable extends AbstractFileTable
 
     /**
      * @param ModifierCode $modifierCode
-     * @return Situations|null
+     * @return Resistance|null
      */
     public function getResistance(ModifierCode $modifierCode)
     {
@@ -292,7 +293,7 @@ class ModifiersTable extends AbstractFileTable
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new Situations($resistanceValue);
+        return new Resistance($resistanceValue);
     }
 
     /**

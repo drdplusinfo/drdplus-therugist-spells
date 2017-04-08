@@ -3,7 +3,6 @@ namespace DrdPlus\Theurgist\Formulas\CastingParameters;
 
 use Granam\Integer\IntegerInterface;
 use Granam\Integer\Tools\ToInteger;
-use Granam\String\StringTools;
 use Granam\Tools\ValueDescriber;
 
 abstract class IntegerCastingParameter extends CastingParameter implements IntegerInterface
@@ -32,16 +31,6 @@ abstract class IntegerCastingParameter extends CastingParameter implements Integ
             );
         }
         parent::__construct($values, 1);
-    }
-
-    /**
-     * @return string
-     */
-    protected function getParameterName(): string
-    {
-        $snakeCaseBaseName = StringTools::camelCaseToSnakeCasedBasename(static::class);
-
-        return str_replace('_', ' ', $snakeCaseBaseName);
     }
 
     /**

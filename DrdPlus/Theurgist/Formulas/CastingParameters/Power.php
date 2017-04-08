@@ -1,7 +1,7 @@
 <?php
 namespace DrdPlus\Theurgist\Formulas\CastingParameters;
 
-class Power extends PositiveCastingParameter
+class Power extends IntegerCastingParameter
 {
 
 }

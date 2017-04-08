@@ -22,7 +22,7 @@ abstract class PositiveCastingParameter extends IntegerCastingParameter implemen
         } catch (\Granam\Integer\Tools\Exceptions\Exception $exception) {
             throw new Exceptions\InvalidValueForPositiveCastingParameter(
                 "Expected positive integer for {$this->getParameterName()}, got "
-                . (array_key_exists(0, $values) ? ValueDescriber::describe($values[0], true) : 'nothing')
+                . (array_key_exists(0, $values) ? ValueDescriber::describe($values[0]) : 'nothing')
             );
         }
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */

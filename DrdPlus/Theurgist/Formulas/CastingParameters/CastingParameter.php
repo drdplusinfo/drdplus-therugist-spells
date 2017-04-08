@@ -2,6 +2,7 @@
 namespace DrdPlus\Theurgist\Formulas\CastingParameters;
 
 use Granam\Strict\Object\StrictObject;
+use Granam\String\StringTools;
 
 /** @noinspection SingletonFactoryPatternViolationInspection */
 abstract class CastingParameter extends StrictObject
@@ -22,9 +23,22 @@ abstract class CastingParameter extends StrictObject
     protected function __construct(array $values, int $additionByRealmIndex)
     {
         if (!array_key_exists($additionByRealmIndex, $values)) {
-            throw new Exceptions\MissingValueForAdditionByRealm('Missing value for addition by realm');
+            throw new Exceptions\MissingValueForAdditionByRealm(
+                "Missing index {$additionByRealmIndex} for addition by realm in given values " . var_export($values, true)
+                . ' for ' . $this->getParameterName()
+            );
         }
         $this->additionByRealm = new AdditionByRealm($values[$additionByRealmIndex]);
+    }
+
+    /**
+     * @return string
+     */
+    protected function getParameterName(): string
+    {
+        $snakeCaseBaseName = StringTools::camelCaseToSnakeCasedBasename(static::class);
+
+        return str_replace('_', ' ', $snakeCaseBaseName);
     }
 
     /**
