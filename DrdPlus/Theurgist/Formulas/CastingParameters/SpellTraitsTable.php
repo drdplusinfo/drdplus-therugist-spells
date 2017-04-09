@@ -6,11 +6,11 @@ use DrdPlus\Tables\Partials\AbstractFileTable;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\TraitCode;
 
-class TraitsTable extends AbstractFileTable
+class SpellTraitsTable extends AbstractFileTable
 {
     protected function getDataFileName(): string
     {
-        return __DIR__ . '/data/traits.csv';
+        return __DIR__ . '/data/spell_traits.csv';
     }
 
     const FORMULAS = 'formulas';

@@ -3,12 +3,12 @@ namespace DrdPlus\Theurgist\Formulas\CastingParameters;
 
 use DrdPlus\Theurgist\Codes\AffectionPeriodCode;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Partials\GetParameterNameTrait;
+use Granam\Integer\NegativeInteger;
 use Granam\Integer\Tools\ToInteger;
-use Granam\Scalar\ScalarInterface;
 use Granam\Strict\Object\StrictObject;
 use Granam\Tools\ValueDescriber;
 
-class Affection extends StrictObject implements ScalarInterface
+class Affection extends StrictObject implements NegativeInteger
 {
     use GetParameterNameTrait;
 

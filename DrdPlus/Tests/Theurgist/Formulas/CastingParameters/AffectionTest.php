@@ -32,7 +32,7 @@ class AffectionTest extends TestWithMockery
     /**
      * @test
      */
-    public function I_can_create_it_zero_affection()
+    public function I_can_create_zero_affection()
     {
         $affection = new Affection(['0']);
         self::assertSame(0, $affection->getValue());
@@ -45,7 +45,7 @@ class AffectionTest extends TestWithMockery
      * @expectedException \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatForNegativeCastingParameter
      * @expectedExceptionMessageRegExp ~1~
      */
-    public function I_can_not_create_it_positive_affection()
+    public function I_can_not_create_positive_affection()
     {
         new Affection(['1']);
     }
