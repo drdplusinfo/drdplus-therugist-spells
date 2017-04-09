@@ -30,7 +30,7 @@ abstract class IntegerCastingParameter extends CastingParameter implements Integ
                 . (array_key_exists(0, $values) ? ValueDescriber::describe($values[0], true) : 'nothing')
             );
         }
-        parent::__construct($values);
+        parent::__construct($values, 1);
     }
 
     /**
