@@ -5,29 +5,29 @@ use Granam\Integer\Tools\ToInteger;
 use Granam\Strict\Object\StrictObject;
 use Granam\Tools\ValueDescriber;
 
-class AdditionByRealm extends StrictObject
+class AdditionByRealms extends StrictObject
 {
-    private $realmsNumber;
+    private $realmIncrement;
     private $addition;
 
     /**
      * @param string $additionByRealmNotation in format 'number' or 'number=number'
-     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfRealmsNumber
-     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAddition
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfRealmIncrement
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAdditionByRealmValue
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\UnexpectedFormatOfAdditionByRealm
      */
     public function __construct(string $additionByRealmNotation)
     {
         $parts = $this->parseParts($additionByRealmNotation);
-        if (count($parts) === 1) {
-            $this->realmsNumber = 1;
+        if (count($parts) === 1 && array_keys($parts) === [0]) {
+            $this->realmIncrement = 1;
             $this->addition = $this->sanitizeAddition($parts[0]);
-        } else if (count($parts) === 2) {
-            $this->realmsNumber = $this->sanitizeRealmsNumber($parts[0]);
+        } else if (count($parts) === 2 && array_keys($parts) === [0, 1]) {
+            $this->realmIncrement = $this->sanitizeRealmIncrement($parts[0]);
             $this->addition = $this->sanitizeAddition($parts[1]);
         } else {
             throw new Exceptions\UnexpectedFormatOfAdditionByRealm(
-                "Expected format of addition by realm as 'number' or 'number=number', got "
+                "Expected addition by realm in format 'number' or 'number=number', got "
                 . ValueDescriber::describe($additionByRealmNotation)
             );
         }
@@ -46,26 +46,27 @@ class AdditionByRealm extends StrictObject
             explode('=', $additionByRealmNotation)
         );
 
-        return array_filter(
-            $parts,
-            function (string $part) {
-                return $part !== '';
+        foreach ($parts as $part) {
+            if ($part === '') {
+                return [];
             }
-        );
+        }
+
+        return $parts;
     }
 
     /**
-     * @param $realmsNumber
+     * @param $realmIncrement
      * @return int
-     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfRealmsNumber
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfRealmIncrement
      */
-    private function sanitizeRealmsNumber($realmsNumber): int
+    private function sanitizeRealmIncrement($realmIncrement): int
     {
         try {
-            return ToInteger::toPositiveInteger($realmsNumber);
+            return ToInteger::toPositiveInteger($realmIncrement);
         } catch (\Granam\Integer\Tools\Exceptions\Exception $exception) {
-            throw new Exceptions\InvalidFormatOfRealmsNumber(
-                'For \'realms\' number expected positive integer, got ' . ValueDescriber::describe($realmsNumber)
+            throw new Exceptions\InvalidFormatOfRealmIncrement(
+                'Expected positive integer for realm increment , got ' . ValueDescriber::describe($realmIncrement)
             );
         }
     }
@@ -73,15 +74,15 @@ class AdditionByRealm extends StrictObject
     /**
      * @param $addition
      * @return int
-     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAddition
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAdditionByRealmValue
      */
     private function sanitizeAddition($addition): int
     {
         try {
             return ToInteger::toInteger($addition);
         } catch (\Granam\Integer\Tools\Exceptions\Exception $exception) {
-            throw new Exceptions\InvalidFormatOfAddition(
-                'For \'addition\' expected integer, got ' . ValueDescriber::describe($addition)
+            throw new Exceptions\InvalidFormatOfAdditionByRealmValue(
+                'Expected integer for addition , got ' . ValueDescriber::describe($addition)
             );
         }
     }
@@ -89,9 +90,9 @@ class AdditionByRealm extends StrictObject
     /**
      * @return int
      */
-    public function getRealmsNumber(): int
+    public function getRealmIncrement(): int
     {
-        return $this->realmsNumber;
+        return $this->realmIncrement;
     }
 
     /**
@@ -107,7 +108,7 @@ class AdditionByRealm extends StrictObject
      */
     public function __toString(): string
     {
-        return "{$this->getRealmsNumber()}=>{$this->getAddition()}";
+        return "{$this->getRealmIncrement()}=>{$this->getAddition()}";
     }
 
 }

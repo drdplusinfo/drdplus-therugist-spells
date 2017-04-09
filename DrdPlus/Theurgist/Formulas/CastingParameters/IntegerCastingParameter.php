@@ -16,8 +16,8 @@ abstract class IntegerCastingParameter extends CastingParameter implements Integ
      * @param array $values
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidValueForIntegerCastingParameter
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\MissingValueForAdditionByRealm
-     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfRealmsNumber
-     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAddition
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfRealmIncrement
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAdditionByRealmValue
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\UnexpectedFormatOfAdditionByRealm
      */
     public function __construct(array $values)
@@ -46,6 +46,6 @@ abstract class IntegerCastingParameter extends CastingParameter implements Integ
      */
     public function __toString(): string
     {
-        return "{$this->getValue()} ({$this->getAdditionByRealm()})";
+        return "{$this->getValue()} ({$this->getAdditionByRealms()})";
     }
 }

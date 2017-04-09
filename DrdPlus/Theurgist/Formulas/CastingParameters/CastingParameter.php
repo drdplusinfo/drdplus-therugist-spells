@@ -10,16 +10,16 @@ abstract class CastingParameter extends StrictObject
     use GetParameterNameTrait;
 
     /**
-     * @var AdditionByRealm
+     * @var AdditionByRealms
      */
-    private $additionByRealm;
+    private $additionByRealms;
 
     /**
      * @param array $values
      * @param int $additionByRealmIndex
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\MissingValueForAdditionByRealm
-     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfRealmsNumber
-     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAddition
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfRealmIncrement
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAdditionByRealmValue
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\UnexpectedFormatOfAdditionByRealm
      */
     protected function __construct(array $values, int $additionByRealmIndex)
@@ -30,14 +30,14 @@ abstract class CastingParameter extends StrictObject
                 . ' for ' . $this->getParameterName()
             );
         }
-        $this->additionByRealm = new AdditionByRealm($values[$additionByRealmIndex]);
+        $this->additionByRealms = new AdditionByRealms($values[$additionByRealmIndex]);
     }
 
     /**
-     * @return AdditionByRealm
+     * @return AdditionByRealms
      */
-    public function getAdditionByRealm(): AdditionByRealm
+    public function getAdditionByRealms(): AdditionByRealms
     {
-        return $this->additionByRealm;
+        return $this->additionByRealms;
     }
 }
