@@ -2,6 +2,10 @@
 namespace DrdPlus\Tests\Theurgist\Formulas;
 
 use DrdPlus\Tables\Partials\AbstractTable;
+use DrdPlus\Tables\Table;
+use DrdPlus\Theurgist\Codes\AbstractTheurgistCode;
+use DrdPlus\Theurgist\Formulas\CastingParameters\Attack;
+use Granam\String\StringTools;
 use Granam\Tests\Tools\TestWithMockery;
 
 abstract class AbstractTheurgistTableTest extends TestWithMockery
@@ -31,5 +35,93 @@ abstract class AbstractTheurgistTableTest extends TestWithMockery
     protected function getValueFromTable(AbstractTable $table, string $formulaName, string $parameterName)
     {
         return $table->getIndexedValues()[$formulaName][$parameterName];
+    }
+
+    /**
+     * @param string $obligatoryParameter
+     * @param string|AbstractTheurgistCode $codeClass
+     */
+    protected function I_can_get_obligatory_parameter(string $obligatoryParameter, string $codeClass)
+    {
+        $getObligatoryParameter = StringTools::assembleGetterForName($obligatoryParameter);
+        $parameterClass = $this->assembleParameterClassName($obligatoryParameter);
+        $sutClass = self::getSutClass();
+        $sut = new $sutClass();
+        $tableArgument = $this->findOutTableArgument($sutClass, $getObligatoryParameter);
+        foreach ($codeClass::getPossibleValues() as $modifierCode) {
+            $expectedParameterValueValue = $this->getValueFromTable($sut, $modifierCode, $obligatoryParameter);
+            if ($tableArgument) {
+                $parameterObject = $sut->$getObligatoryParameter($codeClass::getIt($modifierCode), $tableArgument);
+                $expectedParameterObject = new $parameterClass($expectedParameterValueValue, $tableArgument);
+            } else {
+                $parameterObject = $sut->$getObligatoryParameter($codeClass::getIt($modifierCode));
+                $expectedParameterObject = new $parameterClass($expectedParameterValueValue);
+            }
+            self::assertEquals($expectedParameterObject, $parameterObject);
+        }
+    }
+
+    private function assembleParameterClassName(string $parameter)
+    {
+        $basename = implode(array_map(
+            function (string $parameterPart) {
+                return ucfirst($parameterPart);
+            },
+            explode('_', $parameter)
+        ));
+
+        $namespace = (new \ReflectionClass(Attack::class))->getNamespaceName();
+
+        return $namespace . '\\' . $basename;
+    }
+
+    /**
+     * @param string $optionalParameter
+     * @param string|AbstractTheurgistCode $codeClass
+     */
+    protected function I_can_get_optional_parameter(string $optionalParameter, string $codeClass)
+    {
+        $getOptionalParameter = StringTools::assembleGetterForName($optionalParameter);
+        $parameterClass = $this->assembleParameterClassName($optionalParameter);
+        $sutClass = self::getSutClass();
+        $sut = new $sutClass();
+        $tableArgument = $this->findOutTableArgument($sutClass, $getOptionalParameter);
+        foreach ($codeClass::getPossibleValues() as $modifierCode) {
+            $expectedParameterValueValue = $this->getValueFromTable($sut, $modifierCode, $optionalParameter);
+            if ($tableArgument) {
+                $parameterObject = $sut->$getOptionalParameter(
+                    $codeClass::getIt($modifierCode),
+                    $tableArgument
+                );
+                $expectedParameterObject = count($expectedParameterValueValue) !== 0
+                    ? new $parameterClass($expectedParameterValueValue, $tableArgument)
+                    : null;
+            } else {
+                $parameterObject = $sut->$getOptionalParameter($codeClass::getIt($modifierCode));
+                $expectedParameterObject = count($expectedParameterValueValue) !== 0
+                    ? new $parameterClass($expectedParameterValueValue)
+                    : null;
+            }
+            self::assertEquals($expectedParameterObject, $parameterObject);
+        }
+    }
+
+    /**
+     * @param string $sutClass
+     * @param string $getterName
+     * @return bool|Table
+     */
+    private function findOutTableArgument(string $sutClass, string $getterName)
+    {
+        $reflectionClass = new \ReflectionClass($sutClass);
+        $reflectionMethod = $reflectionClass->getMethod($getterName);
+        $parameters = $reflectionMethod->getParameters();
+        if (count($parameters) === 1) {
+            return false;
+        }
+        $tableParameter = $parameters[1];
+        $tableClass = $tableParameter->getClass()->getName();
+
+        return new $tableClass;
     }
 }

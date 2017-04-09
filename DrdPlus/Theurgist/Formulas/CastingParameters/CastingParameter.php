@@ -1,12 +1,14 @@
 <?php
 namespace DrdPlus\Theurgist\Formulas\CastingParameters;
 
+use DrdPlus\Theurgist\Formulas\CastingParameters\Partials\GetParameterNameTrait;
 use Granam\Strict\Object\StrictObject;
-use Granam\String\StringTools;
 
 /** @noinspection SingletonFactoryPatternViolationInspection */
 abstract class CastingParameter extends StrictObject
 {
+    use GetParameterNameTrait;
+
     /**
      * @var AdditionByRealm
      */
@@ -29,16 +31,6 @@ abstract class CastingParameter extends StrictObject
             );
         }
         $this->additionByRealm = new AdditionByRealm($values[$additionByRealmIndex]);
-    }
-
-    /**
-     * @return string
-     */
-    protected function getParameterName(): string
-    {
-        $snakeCaseBaseName = StringTools::camelCaseToSnakeCasedBasename(static::class);
-
-        return str_replace('_', ' ', $snakeCaseBaseName);
     }
 
     /**

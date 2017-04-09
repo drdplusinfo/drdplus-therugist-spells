@@ -8,24 +8,23 @@ use DrdPlus\Theurgist\Codes\FormCode;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ProfileCode;
+use DrdPlus\Theurgist\Formulas\CastingParameters\Affection;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Attack;
+use DrdPlus\Theurgist\Formulas\CastingParameters\Casting;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Conditions;
-use DrdPlus\Theurgist\Formulas\CastingParameters\Difficulty;
+use DrdPlus\Theurgist\Formulas\CastingParameters\DifficultyChange;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Grafts;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Invisibility;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Points;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Power;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Quality;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Radius;
+use DrdPlus\Theurgist\Formulas\CastingParameters\Realm;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Resistance;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Situations;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Speed;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Threshold;
-use Granam\Integer\NegativeInteger;
-use Granam\Integer\NegativeIntegerObject;
-use Granam\Integer\PositiveInteger;
-use Granam\Integer\PositiveIntegerObject;
 
 class ModifiersTable extends AbstractFileTable
 {
@@ -41,7 +40,7 @@ class ModifiersTable extends AbstractFileTable
     const AFFECTION = 'affection';
     const AFFECTION_TYPE = 'affection_type';
     const CASTING = 'casting';
-    const DIFFICULTY = 'difficulty';
+    const DIFFICULTY_CHANGE = 'difficulty_change';
     const RADIUS = 'radius';
     const POWER = 'power';
     const ATTACK = 'attack';
@@ -63,10 +62,9 @@ class ModifiersTable extends AbstractFileTable
     {
         return [
             self::REALM => self::POSITIVE_INTEGER,
-            self::AFFECTION => self::NEGATIVE_INTEGER,
-            self::AFFECTION_TYPE => self::STRING,
+            self::AFFECTION => self::ARRAY,
             self::CASTING => self::POSITIVE_INTEGER,
-            self::DIFFICULTY => self::POSITIVE_INTEGER,
+            self::DIFFICULTY_CHANGE => self::POSITIVE_INTEGER,
             self::RADIUS => self::ARRAY,
             self::POWER => self::ARRAY,
             self::ATTACK => self::ARRAY,
@@ -97,42 +95,48 @@ class ModifiersTable extends AbstractFileTable
 
     /**
      * @param ModifierCode $modifierCode
-     * @return PositiveInteger
+     * @return Realm
      */
-    public function getRealm(ModifierCode $modifierCode): PositiveInteger
+    public function getRealm(ModifierCode $modifierCode): Realm
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new PositiveIntegerObject($this->getValue($modifierCode, self::REALM));
+        return new Realm($this->getValue($modifierCode, self::REALM));
     }
 
     /**
      * @param ModifierCode $modifierCode
-     * @return NegativeInteger
+     * @return Affection|null
      */
-    public function getAffection(ModifierCode $modifierCode): NegativeInteger
+    public function getAffection(ModifierCode $modifierCode)
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new NegativeIntegerObject($this->getValue($modifierCode, self::AFFECTION));
+        $affectionValues = $this->getValue($modifierCode, self::AFFECTION);
+        if (count($affectionValues) === 0) {
+            return null;
+        }
+
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new Affection($affectionValues);
     }
 
     /**
      * @param ModifierCode $modifierCode
-     * @return PositiveInteger
+     * @return Casting
      */
-    public function getCasting(ModifierCode $modifierCode): PositiveInteger
+    public function getCasting(ModifierCode $modifierCode): Casting
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new PositiveIntegerObject($this->getValue($modifierCode, self::CASTING));
+        return new Casting($this->getValue($modifierCode, self::CASTING));
     }
 
     /**
      * @param ModifierCode $modifierCode
-     * @return Difficulty
+     * @return DifficultyChange
      */
-    public function getDifficulty(ModifierCode $modifierCode): Difficulty
+    public function getDifficultyChange(ModifierCode $modifierCode): DifficultyChange
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new Difficulty($this->getValue($modifierCode, self::DIFFICULTY));
+        return new DifficultyChange($this->getValue($modifierCode, self::DIFFICULTY_CHANGE));
     }
 
     /**

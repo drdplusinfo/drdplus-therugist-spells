@@ -1,23 +1,13 @@
 <?php
 namespace DrdPlus\Tests\Theurgist\Formulas;
 
+use DrdPlus\Tables\Measurements\Distance\DistanceTable;
 use DrdPlus\Theurgist\Codes\FormCode;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ProfileCode;
 use DrdPlus\Theurgist\Codes\TraitCode;
-use DrdPlus\Theurgist\Formulas\CastingParameters\Attack;
-use DrdPlus\Theurgist\Formulas\CastingParameters\Conditions;
-use DrdPlus\Theurgist\Formulas\CastingParameters\Grafts;
-use DrdPlus\Theurgist\Formulas\CastingParameters\Invisibility;
-use DrdPlus\Theurgist\Formulas\CastingParameters\Points;
-use DrdPlus\Theurgist\Formulas\CastingParameters\Power;
-use DrdPlus\Theurgist\Formulas\CastingParameters\Quality;
-use DrdPlus\Theurgist\Formulas\CastingParameters\Resistance;
-use DrdPlus\Theurgist\Formulas\CastingParameters\Situations;
-use DrdPlus\Theurgist\Formulas\CastingParameters\Speed;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
-use DrdPlus\Theurgist\Formulas\CastingParameters\Threshold;
 use DrdPlus\Theurgist\Formulas\FormulasTable;
 use DrdPlus\Theurgist\Formulas\ModifiersTable;
 use DrdPlus\Theurgist\Formulas\ProfilesTable;
@@ -33,186 +23,40 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
      * @var ProfilesTable
      */
     private $profilesTable;
+    /**
+     * @var DistanceTable
+     */
+    private $distanceTable;
 
     protected function setUp()
     {
         $this->formulasTable = new FormulasTable();
         $this->profilesTable = new ProfilesTable();
+        $this->distanceTable = new DistanceTable();
     }
 
     /**
      * @test
      */
-    public function I_can_get_power()
+    public function I_can_get_every_obligatory_parameter()
     {
-        $modifiersTable = new ModifiersTable();
-        foreach (ModifierCode::getPossibleValues() as $modifierCode) {
-            $power = $modifiersTable->getPower(ModifierCode::getIt($modifierCode));
-            $expectedPowerValue = $this->getValueFromTable($modifiersTable, $modifierCode, 'power');
-            $expectedPower = count($expectedPowerValue) !== 0
-                ? new Power($expectedPowerValue)
-                : null;
-            self::assertEquals($expectedPower, $power);
+        $obligatoryParameters = ['realm', 'difficulty_change'];
+        foreach ($obligatoryParameters as $obligatoryParameter) {
+            $this->I_can_get_obligatory_parameter($obligatoryParameter, ModifierCode::class);
         }
     }
 
     /**
      * @test
      */
-    public function I_can_get_attack()
+    public function I_can_get_every_optional_parameter()
     {
-        $modifiersTable = new ModifiersTable();
-        foreach (ModifierCode::getPossibleValues() as $modifierCode) {
-            $attack = $modifiersTable->getAttack(ModifierCode::getIt($modifierCode));
-            $expectedAttackValue = $this->getValueFromTable($modifiersTable, $modifierCode, 'attack');
-            $expectedAttack = count($expectedAttackValue) !== 0
-                ? new Attack($expectedAttackValue)
-                : null;
-            self::assertEquals($expectedAttack, $attack);
-        }
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_get_grafts()
-    {
-        $modifiersTable = new ModifiersTable();
-        foreach (ModifierCode::getPossibleValues() as $modifierCode) {
-            $grafts = $modifiersTable->getGrafts(ModifierCode::getIt($modifierCode));
-            $expectedGraftsValue = $this->getValueFromTable($modifiersTable, $modifierCode, 'grafts');
-            $expectedGrafts = count($expectedGraftsValue) !== 0
-                ? new Grafts($expectedGraftsValue)
-                : null;
-            self::assertEquals($expectedGrafts, $grafts);
-        }
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_get_speed()
-    {
-        $modifiersTable = new ModifiersTable();
-        foreach (ModifierCode::getPossibleValues() as $modifierCode) {
-            $speed = $modifiersTable->getSpeed(ModifierCode::getIt($modifierCode));
-            $expectedSpeedValue = $this->getValueFromTable($modifiersTable, $modifierCode, 'speed');
-            $expectedSpeed = count($expectedSpeedValue) !== 0
-                ? new Speed($expectedSpeedValue)
-                : null;
-            self::assertEquals($expectedSpeed, $speed);
-        }
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_get_points()
-    {
-        $modifiersTable = new ModifiersTable();
-        foreach (ModifierCode::getPossibleValues() as $modifierCode) {
-            $points = $modifiersTable->getPoints(ModifierCode::getIt($modifierCode));
-            $expectedPointsValue = $this->getValueFromTable($modifiersTable, $modifierCode, 'points');
-            $expectedPoints = count($expectedPointsValue) !== 0
-                ? new Points($expectedPointsValue)
-                : null;
-            self::assertEquals($expectedPoints, $points);
-        }
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_get_invisibility()
-    {
-        $modifiersTable = new ModifiersTable();
-        foreach (ModifierCode::getPossibleValues() as $modifierCode) {
-            $invisibility = $modifiersTable->getInvisibility(ModifierCode::getIt($modifierCode));
-            $expectedInvisibilityValue = $this->getValueFromTable($modifiersTable, $modifierCode, 'invisibility');
-            $expectedInvisibility = count($expectedInvisibilityValue) !== 0
-                ? new Invisibility($expectedInvisibilityValue)
-                : null;
-            self::assertEquals($expectedInvisibility, $invisibility);
-        }
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_get_quality()
-    {
-        $modifiersTable = new ModifiersTable();
-        foreach (ModifierCode::getPossibleValues() as $modifierCode) {
-            $quality = $modifiersTable->getQuality(ModifierCode::getIt($modifierCode));
-            $expectedQualityValue = $this->getValueFromTable($modifiersTable, $modifierCode, 'quality');
-            $expectedQuality = count($expectedQualityValue) !== 0
-                ? new Quality($expectedQualityValue)
-                : null;
-            self::assertEquals($expectedQuality, $quality);
-        }
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_get_conditions()
-    {
-        $modifiersTable = new ModifiersTable();
-        foreach (ModifierCode::getPossibleValues() as $modifierCode) {
-            $conditions = $modifiersTable->getConditions(ModifierCode::getIt($modifierCode));
-            $expectedConditionsValue = $this->getValueFromTable($modifiersTable, $modifierCode, 'conditions');
-            $expectedConditions = count($expectedConditionsValue) !== 0
-                ? new Conditions($expectedConditionsValue)
-                : null;
-            self::assertEquals($expectedConditions, $conditions);
-        }
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_get_resistance()
-    {
-        $modifiersTable = new ModifiersTable();
-        foreach (ModifierCode::getPossibleValues() as $modifierCode) {
-            $resistance = $modifiersTable->getResistance(ModifierCode::getIt($modifierCode));
-            $expectedResistanceValue = $this->getValueFromTable($modifiersTable, $modifierCode, 'resistance');
-            $expectedResistance = count($expectedResistanceValue) !== 0
-                ? new Resistance($expectedResistanceValue)
-                : null;
-            self::assertEquals($expectedResistance, $resistance);
-        }
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_get_situations()
-    {
-        $modifiersTable = new ModifiersTable();
-        foreach (ModifierCode::getPossibleValues() as $modifierCode) {
-            $situations = $modifiersTable->getSituations(ModifierCode::getIt($modifierCode));
-            $expectedSituationsValue = $this->getValueFromTable($modifiersTable, $modifierCode, 'situations');
-            $expectedSituations = count($expectedSituationsValue) !== 0
-                ? new Situations($expectedSituationsValue)
-                : null;
-            self::assertEquals($expectedSituations, $situations);
-        }
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_get_threshold()
-    {
-        $modifiersTable = new ModifiersTable();
-        foreach (ModifierCode::getPossibleValues() as $modifierCode) {
-            $threshold = $modifiersTable->getThreshold(ModifierCode::getIt($modifierCode));
-            $expectedThresholdValue = $this->getValueFromTable($modifiersTable, $modifierCode, 'threshold');
-            $expectedThreshold = count($expectedThresholdValue) !== 0
-                ? new Threshold($expectedThresholdValue)
-                : null;
-            self::assertEquals($expectedThreshold, $threshold);
+        $optionalParameters = [
+            'affection', 'casting', 'radius', 'power', 'attack', 'grafts',
+            'speed', 'points', 'invisibility', 'quality', 'conditions', 'resistance', 'situations', 'threshold',
+        ];
+        foreach ($optionalParameters as $optionalParameter) {
+            $this->I_can_get_optional_parameter($optionalParameter, ModifierCode::class);
         }
     }
 

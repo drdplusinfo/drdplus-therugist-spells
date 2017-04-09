@@ -1,29 +1,15 @@
 <?php
 namespace DrdPlus\Tests\Theurgist\Formulas;
 
-use DrdPlus\Tables\Measurements\Distance\DistanceTable;
-use DrdPlus\Tables\Measurements\Time\TimeTable;
 use DrdPlus\Theurgist\Codes\FormCode;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ProfileCode;
 use DrdPlus\Theurgist\Codes\TraitCode;
-use DrdPlus\Theurgist\Formulas\CastingParameters\Attack;
-use DrdPlus\Theurgist\Formulas\CastingParameters\Brightness;
-use DrdPlus\Theurgist\Formulas\CastingParameters\DetailLevel;
-use DrdPlus\Theurgist\Formulas\CastingParameters\Difficulty;
-use DrdPlus\Theurgist\Formulas\CastingParameters\Duration;
-use DrdPlus\Theurgist\Formulas\CastingParameters\Power;
-use DrdPlus\Theurgist\Formulas\CastingParameters\Radius;
-use DrdPlus\Theurgist\Formulas\CastingParameters\SizeChange;
-use DrdPlus\Theurgist\Formulas\CastingParameters\Speed;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
-use DrdPlus\Theurgist\Formulas\CastingParameters\Transposition;
 use DrdPlus\Theurgist\Formulas\FormulasTable;
 use DrdPlus\Theurgist\Formulas\ModifiersTable;
 use DrdPlus\Theurgist\Formulas\ProfilesTable;
-use Granam\Integer\NegativeIntegerObject;
-use Granam\Integer\PositiveIntegerObject;
 
 class FormulasTableTest extends AbstractTheurgistTableTest
 {
@@ -40,205 +26,24 @@ class FormulasTableTest extends AbstractTheurgistTableTest
     /**
      * @test
      */
-    public function I_can_get_realm()
+    public function I_can_get_every_obligatory_parameter()
     {
-        $formulasTable = new FormulasTable();
-        foreach (FormulaCode::getPossibleValues() as $formulaValue) {
-            $realm = $formulasTable->getRealm(FormulaCode::getIt($formulaValue));
-            self::assertEquals(
-                new PositiveIntegerObject($this->getValueFromTable($formulasTable, $formulaValue, 'realm')),
-                $realm
-            );
+        $obligatoryParameters = ['realm', 'affection', 'casting', 'difficulty', 'duration'];
+        foreach ($obligatoryParameters as $obligatoryParameter) {
+            $this->I_can_get_obligatory_parameter($obligatoryParameter, FormulaCode::class);
         }
     }
 
     /**
      * @test
      */
-    public function I_can_get_affection()
+    public function I_can_get_every_optional_parameter()
     {
-        $formulasTable = new FormulasTable();
-        foreach (FormulaCode::getPossibleValues() as $formulaValue) {
-            $affection = $formulasTable->getAffection(FormulaCode::getIt($formulaValue));
-            self::assertEquals(
-                new NegativeIntegerObject($this->getValueFromTable($formulasTable, $formulaValue, 'affection')),
-                $affection
-            );
-        }
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_get_casting()
-    {
-        $formulasTable = new FormulasTable();
-        foreach (FormulaCode::getPossibleValues() as $formulaValue) {
-            $casting = $formulasTable->getCasting(FormulaCode::getIt($formulaValue));
-            self::assertEquals(
-                new PositiveIntegerObject($this->getValueFromTable($formulasTable, $formulaValue, 'casting')),
-                $casting
-            );
-        }
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_get_difficulty()
-    {
-        $formulasTable = new FormulasTable();
-        foreach (FormulaCode::getPossibleValues() as $formulaValue) {
-            $difficulty = $formulasTable->getDifficulty(FormulaCode::getIt($formulaValue));
-            self::assertEquals(
-                new Difficulty($this->getValueFromTable($formulasTable, $formulaValue, 'difficulty')),
-                $difficulty
-            );
-        }
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_get_radius()
-    {
-        $formulasTable = new FormulasTable();
-        $distanceTable = new DistanceTable();
-        foreach (FormulaCode::getPossibleValues() as $formulaValue) {
-            $radius = $formulasTable->getRadius(FormulaCode::getIt($formulaValue), $distanceTable);
-            $expectedRadiusValue = $this->getValueFromTable($formulasTable, $formulaValue, 'radius');
-            $expectedRadius = count($expectedRadiusValue) !== 0
-                ? new Radius($expectedRadiusValue, $distanceTable)
-                : null;
-            self::assertEquals($expectedRadius, $radius);
-        }
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_get_duration()
-    {
-        $formulasTable = new FormulasTable();
-        $timeTable = new TimeTable();
-        foreach (FormulaCode::getPossibleValues() as $formulaValue) {
-            $duration = $formulasTable->getDuration(FormulaCode::getIt($formulaValue), $timeTable);
-            self::assertEquals(
-                new Duration($this->getValueFromTable($formulasTable, $formulaValue, 'duration'), $timeTable),
-                $duration
-            );
-        }
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_get_power()
-    {
-        $formulasTable = new FormulasTable();
-        foreach (FormulaCode::getPossibleValues() as $formulaValue) {
-            $power = $formulasTable->getPower(FormulaCode::getIt($formulaValue));
-            $expectedPowerValue = $this->getValueFromTable($formulasTable, $formulaValue, 'power');
-            $expectedPower = count($expectedPowerValue) !== 0
-                ? new Power($expectedPowerValue)
-                : null;
-            self::assertEquals($expectedPower, $power);
-        }
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_get_attack()
-    {
-        $formulasTable = new FormulasTable();
-        foreach (FormulaCode::getPossibleValues() as $formulaValue) {
-            $attack = $formulasTable->getAttack(FormulaCode::getIt($formulaValue));
-            $expectedAttackValue = $this->getValueFromTable($formulasTable, $formulaValue, 'attack');
-            $expectedAttack = count($expectedAttackValue) !== 0
-                ? new Attack($expectedAttackValue)
-                : null;
-            self::assertEquals($expectedAttack, $attack);
-        }
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_get_size_change()
-    {
-        $formulasTable = new FormulasTable();
-        foreach (FormulaCode::getPossibleValues() as $formulaValue) {
-            $sizeChange = $formulasTable->getSizeChange(FormulaCode::getIt($formulaValue));
-            $expectedSizeChangeValue = $this->getValueFromTable($formulasTable, $formulaValue, 'size_change');
-            $expectedSizeChange = count($expectedSizeChangeValue) !== 0
-                ? new SizeChange($expectedSizeChangeValue)
-                : null;
-            self::assertEquals($expectedSizeChange, $sizeChange);
-        }
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_get_detail_level()
-    {
-        $formulasTable = new FormulasTable();
-        foreach (FormulaCode::getPossibleValues() as $formulaValue) {
-            $detailLevel = $formulasTable->getDetailLevel(FormulaCode::getIt($formulaValue));
-            $expectedDetailLevelValue = $this->getValueFromTable($formulasTable, $formulaValue, 'detail_level');
-            $expectedDetailLevel = count($expectedDetailLevelValue) !== 0
-                ? new DetailLevel($expectedDetailLevelValue)
-                : null;
-            self::assertEquals($expectedDetailLevel, $detailLevel);
-        }
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_get_brightness()
-    {
-        $formulasTable = new FormulasTable();
-        foreach (FormulaCode::getPossibleValues() as $formulaValue) {
-            $brightness = $formulasTable->getBrightness(FormulaCode::getIt($formulaValue));
-            $expectedBrightnessValue = $this->getValueFromTable($formulasTable, $formulaValue, 'brightness');
-            $expectedBrightness = count($expectedBrightnessValue) !== 0
-                ? new Brightness($expectedBrightnessValue)
-                : null;
-            self::assertEquals($expectedBrightness, $brightness);
-        }
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_get_speed()
-    {
-        $formulasTable = new FormulasTable();
-        foreach (FormulaCode::getPossibleValues() as $formulaValue) {
-            $speed = $formulasTable->getSpeed(FormulaCode::getIt($formulaValue));
-            $expectedSpeedValue = $this->getValueFromTable($formulasTable, $formulaValue, 'speed');
-            $expectedSpeed = count($expectedSpeedValue) !== 0
-                ? new Speed($expectedSpeedValue)
-                : null;
-            self::assertEquals($expectedSpeed, $speed);
-        }
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_get_transposition()
-    {
-        $formulasTable = new FormulasTable();
-        foreach (FormulaCode::getPossibleValues() as $formulaValue) {
-            $transposition = $formulasTable->getTransposition(FormulaCode::getIt($formulaValue));
-            $expectedTranspositionValue = $this->getValueFromTable($formulasTable, $formulaValue, 'transposition');
-            $expectedTransposition = count($expectedTranspositionValue) !== 0
-                ? new Transposition($expectedTranspositionValue)
-                : null;
-            self::assertEquals($expectedTransposition, $transposition);
+        $optionalParameters = [
+            'radius', 'power', 'attack', 'size_change', 'detail_level', 'brightness', 'speed', 'transposition'
+        ];
+        foreach ($optionalParameters as $optionalParameter) {
+            $this->I_can_get_optional_parameter($optionalParameter, FormulaCode::class);
         }
     }
 

@@ -9,21 +9,20 @@ use DrdPlus\Theurgist\Codes\FormCode;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ProfileCode;
+use DrdPlus\Theurgist\Formulas\CastingParameters\Affection;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Attack;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Brightness;
+use DrdPlus\Theurgist\Formulas\CastingParameters\Casting;
 use DrdPlus\Theurgist\Formulas\CastingParameters\DetailLevel;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Difficulty;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Duration;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Power;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Radius;
+use DrdPlus\Theurgist\Formulas\CastingParameters\Realm;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SizeChange;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Speed;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Transposition;
-use Granam\Integer\NegativeInteger;
-use Granam\Integer\NegativeIntegerObject;
-use Granam\Integer\PositiveInteger;
-use Granam\Integer\PositiveIntegerObject;
 
 class FormulasTable extends AbstractFileTable
 {
@@ -54,7 +53,7 @@ class FormulasTable extends AbstractFileTable
     {
         return [
             self::REALM => self::POSITIVE_INTEGER,
-            self::AFFECTION => self::NEGATIVE_INTEGER,
+            self::AFFECTION => self::ARRAY,
             self::CASTING => self::POSITIVE_INTEGER,
             self::DIFFICULTY => self::ARRAY,
             self::RADIUS => self::ARRAY,
@@ -84,32 +83,32 @@ class FormulasTable extends AbstractFileTable
 
     /**
      * @param FormulaCode $formulaCode
-     * @return PositiveInteger
+     * @return Realm
      */
-    public function getRealm(FormulaCode $formulaCode): PositiveInteger
+    public function getRealm(FormulaCode $formulaCode): Realm
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new PositiveIntegerObject($this->getValue($formulaCode, self::REALM));
+        return new Realm($this->getValue($formulaCode, self::REALM));
     }
 
     /**
      * @param FormulaCode $formulaCode
-     * @return NegativeInteger
+     * @return Affection
      */
-    public function getAffection(FormulaCode $formulaCode): NegativeInteger
+    public function getAffection(FormulaCode $formulaCode): Affection
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new NegativeIntegerObject($this->getValue($formulaCode, self::AFFECTION));
+        return new Affection($this->getValue($formulaCode, self::AFFECTION));
     }
 
     /**
      * @param FormulaCode $formulaCode
-     * @return PositiveInteger
+     * @return Casting
      */
-    public function getCasting(FormulaCode $formulaCode): PositiveInteger
+    public function getCasting(FormulaCode $formulaCode): Casting
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new PositiveIntegerObject($this->getValue($formulaCode, self::CASTING));
+        return new Casting($this->getValue($formulaCode, self::CASTING));
     }
 
     /**
