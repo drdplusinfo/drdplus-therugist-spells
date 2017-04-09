@@ -1,14 +1,14 @@
 <?php
 namespace DrdPlus\Theurgist\Formulas\CastingParameters;
 
-use DrdPlus\Theurgist\Codes\AffectionTypeCode;
+use DrdPlus\Theurgist\Codes\AffectionPeriodCode;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Partials\GetParameterNameTrait;
-use Granam\Integer\NegativeInteger;
 use Granam\Integer\Tools\ToInteger;
+use Granam\Scalar\ScalarInterface;
 use Granam\Strict\Object\StrictObject;
 use Granam\Tools\ValueDescriber;
 
-class Affection extends StrictObject implements NegativeInteger
+class Affection extends StrictObject implements ScalarInterface
 {
     use GetParameterNameTrait;
 
@@ -17,9 +17,9 @@ class Affection extends StrictObject implements NegativeInteger
      */
     private $value;
     /**
-     * @var AffectionTypeCode
+     * @var AffectionPeriodCode
      */
-    private $affectionType;
+    private $affectionPeriod;
 
     /**
      * @param array $affectionParts
@@ -38,7 +38,7 @@ class Affection extends StrictObject implements NegativeInteger
                 ) . ' for ' . $this->getParameterName()
             );
         }
-        $this->affectionType = AffectionTypeCode::getIt($affectionParts[1] ?? AffectionTypeCode::DAILY);
+        $this->affectionPeriod = AffectionPeriodCode::getIt($affectionParts[1] ?? AffectionPeriodCode::DAILY);
     }
 
     /**
@@ -50,11 +50,11 @@ class Affection extends StrictObject implements NegativeInteger
     }
 
     /**
-     * @return AffectionTypeCode
+     * @return AffectionPeriodCode
      */
-    public function getAffectionType(): AffectionTypeCode
+    public function getAffectionPeriod(): AffectionPeriodCode
     {
-        return $this->affectionType;
+        return $this->affectionPeriod;
     }
 
     /**
@@ -62,7 +62,9 @@ class Affection extends StrictObject implements NegativeInteger
      */
     public function __toString(): string
     {
-        return (string)$this->getValue();
+        return (string)$this->getValue() . ($this->getValue() !== 0
+                ? (' ' . $this->getAffectionPeriod())
+                : '');
     }
 
 }
