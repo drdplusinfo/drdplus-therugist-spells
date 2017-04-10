@@ -46,4 +46,15 @@ abstract class IntegerCastingParameterTest extends TestWithMockery
         self::assertEquals(new AdditionByRealms('332211'), $sut->getAdditionByRealms());
         self::assertSame('35689 (' . $sut->getAdditionByRealms() . ')', (string)$sut);
     }
+
+    /**
+     * @test
+     * @expectedException \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidValueForIntegerCastingParameter
+     * @expectedExceptionMessageRegExp ~infinite~
+     */
+    public function I_can_not_create_it_non_numeric()
+    {
+        $sutClass = self::getSutClass();
+        new $sutClass(['infinite', '332211']);
+    }
 }
