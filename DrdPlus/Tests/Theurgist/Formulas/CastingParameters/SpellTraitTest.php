@@ -32,6 +32,16 @@ class SpellTraitTest extends TestWithMockery
      */
     public function I_can_not_create_it_with_non_number_difficulty_change()
     {
-        new SpellTrait(TraitCode::BIDIRECTIONAL . '=impossible');
+        new SpellTrait(TraitCode::ODORLESS . '=impossible');
+    }
+
+    /**
+     * @test
+     * @expectedException \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\UnexpectedFormatOfSpellTrait
+     * @expectedExceptionMessageRegExp ~deformation=14=-78~
+     */
+    public function I_can_not_crete_it_from_string_with_too_many_parts()
+    {
+        new SpellTrait(TraitCode::DEFORMATION . '=14=-78');
     }
 }

@@ -67,13 +67,11 @@ class SpellTrait extends StrictObject
             },
             explode('=', $additionByRealmNotation)
         );
+        if (count($parts) > 2) {
+            return [];
+        }
 
-        return array_filter(
-            $parts,
-            function (string $part) {
-                return $part !== '';
-            }
-        );
+        return $parts;
     }
 
     /**
