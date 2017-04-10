@@ -61,4 +61,20 @@ class Difficulty extends CastingParameter
     {
         return $this->maximal;
     }
+
+    /**
+     * @return string
+     */
+    public function __toString(): string
+    {
+        $asString = (string)$this->getMinimal();
+        if ($this->getMaximal() !== $this->getMinimal()) {
+            $asString .= ' - ' . $this->getMaximal();
+        }
+        if ($this->getAdditionByRealms()->getAddition() > 0) {
+            $asString .= ' (' . $this->getAdditionByRealms() . ')';
+        }
+
+        return $asString;
+    }
 }
