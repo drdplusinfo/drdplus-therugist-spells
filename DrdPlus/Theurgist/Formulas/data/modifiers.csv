@@ -1,4 +1,4 @@
-modifier,realm,affection,casting,difficulty_change,radius,power,attack,grafts,speed,points,invisibility,quality,conditions,resistance,situations,threshold,forms,traits,profiles,formulas
+modifier,realm,affection,casting,difficulty_change,radius,power,attack,grafts,speed,points,invisibility,quality,conditions,resistance,number_of_situations,threshold,forms,traits,profiles,formulas
 color,1,,,1,,,,,,,,,,,,,,,look_mars;spark_mars,barrier;smoke;fire;light;discharge
 gate,4,-1,4,2,-6;3,,,,,,,,,,,0;-1,direct;planar;tangible;visible,bidirectional=1,gate_mars;spark_venus;breach_venus;watcher_venus;time_venus;release_venus,portal
 explosion,2,,,3,0;2=3,6;1=0,,,,,,0;2,,,,,,,look_venus;fire_mars,fire

@@ -21,7 +21,7 @@ use DrdPlus\Theurgist\Formulas\CastingParameters\Quality;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Radius;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Realm;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Resistance;
-use DrdPlus\Theurgist\Formulas\CastingParameters\Situations;
+use DrdPlus\Theurgist\Formulas\CastingParameters\NumberOfSituations;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Speed;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Threshold;
@@ -51,7 +51,7 @@ class ModifiersTable extends AbstractFileTable
     const QUALITY = 'quality';
     const CONDITIONS = 'conditions';
     const RESISTANCE = 'resistance';
-    const SITUATIONS = 'situations';
+    const NUMBER_OF_SITUATIONS = 'number_of_situations';
     const THRESHOLD = 'threshold';
     const FORMS = 'forms';
     const TRAITS = 'traits';
@@ -75,7 +75,7 @@ class ModifiersTable extends AbstractFileTable
             self::QUALITY => self::ARRAY,
             self::CONDITIONS => self::ARRAY,
             self::RESISTANCE => self::ARRAY,
-            self::SITUATIONS => self::ARRAY,
+            self::NUMBER_OF_SITUATIONS => self::ARRAY,
             self::THRESHOLD => self::ARRAY,
             self::FORMS => self::ARRAY,
             self::TRAITS => self::ARRAY,
@@ -302,18 +302,18 @@ class ModifiersTable extends AbstractFileTable
 
     /**
      * @param ModifierCode $modifierCode
-     * @return Situations|null
+     * @return NumberOfSituations|null
      */
-    public function getSituations(ModifierCode $modifierCode)
+    public function getNumberOfSituations(ModifierCode $modifierCode)
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        $situationsValue = $this->getValue($modifierCode, self::SITUATIONS);
-        if (!$situationsValue) {
+        $numberOfSituationsValue = $this->getValue($modifierCode, self::NUMBER_OF_SITUATIONS);
+        if (!$numberOfSituationsValue) {
             return null;
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new Situations($situationsValue);
+        return new NumberOfSituations($numberOfSituationsValue);
     }
 
     /**
@@ -323,13 +323,13 @@ class ModifiersTable extends AbstractFileTable
     public function getThreshold(ModifierCode $modifierCode)
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        $situationsValue = $this->getValue($modifierCode, self::THRESHOLD);
-        if (!$situationsValue) {
+        $thresholdValues = $this->getValue($modifierCode, self::THRESHOLD);
+        if (!$thresholdValues) {
             return null;
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new Threshold($situationsValue);
+        return new Threshold($thresholdValues);
     }
 
     /**

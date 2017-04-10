@@ -53,7 +53,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
     {
         $optionalParameters = [
             'affection', 'casting', 'radius', 'power', 'attack', 'grafts',
-            'speed', 'points', 'invisibility', 'quality', 'conditions', 'resistance', 'situations', 'threshold',
+            'speed', 'points', 'invisibility', 'quality', 'conditions', 'resistance', 'number_of_situations', 'threshold',
         ];
         foreach ($optionalParameters as $optionalParameter) {
             $this->I_can_get_optional_parameter($optionalParameter, ModifierCode::class);

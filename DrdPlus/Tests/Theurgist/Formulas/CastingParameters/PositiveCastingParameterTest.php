@@ -12,14 +12,8 @@ abstract class PositiveCastingParameterTest extends TestWithMockery
      */
     public function I_can_create_it()
     {
-        $this->I_can_create_it_negative();
         $this->I_can_create_it_with_zero();
         $this->I_can_create_it_positive();
-    }
-
-    protected function I_can_create_it_negative()
-    {
-        self::assertFalse(false);
     }
 
     protected function I_can_create_it_with_zero()
@@ -40,5 +34,16 @@ abstract class PositiveCastingParameterTest extends TestWithMockery
         self::assertSame(35689, $sut->getValue());
         self::assertEquals(new AdditionByRealms('332211'), $sut->getAdditionByRealms());
         self::assertSame('35689 (' . $sut->getAdditionByRealms() . ')', (string)$sut);
+    }
+
+    /**
+     * @test
+     * @expectedException \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidValueForPositiveCastingParameter
+     * @expectedExceptionMessageRegExp ~-5~
+     */
+    public function I_can_not_create_it_negative()
+    {
+        $sutClass = self::getSutClass();
+        new $sutClass(['-5']);
     }
 }
