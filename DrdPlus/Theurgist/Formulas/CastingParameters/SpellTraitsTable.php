@@ -4,7 +4,7 @@ namespace DrdPlus\Theurgist\Formulas\CastingParameters;
 use DrdPlus\Tables\Partials\AbstractFileTable;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
-use DrdPlus\Theurgist\Codes\TraitCode;
+use DrdPlus\Theurgist\Codes\SpellTraitCode;
 
 class SpellTraitsTable extends AbstractFileTable
 {
@@ -36,10 +36,10 @@ class SpellTraitsTable extends AbstractFileTable
     }
 
     /**
-     * @param TraitCode $traitCode
+     * @param SpellTraitCode $traitCode
      * @return array|FormulaCode[]
      */
-    public function getFormulas(TraitCode $traitCode): array
+    public function getFormulas(SpellTraitCode $traitCode): array
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return array_map(
@@ -51,10 +51,10 @@ class SpellTraitsTable extends AbstractFileTable
     }
 
     /**
-     * @param TraitCode $traitCode
+     * @param SpellTraitCode $traitCode
      * @return array|ModifierCode[]
      */
-    public function getModifiers(TraitCode $traitCode): array
+    public function getModifiers(SpellTraitCode $traitCode): array
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return array_map(
@@ -66,20 +66,20 @@ class SpellTraitsTable extends AbstractFileTable
     }
 
     /**
-     * @param TraitCode $traitCode
+     * @param SpellTraitCode $traitCode
      * @return DifficultyChange
      */
-    public function getDifficultyChange(TraitCode $traitCode): DifficultyChange
+    public function getDifficultyChange(SpellTraitCode $traitCode): DifficultyChange
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new DifficultyChange($this->getValue($traitCode, self::DIFFICULTY_CHANGE));
     }
 
     /**
-     * @param TraitCode $traitCode
+     * @param SpellTraitCode $traitCode
      * @return Trap|null
      */
-    public function getTrap(TraitCode $traitCode)
+    public function getTrap(SpellTraitCode $traitCode)
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         $trapValues = $this->getValue($traitCode, self::TRAP);

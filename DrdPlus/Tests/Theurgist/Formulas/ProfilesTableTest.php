@@ -68,7 +68,7 @@ class ProfilesTableTest extends AbstractTheurgistTableTest
         $oppositeProfile = $this->reverseProfileGender($profileValue);
         $expectedFormulaValues = [];
         foreach (FormulaCode::getPossibleValues() as $formulaValue) {
-            $profileCodes = $this->formulasTable->getProfilesForFormula(FormulaCode::getIt($formulaValue));
+            $profileCodes = $this->formulasTable->getProfiles(FormulaCode::getIt($formulaValue));
             /** @var ProfileCode $profileCode */
             foreach ($profileCodes as $profileCode) {
                 if ($profileCode->getValue() === $oppositeProfile) {

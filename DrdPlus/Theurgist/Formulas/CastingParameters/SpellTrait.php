@@ -1,7 +1,7 @@
 <?php
 namespace DrdPlus\Theurgist\Formulas\CastingParameters;
 
-use DrdPlus\Theurgist\Codes\TraitCode;
+use DrdPlus\Theurgist\Codes\SpellTraitCode;
 use Granam\Integer\Tools\ToInteger;
 use Granam\Strict\Object\StrictObject;
 use Granam\Tools\ValueDescriber;
@@ -13,7 +13,7 @@ class SpellTrait extends StrictObject
      */
     private $difficultyChange;
     /**
-     * @var TraitCode
+     * @var SpellTraitCode
      */
     private $traitCode;
 
@@ -26,10 +26,10 @@ class SpellTrait extends StrictObject
     {
         $parts = $this->parseParts($spellTraitAnnotation);
         if (count($parts) === 1) {
-            $this->traitCode = TraitCode::getIt($parts[0]);
+            $this->traitCode = SpellTraitCode::getIt($parts[0]);
             $this->difficultyChange = 1;
         } else if (count($parts) === 2) {
-            $this->traitCode = TraitCode::getIt($parts[0]);
+            $this->traitCode = SpellTraitCode::getIt($parts[0]);
             $this->difficultyChange = $this->sanitizeDifficultyChange($parts[1]);
         } else {
             throw new Exceptions\UnexpectedFormatOfSpellTrait(
@@ -83,9 +83,9 @@ class SpellTrait extends StrictObject
     }
 
     /**
-     * @return TraitCode
+     * @return SpellTraitCode
      */
-    public function getTraitCode(): TraitCode
+    public function getSpellTraitCode(): SpellTraitCode
     {
         return $this->traitCode;
     }

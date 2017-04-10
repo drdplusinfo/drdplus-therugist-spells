@@ -1,5 +1,5 @@
 trait,formulas,modifiers,difficulty_change,trap
-affecting,,color,6,
+affecting,,interactive_illusion,6,
 invisible,,camouflage,3,-6;3;sight
 silent,,camouflage,3,-6;3;hearing
 odorless,,camouflage,3,-6;3;smell

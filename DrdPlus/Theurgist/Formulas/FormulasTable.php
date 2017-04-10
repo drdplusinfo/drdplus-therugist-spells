@@ -297,7 +297,7 @@ class FormulasTable extends AbstractFileTable
      * @return array|ProfileCode[]
      * @throws \DrdPlus\Theurgist\Formulas\Exceptions\UnknownFormulaToGetProfilesFor
      */
-    public function getProfilesForFormula(FormulaCode $formulaCode): array
+    public function getProfiles(FormulaCode $formulaCode): array
     {
         try {
             /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
@@ -317,7 +317,7 @@ class FormulasTable extends AbstractFileTable
      * @return array|ModifierCode[]
      * @throws \DrdPlus\Theurgist\Formulas\Exceptions\UnknownFormulaToGetModifiersFor
      */
-    public function getModifiersForFormula(FormulaCode $formulaCode): array
+    public function getModifiers(FormulaCode $formulaCode): array
     {
         try {
             /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
