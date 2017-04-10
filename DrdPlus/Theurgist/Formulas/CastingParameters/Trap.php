@@ -32,4 +32,12 @@ class Trap extends IntegerCastingParameter
     {
         return $this->propertyCode;
     }
+
+    /**
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return "{$this->getValue()} {$this->getPropertyCode()} ({$this->getAdditionByRealms()})";
+    }
 }
