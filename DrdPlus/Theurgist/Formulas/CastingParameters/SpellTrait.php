@@ -8,11 +8,17 @@ use Granam\Tools\ValueDescriber;
 
 class SpellTrait extends StrictObject
 {
+    /**
+     * @var int
+     */
     private $difficultyChange;
+    /**
+     * @var TraitCode
+     */
     private $traitCode;
 
     /**
-     * @param string $spellTraitAnnotation
+     * @param string $spellTraitAnnotation in format 'trait name' or 'trait name=number'
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidValueForSpellTraitDifficultyChange
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\UnexpectedFormatOfSpellTrait
      */
@@ -27,7 +33,7 @@ class SpellTrait extends StrictObject
             $this->difficultyChange = $this->sanitizeDifficultyChange($parts[1]);
         } else {
             throw new Exceptions\UnexpectedFormatOfSpellTrait(
-                "Expected format of spell trait annotation is 'string' or 'string=number', got "
+                "Expected format of spell trait annotation is 'trait name' or 'trait name=number', got "
                 . ValueDescriber::describe($spellTraitAnnotation)
             );
         }
