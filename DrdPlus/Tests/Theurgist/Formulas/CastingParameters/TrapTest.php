@@ -44,4 +44,24 @@ class TrapTest extends TestWithMockery
         self::assertEquals(new AdditionByRealms('332211'), $trap->getAdditionByRealms());
         self::assertSame('35689 endurance (1=>332211)', (string)$trap);
     }
+
+    /**
+     * @test
+     * @expectedException \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfPropertyUsedForTrap
+     * @expectedExceptionMessageRegExp ~goodness~
+     */
+    public function I_can_not_create_it_with_unknown_property()
+    {
+        new Trap(['35689', '332211', 'goodness']);
+    }
+
+    /**
+     * @test
+     * @expectedException \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfPropertyUsedForTrap
+     * @expectedExceptionMessageRegExp ~nothing~
+     */
+    public function I_can_not_create_it_without_property()
+    {
+        new Trap(['35689', '332211']);
+    }
 }

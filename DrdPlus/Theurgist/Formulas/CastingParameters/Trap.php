@@ -24,7 +24,7 @@ class Trap extends IntegerCastingParameter
     {
         parent::__construct($values);
         try {
-            $this->propertyCode = PropertyCode::getIt($values[2] ?? null);
+            $this->propertyCode = PropertyCode::getIt($values[2] ?? '');
         } catch (\DrdPlus\Codes\Partials\Exceptions\UnknownValueForCode $unknownValueForCode) {
             throw new Exceptions\InvalidFormatOfPropertyUsedForTrap(
                 'Expected valid property code, got '
