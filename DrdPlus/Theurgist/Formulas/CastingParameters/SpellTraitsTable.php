@@ -1,9 +1,9 @@
 <?php
 namespace DrdPlus\Theurgist\Formulas\CastingParameters;
 
-use DrdPlus\Codes\Properties\PropertyCode;
 use DrdPlus\Tables\Partials\AbstractFileTable;
 use DrdPlus\Theurgist\Codes\FormulaCode;
+use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\TraitCode;
 
 class SpellTraitsTable extends AbstractFileTable
@@ -15,18 +15,16 @@ class SpellTraitsTable extends AbstractFileTable
 
     const FORMULAS = 'formulas';
     const MODIFIERS = 'modifiers';
-    const DIFFICULTY = 'difficulty';
+    const DIFFICULTY_CHANGE = 'difficulty_change';
     const TRAP = 'trap';
-    const TRAP_SENSE = 'trap_sense';
 
     protected function getExpectedDataHeaderNamesToTypes(): array
     {
         return [
             self::FORMULAS => self::ARRAY,
             self::MODIFIERS => self::ARRAY,
-            self::DIFFICULTY => self::INTEGER,
+            self::DIFFICULTY_CHANGE => self::INTEGER,
             self::TRAP => self::ARRAY,
-            self::TRAP_SENSE => self::STRING,
         ];
     }
 
@@ -39,7 +37,7 @@ class SpellTraitsTable extends AbstractFileTable
 
     /**
      * @param TraitCode $traitCode
-     * @return array
+     * @return array|FormulaCode[]
      */
     public function getFormulas(TraitCode $traitCode): array
     {
@@ -54,14 +52,14 @@ class SpellTraitsTable extends AbstractFileTable
 
     /**
      * @param TraitCode $traitCode
-     * @return array
+     * @return array|ModifierCode[]
      */
     public function getModifiers(TraitCode $traitCode): array
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return array_map(
             function (string $modifierValue) {
-                return FormulaCode::getIt($modifierValue);
+                return ModifierCode::getIt($modifierValue);
             },
             $this->getValue($traitCode, self::MODIFIERS)
         );
@@ -69,27 +67,28 @@ class SpellTraitsTable extends AbstractFileTable
 
     /**
      * @param TraitCode $traitCode
-     * @return int
+     * @return DifficultyChange
      */
-    public function getDifficulty(TraitCode $traitCode): int
+    public function getDifficultyChange(TraitCode $traitCode): DifficultyChange
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return $this->getValue($traitCode, self::DIFFICULTY);
+        return new DifficultyChange($this->getValue($traitCode, self::DIFFICULTY_CHANGE));
     }
 
     /**
      * @param TraitCode $traitCode
-     * @return Trap
+     * @return Trap|null
      */
-    public function getTrap(TraitCode $traitCode): Trap
+    public function getTrap(TraitCode $traitCode)
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         $trapValues = $this->getValue($traitCode, self::TRAP);
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        $trapSense = $this->getValue($traitCode, self::TRAP_SENSE);
+        if (count($trapValues) === 0) {
+            return null;
+        }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new Trap($trapValues, PropertyCode::getIt($trapSense));
+        return new Trap($trapValues);
     }
 
 }
