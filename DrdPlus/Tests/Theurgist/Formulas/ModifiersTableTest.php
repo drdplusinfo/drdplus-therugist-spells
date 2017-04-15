@@ -349,4 +349,51 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
         (new ModifiersTable())->getProfiles($this->createModifierCode('magnified'));
     }
 
+    /**
+     * @test
+     */
+    public function I_can_get_parent_modifiers()
+    {
+        $modifiersTable = new ModifiersTable();
+        $matchingProfiles = [];
+        foreach (ModifierCode::getPossibleValues() as $modifierValue) {
+            $profileValues = $this->getExpectedProfileValues($modifierValue);
+            $modifierMatchingProfiles = [];
+            $parentModifiers = $modifiersTable->getParentModifiers(ModifierCode::getIt($modifierValue));
+            foreach ($parentModifiers as $parentModifier) {
+                $parentProfileValues = $this->getExpectedProfileValues($parentModifier->getValue());
+                $matchingProfile = null;
+                foreach ($parentProfileValues as $parentProfileValue) {
+                    if (in_array($this->reverseProfileGender($parentProfileValue), $profileValues, true)) {
+                        if ($matchingProfile !== null && $modifierValue !== ModifierCode::TRANSPOSITION) {
+                            throw new \LogicException(
+                                "For modifier '{$modifierValue}' has been already found matching parent profile '{$matchingProfile}'"
+                                . " so can not use '{$parentProfileValue}'"
+                            );
+                        }
+                        $matchingProfile = $parentProfileValue;
+                    }
+                }
+                if ($matchingProfile === null) {
+                    throw new \LogicException(
+                        "No connecting profile has been found for modifier '{$modifierValue}' and its parent modifier '{$parentModifier}'"
+                    );
+                }
+                if (array_key_exists($parentModifier->getValue(), $modifierMatchingProfiles)) {
+                    throw new \LogicException(
+                        "Modifier '{$modifierValue}' is already connected with '{$parentModifier}' via profile "
+                        . $modifierMatchingProfiles[$parentModifier->getValue()] . "', so can not connect it also via '{$matchingProfile}'"
+                    );
+                }
+                $modifierMatchingProfiles[$parentModifier->getValue()] = $matchingProfile;
+            }
+            foreach ($modifierMatchingProfiles as $modifierMatchingProfile) {
+                $matchingProfiles[] = $modifierMatchingProfile;
+            }
+        }
+        foreach ($matchingProfiles as $matchingProfile) {
+            self::assertContains('_venus', $matchingProfile, 'Only venus profiles can be used for connection to parent modifier');
+        }
+    }
+
 }

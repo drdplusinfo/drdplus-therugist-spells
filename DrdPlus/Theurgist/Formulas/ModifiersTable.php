@@ -57,6 +57,8 @@ class ModifiersTable extends AbstractFileTable
     const TRAITS = 'traits';
     const PROFILES = 'profiles';
     const FORMULAS = 'formulas';
+    const PARENT_MODIFIERS = 'parent_modifiers';
+    const CHILD_MODIFIERS = 'child_modifiers';
 
     protected function getExpectedDataHeaderNamesToTypes(): array
     {
@@ -81,6 +83,8 @@ class ModifiersTable extends AbstractFileTable
             self::TRAITS => self::ARRAY,
             self::PROFILES => self::ARRAY,
             self::FORMULAS => self::ARRAY,
+            self::PARENT_MODIFIERS => self::ARRAY,
+            self::CHILD_MODIFIERS => self::ARRAY,
         ];
     }
 
@@ -400,6 +404,50 @@ class ModifiersTable extends AbstractFileTable
             );
         } catch (RequiredRowNotFound $requiredRowNotFound) {
             throw new Exceptions\UnknownModifierToGetFormulasFor("Given modifier code '{$modifierCode}' is unknown");
+        }
+    }
+
+    /**
+     * @param ModifierCode $modifierCode
+     * @return array|ModifierCode[]
+     * @throws \DrdPlus\Theurgist\Formulas\Exceptions\UnknownModifierToGetParentModifiersFor
+     */
+    public function getParentModifiers(ModifierCode $modifierCode): array
+    {
+        try {
+            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+            return array_map(
+                function (string $modifierValue) {
+                    return ModifierCode::getIt($modifierValue);
+                },
+                $this->getValue($modifierCode, self::PARENT_MODIFIERS)
+            );
+        } catch (RequiredRowNotFound $requiredRowNotFound) {
+            throw new Exceptions\UnknownModifierToGetParentModifiersFor(
+                "Given modifier code '{$modifierCode}' is unknown"
+            );
+        }
+    }
+
+    /**
+     * @param ModifierCode $modifierCode
+     * @return array
+     * @throws \DrdPlus\Theurgist\Formulas\Exceptions\UnknownModifierToGetChildModifiersFor
+     */
+    public function getChildModifiers(ModifierCode $modifierCode): array
+    {
+        try {
+            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+            return array_map(
+                function (string $modifierValue) {
+                    return ModifierCode::getIt($modifierValue);
+                },
+                $this->getValue($modifierCode, self::CHILD_MODIFIERS)
+            );
+        } catch (RequiredRowNotFound $requiredRowNotFound) {
+            throw new Exceptions\UnknownModifierToGetChildModifiersFor(
+                "Given modifier code '{$modifierCode}' is unknown"
+            );
         }
     }
 }
