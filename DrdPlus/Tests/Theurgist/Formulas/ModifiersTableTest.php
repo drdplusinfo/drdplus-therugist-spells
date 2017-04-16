@@ -359,8 +359,10 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
         foreach (ModifierCode::getPossibleValues() as $modifierValue) {
             $profileValues = $this->getExpectedProfileValues($modifierValue);
             $fromParentToModifierMatchingProfiles = [];
-            $parentModifiers = $modifiersTable->getParentModifiers(ModifierCode::getIt($modifierValue));
+            $modifier = ModifierCode::getIt($modifierValue);
+            $parentModifiers = $modifiersTable->getParentModifiers($modifier);
             foreach ($parentModifiers as $parentModifier) {
+                self::assertContains($modifier, $modifiersTable->getChildModifiers($parentModifier));
                 $parentProfileValues = $this->getExpectedProfileValues($parentModifier->getValue());
                 $matchingProfile = null;
                 foreach ($parentProfileValues as $parentProfileValue) {
@@ -413,8 +415,10 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
         foreach (ModifierCode::getPossibleValues() as $modifierValue) {
             $profileValues = $this->getExpectedProfileValues($modifierValue);
             $fromChildToModifierMatchingProfiles = [];
-            $childModifiers = $modifiersTable->getChildModifiers(ModifierCode::getIt($modifierValue));
+            $modifier = ModifierCode::getIt($modifierValue);
+            $childModifiers = $modifiersTable->getChildModifiers($modifier);
             foreach ($childModifiers as $childModifier) {
+                self::assertContains($modifier, $modifiersTable->getParentModifiers($childModifier));
                 $childProfileValues = $this->getExpectedProfileValues($childModifier->getValue());
                 $matchingProfile = null;
                 foreach ($childProfileValues as $childProfileValue) {
