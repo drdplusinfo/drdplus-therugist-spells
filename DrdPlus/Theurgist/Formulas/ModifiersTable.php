@@ -431,7 +431,7 @@ class ModifiersTable extends AbstractFileTable
 
     /**
      * @param ModifierCode $modifierCode
-     * @return array
+     * @return array|ModifierCode[]
      * @throws \DrdPlus\Theurgist\Formulas\Exceptions\UnknownModifierToGetChildModifiersFor
      */
     public function getChildModifiers(ModifierCode $modifierCode): array

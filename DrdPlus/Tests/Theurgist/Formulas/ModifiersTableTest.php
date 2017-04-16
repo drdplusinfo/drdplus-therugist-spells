@@ -355,10 +355,10 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
     public function I_can_get_parent_modifiers()
     {
         $modifiersTable = new ModifiersTable();
-        $matchingProfiles = [];
+        $fromParentMatchingProfiles = [];
         foreach (ModifierCode::getPossibleValues() as $modifierValue) {
             $profileValues = $this->getExpectedProfileValues($modifierValue);
-            $modifierMatchingProfiles = [];
+            $fromParentToModifierMatchingProfiles = [];
             $parentModifiers = $modifiersTable->getParentModifiers(ModifierCode::getIt($modifierValue));
             foreach ($parentModifiers as $parentModifier) {
                 $parentProfileValues = $this->getExpectedProfileValues($parentModifier->getValue());
@@ -371,6 +371,9 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
                                 . " so can not use '{$parentProfileValue}'"
                             );
                         }
+                        if ($parentProfileValue === ProfileCode::TRANSPOSITION_MARS) {
+                            continue;
+                        }
                         $matchingProfile = $parentProfileValue;
                     }
                 }
@@ -379,20 +382,78 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
                         "No connecting profile has been found for modifier '{$modifierValue}' and its parent modifier '{$parentModifier}'"
                     );
                 }
-                if (array_key_exists($parentModifier->getValue(), $modifierMatchingProfiles)) {
+                if (array_key_exists($parentModifier->getValue(), $fromParentToModifierMatchingProfiles)) {
                     throw new \LogicException(
                         "Modifier '{$modifierValue}' is already connected with '{$parentModifier}' via profile "
-                        . $modifierMatchingProfiles[$parentModifier->getValue()] . "', so can not connect it also via '{$matchingProfile}'"
+                        . $fromParentToModifierMatchingProfiles[$parentModifier->getValue()] . "', so can not connect it also via '{$matchingProfile}'"
                     );
                 }
-                $modifierMatchingProfiles[$parentModifier->getValue()] = $matchingProfile;
+                $fromParentToModifierMatchingProfiles[$parentModifier->getValue()] = $matchingProfile;
             }
-            foreach ($modifierMatchingProfiles as $modifierMatchingProfile) {
-                $matchingProfiles[] = $modifierMatchingProfile;
+            foreach ($fromParentToModifierMatchingProfiles as $fromParentToModifierMatchingProfile) {
+                $fromParentMatchingProfiles[] = $fromParentToModifierMatchingProfile;
             }
         }
-        foreach ($matchingProfiles as $matchingProfile) {
-            self::assertContains('_venus', $matchingProfile, 'Only venus profiles can be used for connection to parent modifier');
+        foreach ($fromParentMatchingProfiles as $matchingProfile) {
+            self::assertContains(
+                '_venus',
+                $matchingProfile,
+                'Only venus profiles can be used on parent modifier side for connection (and mars on child side)'
+            );
+        }
+    }
+
+    /**
+     * @test
+     */
+    public function I_can_get_child_modifiers()
+    {
+        $modifiersTable = new ModifiersTable();
+        $fromChildrenMatchingProfiles = [];
+        foreach (ModifierCode::getPossibleValues() as $modifierValue) {
+            $profileValues = $this->getExpectedProfileValues($modifierValue);
+            $fromChildToModifierMatchingProfiles = [];
+            $childModifiers = $modifiersTable->getChildModifiers(ModifierCode::getIt($modifierValue));
+            foreach ($childModifiers as $childModifier) {
+                $childProfileValues = $this->getExpectedProfileValues($childModifier->getValue());
+                $matchingProfile = null;
+                foreach ($childProfileValues as $childProfileValue) {
+                    if (in_array($this->reverseProfileGender($childProfileValue), $profileValues, true)) {
+                        if ($matchingProfile !== null && $modifierValue !== ModifierCode::TRANSPOSITION) {
+                            throw new \LogicException(
+                                "For modifier '{$modifierValue}' has been already found matching child profile '{$matchingProfile}'"
+                                . " so can not use '{$childProfileValue}'"
+                            );
+                        }
+                        if ($childProfileValue === ProfileCode::TRANSPOSITION_VENUS) {
+                            continue;
+                        }
+                        $matchingProfile = $childProfileValue;
+                    }
+                }
+                if ($matchingProfile === null) {
+                    throw new \LogicException(
+                        "No connecting profile has been found for modifier '{$modifierValue}' and its child modifier '{$childModifier}'"
+                    );
+                }
+                if (array_key_exists($childModifier->getValue(), $fromChildToModifierMatchingProfiles)) {
+                    throw new \LogicException(
+                        "Modifier '{$modifierValue}' is already connected with '{$childModifier}' via profile "
+                        . $fromChildToModifierMatchingProfiles[$childModifier->getValue()] . "', so can not connect it also via '{$matchingProfile}'"
+                    );
+                }
+                $fromChildToModifierMatchingProfiles[$childModifier->getValue()] = $matchingProfile;
+            }
+            foreach ($fromChildToModifierMatchingProfiles as $fromChildToModifierMatchingProfile) {
+                $fromChildrenMatchingProfiles[] = $fromChildToModifierMatchingProfile;
+            }
+        }
+        foreach ($fromChildrenMatchingProfiles as $matchingProfile) {
+            self::assertContains(
+                '_mars',
+                $matchingProfile,
+                'Only mars profiles can be used by child modifiers to connect to parent (and venus on parent side)'
+            );
         }
     }
 
