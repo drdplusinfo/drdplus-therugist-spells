@@ -504,6 +504,9 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
     public function I_can_get_highest_required_realm()
     {
         $modifiersTable = new ModifiersTable();
+
+        self::assertEquals(new Realm(0), $modifiersTable->getHighestRequiredRealm([]));
+
         $singleModifier = ModifierCode::getIt(ModifierCode::INVISIBILITY);
         $singleModifierRealm = $modifiersTable->getRealm($singleModifier);
         self::assertEquals($singleModifierRealm, $modifiersTable->getHighestRequiredRealm([$singleModifier]));

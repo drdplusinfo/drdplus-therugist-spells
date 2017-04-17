@@ -480,6 +480,10 @@ class ModifiersTable extends AbstractFileTable
      */
     public function getHighestRequiredRealm(array $modifierCodes): Realm
     {
+        if (count($modifierCodes) === 0) {
+            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+            return new Realm(0);
+        }
         $realms = array_map(function ($modifierCodesOrCode) {
             if (is_array($modifierCodesOrCode)) {
                 return $this->getHighestRequiredRealm($modifierCodesOrCode);
