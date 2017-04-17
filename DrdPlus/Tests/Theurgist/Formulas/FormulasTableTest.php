@@ -6,6 +6,7 @@ use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ProfileCode;
 use DrdPlus\Theurgist\Codes\SpellTraitCode;
+use DrdPlus\Theurgist\Formulas\CastingParameters\DifficultyLimit;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Realm;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
 use DrdPlus\Theurgist\Formulas\FormulasTable;
@@ -474,6 +475,42 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         self::assertSame(
             $basicFormulaRealmValue + $realmsIncrement,
             $requiredRealmOfHeavilyModifiedFormula->getValue()
+        );
+    }
+
+    /**
+     * @test
+     * @expectedException \DrdPlus\Theurgist\Formulas\Exceptions\CanNotBuildFormulaWithRequiredModification
+     * @expectedExceptionMessageRegExp ~-1~
+     */
+    public function I_can_not_get_minimal_required_realm_of_heavily_modified_formula_with_negative_addition()
+    {
+        $formulasTable = $this->mockery(FormulasTable::class);
+        $formulasTable->shouldReceive('getDifficultyLimit')
+            ->andReturn(new DifficultyLimit([123, 456, -1 /* higher realm cause lower difficulty to be handled */]));
+        $getDataFileName = new \ReflectionMethod(FormulasTable::class, 'getDataFileName');
+        $getDataFileName->setAccessible(true);
+        $formulasTable->shouldAllowMockingProtectedMethods()
+            ->shouldReceive('getDataFileName')
+            ->andReturn($getDataFileName->invoke(new FormulasTable()));
+        $formulasTable = $formulasTable->makePartial(); // call original methods
+
+        $modifiers = ['foo'];
+        /** @var FormulasTable $formulasTable */
+        try {
+            $formulasTable->getRequiredRealmOfModified(
+                FormulaCode::getIt(FormulaCode::FLOW_OF_TIME),
+                $modifiers,
+                $this->createModifiersTable($modifiers, $difficultyChangeValue = 333)
+            );
+        } catch (\Exception $exception) {
+            self::fail('No exception expected so far: ' . $exception->getMessage());
+        }
+
+        $formulasTable->getRequiredRealmOfModified(
+            FormulaCode::getIt(FormulaCode::FLOW_OF_TIME),
+            $modifiers,
+            $this->createModifiersTable($modifiers, $difficultyChangeValue = 334)
         );
     }
 }

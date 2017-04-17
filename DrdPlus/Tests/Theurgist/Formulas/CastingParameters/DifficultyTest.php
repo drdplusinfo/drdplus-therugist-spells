@@ -16,7 +16,7 @@ class DifficultyTest extends TestWithMockery
         self::assertSame(0, $zeroMinimalDifficulty->getMinimal());
         self::assertSame(65, $zeroMinimalDifficulty->getMaximal());
         self::assertEquals(new AdditionByRealms('12=13'), $zeroMinimalDifficulty->getAdditionByRealms());
-        self::assertSame('0 - 65 (12=>13)', (string)$zeroMinimalDifficulty);
+        self::assertSame('0 — 65 (12=>13)', (string)$zeroMinimalDifficulty);
 
         $sameMinimalAsMaximal = new DifficultyLimit(['89', '89', '1=2']);
         self::assertSame(89, $sameMinimalAsMaximal->getMinimal());
@@ -26,7 +26,7 @@ class DifficultyTest extends TestWithMockery
         $withoutAdditionByRealms = new DifficultyLimit(['123', '456', '0']);
         self::assertSame(123, $withoutAdditionByRealms->getMinimal());
         self::assertSame(456, $withoutAdditionByRealms->getMaximal());
-        self::assertSame('123 - 456', (string)$withoutAdditionByRealms);
+        self::assertSame('123 — 456', (string)$withoutAdditionByRealms);
 
         $simplyZero = new DifficultyLimit(['0', '0', '0']);
         self::assertSame(0, $simplyZero->getMinimal());

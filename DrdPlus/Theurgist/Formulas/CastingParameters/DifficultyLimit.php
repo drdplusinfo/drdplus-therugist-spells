@@ -73,7 +73,7 @@ class DifficultyLimit extends CastingParameter
     {
         $asString = (string)$this->getMinimal();
         if ($this->getMaximal() !== $this->getMinimal()) {
-            $asString .= ' - ' . $this->getMaximal();
+            $asString .= ' — ' . $this->getMaximal();
         }
         if ($this->getAdditionByRealms()->getAddition() > 0) {
             $asString .= ' (' . $this->getAdditionByRealms() . ')';

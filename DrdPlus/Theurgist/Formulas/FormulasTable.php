@@ -377,8 +377,8 @@ class FormulasTable extends AbstractFileTable
         if ($formulaAdditionByRealmsValue <= 0) {
             // this should never happen, because every formula addition is currently greater than zero
             throw new Exceptions\CanNotBuildFormulaWithRequiredModification(
-                "Formula {$formulaCode} can not be build with difficulty {$difficultyOfModifiedFormula}"
-                . " because of its addition by realms {$formulaAdditionByRealms}"
+                "Formula {$formulaCode} with basic difficulty {$basicFormulaDifficulty} can not be build with difficulty"
+                . " {$difficultyOfModifiedFormula} because of its addition by realms {$formulaAdditionByRealms}"
             );
         }
         $formulaMaximalDifficulty = $basicFormulaDifficulty->getMaximal();
