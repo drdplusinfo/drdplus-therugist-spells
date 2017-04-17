@@ -24,6 +24,7 @@ use DrdPlus\Theurgist\Formulas\CastingParameters\Speed;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Transposition;
 use Granam\Integer\IntegerInterface;
+use Granam\Integer\IntegerObject;
 
 class FormulasTable extends AbstractFileTable
 {
@@ -346,7 +347,9 @@ class FormulasTable extends AbstractFileTable
         ModifiersTable $modifiersTable
     ): IntegerInterface
     {
-        return $this->calculateRealmAndDifficulty($formulaCode, $modifiers, $modifiersTable)['difficulty'];
+        return new IntegerObject(
+            $this->calculateRealmAndDifficulty($formulaCode, $modifiers, $modifiersTable)['difficulty']
+        );
     }
 
     /**
