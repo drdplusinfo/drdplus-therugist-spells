@@ -7,6 +7,7 @@ use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ProfileCode;
 use DrdPlus\Theurgist\Codes\SpellTraitCode;
+use DrdPlus\Theurgist\Formulas\CastingParameters\Realm;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
 use DrdPlus\Theurgist\Formulas\FormulasTable;
 use DrdPlus\Theurgist\Formulas\ModifiersTable;
@@ -470,10 +471,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
         $singleModifier = ModifierCode::getIt(ModifierCode::INVISIBILITY);
         $singleModifierSum = $modifiersTable->getDifficultyChange($singleModifier)->getValue();
         self::assertNotEquals(0, $singleModifierSum);
-        self::assertSame(
-            $modifiersTable->getDifficultyChange($singleModifier)->getValue(),
-            $modifiersTable->sumDifficultyChange([$singleModifier])
-        );
+        self::assertSame($singleModifierSum, $modifiersTable->sumDifficultyChange([$singleModifier])->getValue());
 
         $flatArray = [
             ModifierCode::getIt(ModifierCode::STEP_TO_PAST),
@@ -486,7 +484,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
             $flatArraySum += $modifiersTable->getDifficultyChange($modifierCode)->getValue();
         }
         self::assertGreaterThan($singleModifierSum, $flatArraySum);
-        self::assertSame($flatArraySum, $modifiersTable->sumDifficultyChange($flatArray));
+        self::assertSame($flatArraySum, $modifiersTable->sumDifficultyChange($flatArray)->getValue());
 
         $treeArray = $flatArray;
         $treeArraySum = $flatArraySum;
@@ -497,7 +495,51 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
         $treeArraySum += $modifiersTable->getDifficultyChange(ModifierCode::getIt(ModifierCode::RELEASE))->getValue();
         $treeArraySum += $modifiersTable->getDifficultyChange(ModifierCode::getIt(ModifierCode::THUNDER))->getValue();
         self::assertGreaterThan($flatArraySum, $treeArraySum);
-        self::assertSame($treeArraySum, $modifiersTable->sumDifficultyChange($treeArray));
+        self::assertSame($treeArraySum, $modifiersTable->sumDifficultyChange($treeArray)->getValue());
+    }
+
+    /**
+     * @test
+     */
+    public function I_can_get_highest_required_realm()
+    {
+        $modifiersTable = new ModifiersTable();
+        $singleModifier = ModifierCode::getIt(ModifierCode::INVISIBILITY);
+        $singleModifierRealm = $modifiersTable->getRealm($singleModifier);
+        self::assertEquals($singleModifierRealm, $modifiersTable->getHighestRequiredRealm([$singleModifier]));
+
+        $flatArray = [
+            ModifierCode::getIt(ModifierCode::STEP_TO_PAST),
+            ModifierCode::getIt(ModifierCode::BREACH),
+            ModifierCode::getIt(ModifierCode::CAMOUFLAGE),
+            ModifierCode::getIt(ModifierCode::HAMMER),
+        ];
+        /** @var Realm|null $highestFlatRealm */
+        $highestFlatRealm = null;
+        $findHighestRealm = function ($modifierCodesOrCode) use (&$findHighestRealm, $modifiersTable) {
+            if (!is_array($modifierCodesOrCode)) {
+                return $modifiersTable->getRealm($modifierCodesOrCode);
+            }
+            $realms = [];
+            foreach ($modifierCodesOrCode as $modifierCode) {
+                if (is_array($modifierCode)) {
+                    $highestRealm = $findHighestRealm($modifierCode);
+                } else {
+                    $highestRealm = $modifiersTable->getRealm($modifierCode);
+                }
+                $realms[$highestRealm->getValue()] = $highestRealm;
+            }
+
+            return $realms[max(array_keys($realms))];
+        };
+        $highestFlatRealm = $findHighestRealm($flatArray);
+        self::assertEquals($highestFlatRealm, $modifiersTable->getHighestRequiredRealm($flatArray));
+
+        $treeArray = $flatArray;
+        $treeArray[] = [ModifierCode::getIt(ModifierCode::COLOR), ModifierCode::getIt(ModifierCode::EXPLOSION)];
+        $treeArray[] = [ModifierCode::getIt(ModifierCode::RELEASE), [ModifierCode::getIt(ModifierCode::THUNDER)]];
+        $highestTreeRealm = $findHighestRealm($treeArray);
+        self::assertEquals($highestTreeRealm, $modifiersTable->getHighestRequiredRealm($treeArray));
     }
 
 }

@@ -25,6 +25,7 @@ use DrdPlus\Theurgist\Formulas\CastingParameters\NumberOfSituations;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Speed;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Threshold;
+use Granam\Integer\IntegerObject;
 
 class ModifiersTable extends AbstractFileTable
 {
@@ -453,19 +454,47 @@ class ModifiersTable extends AbstractFileTable
 
     /**
      * @param array|ModifierCode[] $modifierCodes
-     * @return int
+     * @return IntegerObject
      */
-    public function sumDifficultyChange(array $modifierCodes): int
+    public function sumDifficultyChange(array $modifierCodes): IntegerObject
     {
-        return array_sum(
-            array_map(function ($modifierCodesOrCode) {
-                if (is_array($modifierCodesOrCode)) {
-                    return $this->sumDifficultyChange($modifierCodesOrCode);
-                }
+        $sumIt = function (array $modifierCodes) use (&$sumIt) {
+            return array_sum(
+                array_map(function ($modifierCodesOrCode) use ($sumIt) {
+                    if (is_array($modifierCodesOrCode)) {
+                        return $sumIt($modifierCodesOrCode);
+                    }
 
-                /** @var ModifierCode $modifierCodesOrCode */
-                return $this->getDifficultyChange($modifierCodesOrCode)->getValue();
-            }, $modifierCodes)
-        );
+                    /** @var ModifierCode $modifierCodesOrCode */
+                    return $this->getDifficultyChange($modifierCodesOrCode)->getValue();
+                }, $modifierCodes)
+            );
+        };
+
+        return new IntegerObject($sumIt($modifierCodes));
+    }
+
+    /**
+     * @param array $modifierCodes
+     * @return Realm
+     */
+    public function getHighestRequiredRealm(array $modifierCodes): Realm
+    {
+        $realms = array_map(function ($modifierCodesOrCode) {
+            if (is_array($modifierCodesOrCode)) {
+                return $this->getHighestRequiredRealm($modifierCodesOrCode);
+            }
+
+            return $this->getRealm($modifierCodesOrCode);
+        }, $modifierCodes);
+        $highestRealm = current($realms);
+        /** @var Realm $realm */
+        foreach ($realms as $realm) {
+            if ($realm->getValue() > $highestRealm->getValue()) {
+                $highestRealm = $realm;
+            }
+        }
+
+        return $highestRealm;
     }
 }
