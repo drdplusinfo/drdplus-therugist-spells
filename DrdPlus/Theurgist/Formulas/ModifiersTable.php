@@ -450,4 +450,22 @@ class ModifiersTable extends AbstractFileTable
             );
         }
     }
+
+    /**
+     * @param array|ModifierCode[] $modifierCodes
+     * @return int
+     */
+    public function sumDifficultyChange(array $modifierCodes): int
+    {
+        return array_sum(
+            array_map(function ($modifierCodesOrCode) {
+                if (is_array($modifierCodesOrCode)) {
+                    return $this->sumDifficultyChange($modifierCodesOrCode);
+                }
+
+                /** @var ModifierCode $modifierCodesOrCode */
+                return $this->getDifficultyChange($modifierCodesOrCode)->getValue();
+            }, $modifierCodes)
+        );
+    }
 }

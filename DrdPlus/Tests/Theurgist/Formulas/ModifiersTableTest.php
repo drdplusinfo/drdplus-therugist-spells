@@ -461,4 +461,43 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
         }
     }
 
+    /**
+     * @test
+     */
+    public function I_can_sum_difficulty_change()
+    {
+        $modifiersTable = new ModifiersTable();
+        $singleModifier = ModifierCode::getIt(ModifierCode::INVISIBILITY);
+        $singleModifierSum = $modifiersTable->getDifficultyChange($singleModifier)->getValue();
+        self::assertNotEquals(0, $singleModifierSum);
+        self::assertSame(
+            $modifiersTable->getDifficultyChange($singleModifier)->getValue(),
+            $modifiersTable->sumDifficultyChange([$singleModifier])
+        );
+
+        $flatArray = [
+            ModifierCode::getIt(ModifierCode::STEP_TO_PAST),
+            ModifierCode::getIt(ModifierCode::BREACH),
+            ModifierCode::getIt(ModifierCode::CAMOUFLAGE),
+            ModifierCode::getIt(ModifierCode::HAMMER),
+        ];
+        $flatArraySum = 0;
+        foreach ($flatArray as $modifierCode) {
+            $flatArraySum += $modifiersTable->getDifficultyChange($modifierCode)->getValue();
+        }
+        self::assertGreaterThan($singleModifierSum, $flatArraySum);
+        self::assertSame($flatArraySum, $modifiersTable->sumDifficultyChange($flatArray));
+
+        $treeArray = $flatArray;
+        $treeArraySum = $flatArraySum;
+        $treeArray[] = [ModifierCode::getIt(ModifierCode::COLOR), ModifierCode::getIt(ModifierCode::EXPLOSION)];
+        $treeArraySum += $modifiersTable->getDifficultyChange(ModifierCode::getIt(ModifierCode::COLOR))->getValue();
+        $treeArraySum += $modifiersTable->getDifficultyChange(ModifierCode::getIt(ModifierCode::EXPLOSION))->getValue();
+        $treeArray[] = [ModifierCode::getIt(ModifierCode::RELEASE), [ModifierCode::getIt(ModifierCode::THUNDER)]];
+        $treeArraySum += $modifiersTable->getDifficultyChange(ModifierCode::getIt(ModifierCode::RELEASE))->getValue();
+        $treeArraySum += $modifiersTable->getDifficultyChange(ModifierCode::getIt(ModifierCode::THUNDER))->getValue();
+        self::assertGreaterThan($flatArraySum, $treeArraySum);
+        self::assertSame($treeArraySum, $modifiersTable->sumDifficultyChange($treeArray));
+    }
+
 }
