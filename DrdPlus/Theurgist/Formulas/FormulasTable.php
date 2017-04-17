@@ -24,7 +24,6 @@ use DrdPlus\Theurgist\Formulas\CastingParameters\Speed;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Transposition;
 use Granam\Integer\IntegerInterface;
-use Granam\Integer\IntegerObject;
 
 class FormulasTable extends AbstractFileTable
 {
@@ -339,6 +338,7 @@ class FormulasTable extends AbstractFileTable
      * @param array $modifiers
      * @param ModifiersTable $modifiersTable
      * @return IntegerInterface
+     * @throws \DrdPlus\Theurgist\Formulas\Exceptions\CanNotBuildFormulaWithRequiredModification
      */
     public function getDifficultyOfModified(
         FormulaCode $formulaCode,
@@ -346,10 +346,7 @@ class FormulasTable extends AbstractFileTable
         ModifiersTable $modifiersTable
     ): IntegerInterface
     {
-        return new IntegerObject(
-            $this->getDifficultyLimit($formulaCode)->getMinimal()
-            + $modifiersTable->sumDifficultyChange($modifiers)->getValue()
-        );
+        return $this->calculateRealmAndDifficulty($formulaCode, $modifiers, $modifiersTable)['difficulty'];
     }
 
     /**
@@ -365,31 +362,71 @@ class FormulasTable extends AbstractFileTable
         ModifiersTable $modifiersTable
     ): Realm
     {
-        $basicFormulaRealm = $this->getRealm($formulaCode);
-        $difficultyOfModifiedFormula = $this->getDifficultyOfModified($formulaCode, $modifiers, $modifiersTable);
-        $basicFormulaDifficulty = $this->getDifficultyLimit($formulaCode);
-        if ($basicFormulaDifficulty->getMaximal() >= $difficultyOfModifiedFormula->getValue()) {
-            // current difficulty can be managed by lowest realm
-            return $basicFormulaRealm;
-        }
-        $formulaAdditionByRealms = $basicFormulaDifficulty->getAdditionByRealms();
+        return $this->calculateRealmAndDifficulty($formulaCode, $modifiers, $modifiersTable)['realm'];
+    }
+
+    /**
+     * @param FormulaCode $formulaCode
+     * @param array $modifiers
+     * @param ModifiersTable $modifiersTable
+     * @return array
+     * @throws \DrdPlus\Theurgist\Formulas\Exceptions\CanNotBuildFormulaWithRequiredModification
+     */
+    private function calculateRealmAndDifficulty(
+        FormulaCode $formulaCode,
+        array $modifiers,
+        ModifiersTable $modifiersTable
+    ): array
+    {
+        $basicFormulaDifficultyLimit = $this->getDifficultyLimit($formulaCode);
+        $formulaAdditionByRealms = $basicFormulaDifficultyLimit->getAdditionByRealms();
         $formulaAdditionByRealmsValue = $formulaAdditionByRealms->getAddition();
-        if ($formulaAdditionByRealmsValue <= 0) {
-            // this should never happen, because every formula addition is currently greater than zero
-            throw new Exceptions\CanNotBuildFormulaWithRequiredModification(
-                "Formula {$formulaCode} with basic difficulty {$basicFormulaDifficulty} can not be build with difficulty"
-                . " {$difficultyOfModifiedFormula} because of its addition by realms {$formulaAdditionByRealms}"
-            );
-        }
-        $formulaMaximalDifficulty = $basicFormulaDifficulty->getMaximal();
-        $minimalPossibleRealm = $basicFormulaRealm;
+        $formulaMaximalDifficulty = $basicFormulaDifficultyLimit->getMaximal();
+        $minimalPossibleRealm = $this->getRealm($formulaCode);
         $realmIncrementToHandleAdditionalDifficulty = $formulaAdditionByRealms->getRealmIncrement();
-        do {
+        $difficultyOfModifiedWithoutRealmChange = $this->getDifficultyOfModifiedWithoutRealmChange(
+            $formulaCode,
+            $modifiers,
+            $modifiersTable
+        );
+        $highestRequiredRealmByModifiers = $modifiersTable->getHighestRequiredRealm($modifiers);
+        $additionsCount = 1;
+        while ($formulaMaximalDifficulty < $difficultyOfModifiedWithoutRealmChange
+            || $minimalPossibleRealm->getValue() < $highestRequiredRealmByModifiers->getValue()
+        ) {
+            if ($formulaAdditionByRealmsValue <= 0) {
+                // this should never happen, because every formula addition is currently greater than zero
+                throw new Exceptions\CanNotBuildFormulaWithRequiredModification(
+                    "Formula {$formulaCode} with basic difficulty {$basicFormulaDifficultyLimit}"
+                    . " can not be build with difficulty {$difficultyOfModifiedWithoutRealmChange}"
+                    . " because of its addition by realms {$formulaAdditionByRealms}"
+                );
+            }
             $formulaMaximalDifficulty += $formulaAdditionByRealmsValue;
             /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
             $minimalPossibleRealm = $minimalPossibleRealm->add($realmIncrementToHandleAdditionalDifficulty);
-        } while ($formulaMaximalDifficulty < $difficultyOfModifiedFormula->getValue());
+            $additionsCount++;
+        }
 
-        return $minimalPossibleRealm;
+        return [
+            'realm' => $minimalPossibleRealm,
+            'difficulty' => $basicFormulaDifficultyLimit->getMinimal() + $additionsCount * $formulaAdditionByRealmsValue,
+        ];
+    }
+
+    /**
+     * @param FormulaCode $formulaCode
+     * @param array $modifiers
+     * @param ModifiersTable $modifiersTable
+     * @return int
+     */
+    private function getDifficultyOfModifiedWithoutRealmChange(
+        FormulaCode $formulaCode,
+        array $modifiers,
+        ModifiersTable $modifiersTable
+    ): int
+    {
+        return $this->getDifficultyLimit($formulaCode)->getMinimal()
+            + $modifiersTable->sumDifficultyChange($modifiers)->getValue();
     }
 }
