@@ -88,6 +88,8 @@ class AdditionByRealms extends StrictObject
     }
 
     /**
+     * How much more realms are need to get addition, @see getAddition.
+     *
      * @return int
      */
     public function getRealmIncrement(): int
@@ -96,6 +98,8 @@ class AdditionByRealms extends StrictObject
     }
 
     /**
+     * Bonus given by using realm incremented by given level, @see getRealmIncrement.
+     *
      * @return int
      */
     public function getAddition(): int

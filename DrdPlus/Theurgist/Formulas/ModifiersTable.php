@@ -25,6 +25,7 @@ use DrdPlus\Theurgist\Formulas\CastingParameters\NumberOfSituations;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Speed;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Threshold;
+use Granam\Integer\IntegerInterface;
 use Granam\Integer\IntegerObject;
 
 class ModifiersTable extends AbstractFileTable
@@ -454,9 +455,9 @@ class ModifiersTable extends AbstractFileTable
 
     /**
      * @param array|ModifierCode[] $modifierCodes
-     * @return IntegerObject
+     * @return IntegerInterface
      */
-    public function sumDifficultyChange(array $modifierCodes): IntegerObject
+    public function sumDifficultyChange(array $modifierCodes): IntegerInterface
     {
         $sumIt = function (array $modifierCodes) use (&$sumIt) {
             return array_sum(

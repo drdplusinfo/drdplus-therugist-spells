@@ -14,7 +14,7 @@ use DrdPlus\Theurgist\Formulas\CastingParameters\Attack;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Brightness;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Casting;
 use DrdPlus\Theurgist\Formulas\CastingParameters\DetailLevel;
-use DrdPlus\Theurgist\Formulas\CastingParameters\Difficulty;
+use DrdPlus\Theurgist\Formulas\CastingParameters\DifficultyLimit;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Duration;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Power;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Radius;
@@ -23,6 +23,8 @@ use DrdPlus\Theurgist\Formulas\CastingParameters\SizeChange;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Speed;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Transposition;
+use Granam\Integer\IntegerInterface;
+use Granam\Integer\IntegerObject;
 
 class FormulasTable extends AbstractFileTable
 {
@@ -34,7 +36,7 @@ class FormulasTable extends AbstractFileTable
     const REALM = 'realm';
     const AFFECTION = 'affection';
     const CASTING = 'casting';
-    const DIFFICULTY = 'difficulty';
+    const DIFFICULTY_LIMIT = 'difficulty_limit';
     const RADIUS = 'radius';
     const DURATION = 'duration';
     const POWER = 'power';
@@ -55,7 +57,7 @@ class FormulasTable extends AbstractFileTable
             self::REALM => self::POSITIVE_INTEGER,
             self::AFFECTION => self::ARRAY,
             self::CASTING => self::POSITIVE_INTEGER,
-            self::DIFFICULTY => self::ARRAY,
+            self::DIFFICULTY_LIMIT => self::ARRAY,
             self::RADIUS => self::ARRAY,
             self::DURATION => self::ARRAY,
             self::POWER => self::ARRAY,
@@ -113,12 +115,12 @@ class FormulasTable extends AbstractFileTable
 
     /**
      * @param FormulaCode $formulaCode
-     * @return Difficulty
+     * @return DifficultyLimit
      */
-    public function getDifficulty(FormulaCode $formulaCode): Difficulty
+    public function getDifficultyLimit(FormulaCode $formulaCode): DifficultyLimit
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new Difficulty($this->getValue($formulaCode, self::DIFFICULTY));
+        return new DifficultyLimit($this->getValue($formulaCode, self::DIFFICULTY_LIMIT));
     }
 
     /**
@@ -330,5 +332,64 @@ class FormulasTable extends AbstractFileTable
         } catch (RequiredRowNotFound $requiredRowNotFound) {
             throw new Exceptions\UnknownFormulaToGetModifiersFor("Given formula code '{$formulaCode}' is unknown");
         }
+    }
+
+    /**
+     * @param FormulaCode $formulaCode
+     * @param array $modifiers
+     * @param ModifiersTable $modifiersTable
+     * @return IntegerInterface
+     */
+    public function getDifficultyOfModified(
+        FormulaCode $formulaCode,
+        array $modifiers,
+        ModifiersTable $modifiersTable
+    ): IntegerInterface
+    {
+        return new IntegerObject(
+            $this->getDifficultyLimit($formulaCode)->getMinimal()
+            + $modifiersTable->sumDifficultyChange($modifiers)->getValue()
+        );
+    }
+
+    /**
+     * @param FormulaCode $formulaCode
+     * @param array $modifiers
+     * @param ModifiersTable $modifiersTable
+     * @return Realm
+     * @throws \DrdPlus\Theurgist\Formulas\Exceptions\CanNotBuildFormulaWithRequiredModification
+     */
+    public function getRequiredRealmOfModified(
+        FormulaCode $formulaCode,
+        array $modifiers,
+        ModifiersTable $modifiersTable
+    ): Realm
+    {
+        $basicFormulaRealm = $this->getRealm($formulaCode);
+        $difficultyOfModifiedFormula = $this->getDifficultyOfModified($formulaCode, $modifiers, $modifiersTable);
+        $basicFormulaDifficulty = $this->getDifficultyLimit($formulaCode);
+        if ($basicFormulaDifficulty->getMaximal() >= $difficultyOfModifiedFormula->getValue()) {
+            // current difficulty can be managed by lowest realm
+            return $basicFormulaRealm;
+        }
+        $formulaAdditionByRealms = $basicFormulaDifficulty->getAdditionByRealms();
+        $formulaAdditionByRealmsValue = $formulaAdditionByRealms->getAddition();
+        if ($formulaAdditionByRealmsValue <= 0) {
+            // this should never happen, because every formula addition is currently greater than zero
+            throw new Exceptions\CanNotBuildFormulaWithRequiredModification(
+                "Formula {$formulaCode} can not be build with difficulty {$difficultyOfModifiedFormula}"
+                . " because of its addition by realms {$formulaAdditionByRealms}"
+            );
+        }
+        $formulaMaximalDifficulty = $basicFormulaDifficulty->getMaximal();
+        $minimalPossibleRealm = $basicFormulaRealm;
+        $realmIncrementToHandleAdditionalDifficulty = $formulaAdditionByRealms->getRealmIncrement();
+        do {
+            $formulaMaximalDifficulty += $formulaAdditionByRealmsValue;
+            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+            $minimalPossibleRealm = $minimalPossibleRealm->add($realmIncrementToHandleAdditionalDifficulty);
+        } while ($formulaMaximalDifficulty < $difficultyOfModifiedFormula->getValue());
+
+        return $minimalPossibleRealm;
     }
 }

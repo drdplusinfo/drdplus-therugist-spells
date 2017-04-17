@@ -4,7 +4,7 @@ namespace DrdPlus\Theurgist\Formulas\CastingParameters;
 use Granam\Integer\Tools\ToInteger;
 use Granam\Tools\ValueDescriber;
 
-class Difficulty extends CastingParameter
+class DifficultyLimit extends CastingParameter
 {
     private $minimal;
     private $maximal;
@@ -47,6 +47,8 @@ class Difficulty extends CastingParameter
     }
 
     /**
+     * Works as difficulty (some kind of "price") for basic formula.
+     *
      * @return int
      */
     public function getMinimal(): int
@@ -55,6 +57,8 @@ class Difficulty extends CastingParameter
     }
 
     /**
+     * Maximal difficulty a formula from lowest possible realm can handle.
+     *
      * @return int
      */
     public function getMaximal(): int

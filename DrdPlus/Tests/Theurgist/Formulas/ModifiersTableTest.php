@@ -12,6 +12,7 @@ use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
 use DrdPlus\Theurgist\Formulas\FormulasTable;
 use DrdPlus\Theurgist\Formulas\ModifiersTable;
 use DrdPlus\Theurgist\Formulas\ProfilesTable;
+use Granam\Integer\IntegerInterface;
 
 class ModifiersTableTest extends AbstractTheurgistTableTest
 {
@@ -471,7 +472,9 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
         $singleModifier = ModifierCode::getIt(ModifierCode::INVISIBILITY);
         $singleModifierSum = $modifiersTable->getDifficultyChange($singleModifier)->getValue();
         self::assertNotEquals(0, $singleModifierSum);
-        self::assertSame($singleModifierSum, $modifiersTable->sumDifficultyChange([$singleModifier])->getValue());
+        $difficultyChangeSum = $modifiersTable->sumDifficultyChange([$singleModifier]);
+        self::assertInstanceOf(IntegerInterface::class, $difficultyChangeSum);
+        self::assertSame($singleModifierSum, $difficultyChangeSum->getValue());
 
         $flatArray = [
             ModifierCode::getIt(ModifierCode::STEP_TO_PAST),
