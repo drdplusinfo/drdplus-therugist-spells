@@ -507,7 +507,7 @@ class ModifiersTable extends AbstractFileTable
      * @param array|ModifierCode[] $modifierCodes
      * @return array
      */
-    public function getSumOfAffections(array $modifierCodes): array
+    public function getAffectionsOfModifiers(array $modifierCodes): array
     {
         if (count($modifierCodes) === 0) {
             /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
@@ -516,7 +516,7 @@ class ModifiersTable extends AbstractFileTable
         $affections = array_filter(
             array_map(function ($modifierCodesOrCode) {
                 if (is_array($modifierCodesOrCode)) {
-                    return $this->getSumOfAffections($modifierCodesOrCode);
+                    return $this->getAffectionsOfModifiers($modifierCodesOrCode);
                 }
 
                 return $this->getAffection($modifierCodesOrCode);

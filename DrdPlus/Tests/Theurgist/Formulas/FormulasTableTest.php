@@ -1,11 +1,13 @@
 <?php
 namespace DrdPlus\Tests\Theurgist\Formulas;
 
+use DrdPlus\Theurgist\Codes\AffectionPeriodCode;
 use DrdPlus\Theurgist\Codes\FormCode;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ProfileCode;
 use DrdPlus\Theurgist\Codes\SpellTraitCode;
+use DrdPlus\Theurgist\Formulas\CastingParameters\Affection;
 use DrdPlus\Theurgist\Formulas\CastingParameters\DifficultyLimit;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Realm;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
@@ -393,7 +395,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $difficultyOfModifiedFormula = $formulasTable->getDifficultyOfModified(
             $fire,
             $modifiers,
-            $this->createModifiersTable($modifiers, 123, 456)
+            $this->createModifiersTableForDifficulty($modifiers, 123, 456)
         );
         self::assertSame(
             $formulasTable->getDifficultyLimit($fire)->getMinimal() + 123,
@@ -407,7 +409,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
      * @param int $highestRequiredReam
      * @return \Mockery\MockInterface|ModifiersTable
      */
-    private function createModifiersTable(array $expectedModifiers, int $difficultyChange, int $highestRequiredReam)
+    private function createModifiersTableForDifficulty(array $expectedModifiers, int $difficultyChange, int $highestRequiredReam)
     {
         $modifiersTable = $this->mockery(ModifiersTable::class);
         $modifiersTable->shouldReceive('sumDifficultyChange')
@@ -449,7 +451,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $requiredRealmOfSlightlyModifiedFormula = $formulasTable->getRequiredRealmOfModified(
             $formulaCode,
             $modifiers,
-            $this->createModifiersTable(
+            $this->createModifiersTableForDifficulty(
                 $modifiers,
                 $difficultyChangeValue = 6 /* 14 + 6 = 20, still can be handled by formula minimal realm */,
                 1 // highest required realm by modifiers
@@ -461,7 +463,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $requiredRealmOnHighModifiersRequirement = $formulasTable->getRequiredRealmOfModified(
             $formulaCode,
             $modifiers,
-            $this->createModifiersTable(
+            $this->createModifiersTableForDifficulty(
                 $modifiers,
                 $difficultyChangeValue = 6 /* 14 + 6 = 20, still can be handled by formula minimal realm */,
                 123 // highest required realm by modifiers
@@ -479,7 +481,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $requiredRealmOfModerateModifiedFormula = $formulasTable->getRequiredRealmOfModified(
             $formulaCode,
             $modifiers,
-            $this->createModifiersTable(
+            $this->createModifiersTableForDifficulty(
                 $modifiers,
                 $difficultyChangeValue = 9 /* 2 + 9 = 11, can not be handled by formula minimal realm */,
                 1
@@ -500,7 +502,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $requiredRealmOfHighModifiersRequirement = $formulasTable->getRequiredRealmOfModified(
             $formulaCode,
             $modifiers,
-            $this->createModifiersTable(
+            $this->createModifiersTableForDifficulty(
                 $modifiers,
                 $difficultyChangeValue = 9 /* 2 + 9 = 11, can not be handled by formula minimal realm */,
                 456
@@ -517,7 +519,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $requiredRealmOfHeavilyModifiedFormula = $formulasTable->getRequiredRealmOfModified(
             $formulaCode,
             $modifiers,
-            $this->createModifiersTable($modifiers, $difficultyChangeValue = 159, 1)
+            $this->createModifiersTableForDifficulty($modifiers, $difficultyChangeValue = 159, 1)
         );
         self::assertInstanceOf(Realm::class, $requiredRealmOfHeavilyModifiedFormula);
         self::assertGreaterThan(
@@ -536,7 +538,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $requiredRealmOfHighModifiersRequirement = $formulasTable->getRequiredRealmOfModified(
             $formulaCode,
             $modifiers,
-            $this->createModifiersTable($modifiers, $difficultyChangeValue = 159, $requiredRealmOfHeavilyModifiedFormula->getValue() + 1)
+            $this->createModifiersTableForDifficulty($modifiers, $difficultyChangeValue = 159, $requiredRealmOfHeavilyModifiedFormula->getValue() + 1)
         );
         self::assertSame($requiredRealmOfHeavilyModifiedFormula->getValue() + 1, $requiredRealmOfHighModifiersRequirement->getValue());
     }
@@ -564,7 +566,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
             $formulasTable->getRequiredRealmOfModified(
                 FormulaCode::getIt(FormulaCode::FLOW_OF_TIME),
                 $modifiers,
-                $this->createModifiersTable($modifiers, $difficultyChangeValue = 333, 1)
+                $this->createModifiersTableForDifficulty($modifiers, $difficultyChangeValue = 333, 1)
             );
         } catch (\Exception $exception) {
             self::fail('No exception expected so far: ' . $exception->getMessage());
@@ -573,7 +575,96 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $formulasTable->getRequiredRealmOfModified(
             FormulaCode::getIt(FormulaCode::FLOW_OF_TIME),
             $modifiers,
-            $this->createModifiersTable($modifiers, $difficultyChangeValue = 334, 1)
+            $this->createModifiersTableForDifficulty($modifiers, $difficultyChangeValue = 334, 1)
         );
     }
+
+    /**
+     * @test
+     */
+    public function I_can_get_affections_of_modified_formula()
+    {
+        $formulasTable = new FormulasTable();
+
+        self::assertEquals(
+            [AffectionPeriodCode::DAILY => new Affection([-1, AffectionPeriodCode::DAILY])],
+            $formulasTable->getAffectionsOfModified(
+                FormulaCode::getIt(FormulaCode::DISCHARGE) /* -1 */,
+                [],
+                $this->modifiersTable
+            )
+        );
+
+        $expectedModifiers = ['foo', 'bar'];
+        self::assertEquals(
+            [AffectionPeriodCode::DAILY => new Affection([-1, AffectionPeriodCode::DAILY])],
+            $formulasTable->getAffectionsOfModified(
+                FormulaCode::getIt(FormulaCode::FLOW_OF_TIME),
+                $expectedModifiers,
+                $this->createModifiersTableForAffections(
+                    $expectedModifiers,
+                    [
+                        [0, AffectionPeriodCode::DAILY],
+                    ]
+                )
+            )
+        );
+
+        self::assertEquals(
+            [AffectionPeriodCode::DAILY => new Affection([-84, AffectionPeriodCode::DAILY])],
+            $formulasTable->getAffectionsOfModified(
+                FormulaCode::getIt(FormulaCode::FLOW_OF_TIME),
+                $expectedModifiers,
+                $this->createModifiersTableForAffections(
+                    $expectedModifiers,
+                    [
+                        [-1, AffectionPeriodCode::DAILY],
+                        [-4, AffectionPeriodCode::DAILY],
+                        [-78, AffectionPeriodCode::DAILY],
+                    ]
+                )
+            )
+        );
+
+        self::assertEquals(
+            [
+                AffectionPeriodCode::DAILY => new Affection([-85, AffectionPeriodCode::DAILY]),
+                AffectionPeriodCode::LIFE => new Affection([-516, AffectionPeriodCode::LIFE]),
+            ],
+            $formulasTable->getAffectionsOfModified(
+                FormulaCode::getIt(FormulaCode::TSUNAMI_FROM_CLAY_AND_STONES), // -2
+                $expectedModifiers,
+                $this->createModifiersTableForAffections(
+                    $expectedModifiers,
+                    [
+                        [-1, AffectionPeriodCode::DAILY],
+                        [-4, AffectionPeriodCode::DAILY],
+                        [-78, AffectionPeriodCode::DAILY],
+                        [-159, AffectionPeriodCode::LIFE],
+                        [-357, AffectionPeriodCode::LIFE],
+                    ]
+                )
+            )
+        );
+    }
+
+    /**
+     * @param array $expectedModifiers
+     * @param array $affectionsOfModifiers
+     * @return \Mockery\MockInterface|ModifiersTable
+     */
+    private function createModifiersTableForAffections(array $expectedModifiers, array $affectionsOfModifiers)
+    {
+        $modifiersTable = $this->mockery(ModifiersTable::class);
+        $modifiersTable->shouldReceive('getAffectionsOfModifiers')
+            ->with($expectedModifiers)
+            ->andReturn(
+                array_map(function (array $affectionParts) {
+                    return new Affection($affectionParts);
+                }, $affectionsOfModifiers)
+            );
+
+        return $modifiersTable;
+    }
+
 }

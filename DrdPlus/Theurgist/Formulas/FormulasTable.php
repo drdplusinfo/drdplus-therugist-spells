@@ -406,4 +406,38 @@ class FormulasTable extends AbstractFileTable
         return $minimalPossibleRealm;
     }
 
+    /**
+     * @param FormulaCode $formulaCode
+     * @param array $modifiers
+     * @param ModifiersTable $modifiersTable
+     * @return array
+     * @throws \DrdPlus\Theurgist\Formulas\Exceptions\CanNotBuildFormulaWithRequiredModification
+     */
+    public function getAffectionsOfModified(
+        FormulaCode $formulaCode,
+        array $modifiers,
+        ModifiersTable $modifiersTable
+    ): array
+    {
+        $formulaAffection = $this->getAffection($formulaCode);
+        $summedAffections = [$formulaAffection->getAffectionPeriod()->getValue() => $formulaAffection];
+        /** @var Affection $modifiersAffection */
+        foreach ($modifiersTable->getAffectionsOfModifiers($modifiers) as $modifiersAffection) {
+            $affectionPeriodValue = $modifiersAffection->getAffectionPeriod()->getValue();
+            if (!array_key_exists($affectionPeriodValue, $summedAffections)) {
+                $summedAffections[$affectionPeriodValue] = $modifiersAffection;
+                continue;
+            }
+            /** @var Affection $summedAffection */
+            $summedAffection = $summedAffections[$affectionPeriodValue];
+            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+            $summedAffections[$affectionPeriodValue] = new Affection([
+                $summedAffection->getValue() + $modifiersAffection->getValue(),
+                $affectionPeriodValue,
+            ]);
+        }
+
+        return $summedAffections;
+    }
+
 }

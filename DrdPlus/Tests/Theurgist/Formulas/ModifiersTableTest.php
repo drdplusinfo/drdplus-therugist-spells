@@ -557,16 +557,16 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
     {
         $modifiersTable = new ModifiersTable();
 
-        self::assertEquals([], $modifiersTable->getSumOfAffections([]));
+        self::assertEquals([], $modifiersTable->getAffectionsOfModifiers([]));
 
-        self::assertEquals([], $modifiersTable->getSumOfAffections([ModifierCode::getIt(ModifierCode::THUNDER) /* +0 */]));
+        self::assertEquals([], $modifiersTable->getAffectionsOfModifiers([ModifierCode::getIt(ModifierCode::THUNDER) /* +0 */]));
 
         self::assertEquals(
             [
                 AffectionPeriodCode::DAILY => new Affection([-2, AffectionPeriodCode::DAILY]),
                 AffectionPeriodCode::LIFE => new Affection([-3, AffectionPeriodCode::LIFE]),
             ],
-            $modifiersTable->getSumOfAffections([
+            $modifiersTable->getAffectionsOfModifiers([
                 ModifierCode::getIt(ModifierCode::THUNDER), // 0
                 ModifierCode::getIt(ModifierCode::BREACH), // -2
                 ModifierCode::getIt(ModifierCode::STEP_TO_PAST), // -3 live
@@ -578,7 +578,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
                 AffectionPeriodCode::DAILY => new Affection([-3, AffectionPeriodCode::DAILY]),
                 AffectionPeriodCode::LIFE => new Affection([-4, AffectionPeriodCode::LIFE]),
             ],
-            $modifiersTable->getSumOfAffections([
+            $modifiersTable->getAffectionsOfModifiers([
                 ModifierCode::getIt(ModifierCode::THUNDER), // 0
                 ModifierCode::getIt(ModifierCode::BREACH), // -2
                 ModifierCode::getIt(ModifierCode::GATE), // -1
