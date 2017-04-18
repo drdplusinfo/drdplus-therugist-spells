@@ -2,11 +2,13 @@
 namespace DrdPlus\Tests\Theurgist\Formulas;
 
 use DrdPlus\Tables\Measurements\Distance\DistanceTable;
+use DrdPlus\Theurgist\Codes\AffectionPeriodCode;
 use DrdPlus\Theurgist\Codes\FormCode;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ProfileCode;
 use DrdPlus\Theurgist\Codes\SpellTraitCode;
+use DrdPlus\Theurgist\Formulas\CastingParameters\Affection;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Realm;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
 use DrdPlus\Theurgist\Formulas\FormulasTable;
@@ -546,6 +548,44 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
         $treeArray[] = [ModifierCode::getIt(ModifierCode::RELEASE), [ModifierCode::getIt(ModifierCode::THUNDER)]];
         $highestTreeRealm = $findHighestRealm($treeArray);
         self::assertEquals($highestTreeRealm, $modifiersTable->getHighestRequiredRealm($treeArray));
+    }
+
+    /**
+     * @test
+     */
+    public function I_can_get_summary_of_affections()
+    {
+        $modifiersTable = new ModifiersTable();
+
+        self::assertEquals([], $modifiersTable->getSumOfAffections([]));
+
+        self::assertEquals([], $modifiersTable->getSumOfAffections([ModifierCode::getIt(ModifierCode::THUNDER) /* +0 */]));
+
+        self::assertEquals(
+            [
+                AffectionPeriodCode::DAILY => new Affection([-2, AffectionPeriodCode::DAILY]),
+                AffectionPeriodCode::LIFE => new Affection([-3, AffectionPeriodCode::LIFE]),
+            ],
+            $modifiersTable->getSumOfAffections([
+                ModifierCode::getIt(ModifierCode::THUNDER), // 0
+                ModifierCode::getIt(ModifierCode::BREACH), // -2
+                ModifierCode::getIt(ModifierCode::STEP_TO_PAST), // -3 live
+            ])
+        );
+
+        self::assertEquals(
+            [
+                AffectionPeriodCode::DAILY => new Affection([-3, AffectionPeriodCode::DAILY]),
+                AffectionPeriodCode::LIFE => new Affection([-4, AffectionPeriodCode::LIFE]),
+            ],
+            $modifiersTable->getSumOfAffections([
+                ModifierCode::getIt(ModifierCode::THUNDER), // 0
+                ModifierCode::getIt(ModifierCode::BREACH), // -2
+                ModifierCode::getIt(ModifierCode::GATE), // -1
+                ModifierCode::getIt(ModifierCode::STEP_TO_PAST), // -3 live
+                ModifierCode::getIt(ModifierCode::STEP_TO_FUTURE), // -1 live
+            ])
+        );
     }
 
 }

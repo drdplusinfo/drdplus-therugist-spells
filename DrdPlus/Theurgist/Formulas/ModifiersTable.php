@@ -476,7 +476,7 @@ class ModifiersTable extends AbstractFileTable
     }
 
     /**
-     * @param array $modifierCodes
+     * @param array|ModifierCode[] $modifierCodes
      * @return Realm
      */
     public function getHighestRequiredRealm(array $modifierCodes): Realm
@@ -501,5 +501,48 @@ class ModifiersTable extends AbstractFileTable
         }
 
         return $highestRealm;
+    }
+
+    /**
+     * @param array|ModifierCode[] $modifierCodes
+     * @return array
+     */
+    public function getSumOfAffections(array $modifierCodes): array
+    {
+        if (count($modifierCodes) === 0) {
+            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+            return [];
+        }
+        $affections = array_filter(
+            array_map(function ($modifierCodesOrCode) {
+                if (is_array($modifierCodesOrCode)) {
+                    return $this->getSumOfAffections($modifierCodesOrCode);
+                }
+
+                return $this->getAffection($modifierCodesOrCode);
+            }, $modifierCodes),
+            function (Affection $affection = null) {
+                return $affection !== null;
+            }
+        );
+
+        $summedAffections = [];
+        /** @var Affection $affection */
+        foreach ($affections as $affection) {
+            $affectionPeriodValue = $affection->getAffectionPeriod()->getValue();
+            if (!array_key_exists($affectionPeriodValue, $summedAffections)) {
+                $summedAffections[$affectionPeriodValue] = $affection;
+                continue;
+            }
+            /** @var Affection $summedAffection */
+            $summedAffection = $summedAffections[$affectionPeriodValue];
+            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+            $summedAffections[$affectionPeriodValue] = new Affection([
+                $summedAffection->getValue() + $affection->getValue(),
+                $affectionPeriodValue,
+            ]);
+        }
+
+        return $summedAffections;
     }
 }
