@@ -459,20 +459,34 @@ class ModifiersTable extends AbstractFileTable
      */
     public function sumDifficultyChange(array $modifierCodes): IntegerInterface
     {
-        $sumIt = function (array $modifierCodes) use (&$sumIt) {
-            return array_sum(
-                array_map(function ($modifierCodesOrCode) use ($sumIt) {
-                    if (is_array($modifierCodesOrCode)) {
-                        return $sumIt($modifierCodesOrCode);
-                    }
-
+        return new IntegerObject(
+            array_sum(
+                array_map(function ($modifierCodesOrCode) {
                     /** @var ModifierCode $modifierCodesOrCode */
                     return $this->getDifficultyChange($modifierCodesOrCode)->getValue();
-                }, $modifierCodes)
-            );
-        };
+                }, $this->toFlatArray($modifierCodes))
+            )
+        );
+    }
 
-        return new IntegerObject($sumIt($modifierCodes));
+    /**
+     * @param array $items
+     * @return array
+     */
+    private function toFlatArray(array $items): array
+    {
+        $flat = [];
+        foreach ($items as $item) {
+            if (is_array($item)) {
+                foreach ($this->toFlatArray($item) as $subItem) {
+                    $flat[] = $subItem;
+                }
+            } else {
+                $flat[] = $item;
+            }
+        }
+
+        return $flat;
     }
 
     /**
@@ -485,13 +499,12 @@ class ModifiersTable extends AbstractFileTable
             /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
             return new Realm(0);
         }
-        $realms = array_map(function ($modifierCodesOrCode) {
-            if (is_array($modifierCodesOrCode)) {
-                return $this->getHighestRequiredRealm($modifierCodesOrCode);
-            }
-
-            return $this->getRealm($modifierCodesOrCode);
-        }, $modifierCodes);
+        $realms = array_map(
+            function ($modifierCodesOrCode) {
+                return $this->getRealm($modifierCodesOrCode);
+            },
+            $this->toFlatArray($modifierCodes)
+        );
         $highestRealm = current($realms);
         /** @var Realm $realm */
         foreach ($realms as $realm) {
@@ -514,13 +527,12 @@ class ModifiersTable extends AbstractFileTable
             return [];
         }
         $affections = array_filter(
-            array_map(function ($modifierCodesOrCode) {
-                if (is_array($modifierCodesOrCode)) {
-                    return $this->getAffectionsOfModifiers($modifierCodesOrCode);
-                }
-
-                return $this->getAffection($modifierCodesOrCode);
-            }, $modifierCodes),
+            array_map(
+                function ($modifierCodesOrCode) {
+                    return $this->getAffection($modifierCodesOrCode);
+                },
+                $this->toFlatArray($modifierCodes)
+            ),
             function (Affection $affection = null) {
                 return $affection !== null;
             }

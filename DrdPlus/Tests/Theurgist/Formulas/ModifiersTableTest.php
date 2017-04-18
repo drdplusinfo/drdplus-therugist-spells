@@ -568,8 +568,10 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
             ],
             $modifiersTable->getAffectionsOfModifiers([
                 ModifierCode::getIt(ModifierCode::THUNDER), // 0
-                ModifierCode::getIt(ModifierCode::BREACH), // -2
-                ModifierCode::getIt(ModifierCode::STEP_TO_PAST), // -3 live
+                [
+                    [ModifierCode::getIt(ModifierCode::BREACH)], // -2
+                    ModifierCode::getIt(ModifierCode::STEP_TO_PAST) // -3 live
+                ],
             ])
         );
 
@@ -580,10 +582,12 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
             ],
             $modifiersTable->getAffectionsOfModifiers([
                 ModifierCode::getIt(ModifierCode::THUNDER), // 0
-                ModifierCode::getIt(ModifierCode::BREACH), // -2
-                ModifierCode::getIt(ModifierCode::GATE), // -1
-                ModifierCode::getIt(ModifierCode::STEP_TO_PAST), // -3 live
-                ModifierCode::getIt(ModifierCode::STEP_TO_FUTURE), // -1 live
+                [
+                    ModifierCode::getIt(ModifierCode::BREACH), // -2
+                    ModifierCode::getIt(ModifierCode::GATE), // -1
+                    ModifierCode::getIt(ModifierCode::STEP_TO_PAST), // -3 live
+                    ModifierCode::getIt(ModifierCode::STEP_TO_FUTURE) // -1 live
+                ],
             ])
         );
     }
