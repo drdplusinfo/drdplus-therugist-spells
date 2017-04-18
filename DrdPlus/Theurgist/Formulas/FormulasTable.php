@@ -104,6 +104,8 @@ class FormulasTable extends AbstractFileTable
     }
 
     /**
+     * Return time bonus value in fact.
+     *
      * @param FormulaCode $formulaCode
      * @return Casting
      */
