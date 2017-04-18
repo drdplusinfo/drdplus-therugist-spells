@@ -107,12 +107,13 @@ class FormulasTable extends AbstractFileTable
      * Return time bonus value in fact.
      *
      * @param FormulaCode $formulaCode
+     * @param TimeTable $timeTable
      * @return Casting
      */
-    public function getCasting(FormulaCode $formulaCode): Casting
+    public function getCasting(FormulaCode $formulaCode, TimeTable $timeTable): Casting
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new Casting($this->getValue($formulaCode, self::CASTING));
+        return new Casting($this->getValue($formulaCode, self::CASTING), $timeTable);
     }
 
     /**
@@ -362,7 +363,7 @@ class FormulasTable extends AbstractFileTable
      * @return Realm
      * @throws \DrdPlus\Theurgist\Formulas\Exceptions\CanNotBuildFormulaWithRequiredModification
      */
-    public function getRequiredRealmOfModified(
+    public function getRealmOfModified(
         FormulaCode $formulaCode,
         array $modifiers,
         ModifiersTable $modifiersTable
@@ -441,5 +442,4 @@ class FormulasTable extends AbstractFileTable
 
         return $summedAffections;
     }
-
 }

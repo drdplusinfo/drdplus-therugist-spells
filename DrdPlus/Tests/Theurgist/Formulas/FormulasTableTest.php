@@ -33,6 +33,13 @@ class FormulasTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_get_every_obligatory_parameter()
     {
+        /**
+         * @see FormulasTable::getRealm()
+         * @see FormulasTable::getAffection()
+         * @see FormulasTable::getCasting()
+         * @see FormulasTable::getDifficultyLimit()
+         * @see FormulasTable::getDuration()
+         */
         $obligatoryParameters = ['realm', 'affection', 'casting', 'difficulty_limit', 'duration'];
         foreach ($obligatoryParameters as $obligatoryParameter) {
             $this->I_can_get_obligatory_parameter($obligatoryParameter, FormulaCode::class);
@@ -44,6 +51,16 @@ class FormulasTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_get_every_optional_parameter()
     {
+        /**
+         * @see FormulasTable::getRadius()
+         * @see FormulasTable::getPower()
+         * @see FormulasTable::getAttack()
+         * @see FormulasTable::getSizeChange()
+         * @see FormulasTable::getDetailLevel()
+         * @see FormulasTable::getBrightness()
+         * @see FormulasTable::getSpeed()
+         * @see FormulasTable::getTransposition()
+         */
         $optionalParameters = [
             'radius', 'power', 'attack', 'size_change', 'detail_level', 'brightness', 'speed', 'transposition',
         ];
@@ -439,7 +456,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
     {
         $formulasTable = new FormulasTable();
         $formulaCode = FormulaCode::getIt(FormulaCode::PORTAL);
-        $requiredRealmOfNonModified = $formulasTable->getRequiredRealmOfModified($formulaCode, [], new ModifiersTable());
+        $requiredRealmOfNonModified = $formulasTable->getRealmOfModified($formulaCode, [], new ModifiersTable());
         self::assertEquals($formulasTable->getRealm($formulaCode), $requiredRealmOfNonModified);
     }
 
@@ -448,7 +465,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $formulaCode = FormulaCode::getIt(FormulaCode::BARRIER);
         $modifiers = ['foo', 'bar', 'baz'];
         $formulasTable = new FormulasTable();
-        $requiredRealmOfSlightlyModifiedFormula = $formulasTable->getRequiredRealmOfModified(
+        $requiredRealmOfSlightlyModifiedFormula = $formulasTable->getRealmOfModified(
             $formulaCode,
             $modifiers,
             $this->createModifiersTableForDifficulty(
@@ -460,7 +477,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         self::assertInstanceOf(Realm::class, $requiredRealmOfSlightlyModifiedFormula);
         self::assertSame($formulasTable->getRealm($formulaCode)->getValue(), $requiredRealmOfSlightlyModifiedFormula->getValue());
 
-        $requiredRealmOnHighModifiersRequirement = $formulasTable->getRequiredRealmOfModified(
+        $requiredRealmOnHighModifiersRequirement = $formulasTable->getRealmOfModified(
             $formulaCode,
             $modifiers,
             $this->createModifiersTableForDifficulty(
@@ -478,7 +495,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $formulaCode = FormulaCode::getIt(FormulaCode::ILLUSION);
         $modifiers = ['foo', 'bar', 'baz'];
         $formulasTable = new FormulasTable();
-        $requiredRealmOfModerateModifiedFormula = $formulasTable->getRequiredRealmOfModified(
+        $requiredRealmOfModerateModifiedFormula = $formulasTable->getRealmOfModified(
             $formulaCode,
             $modifiers,
             $this->createModifiersTableForDifficulty(
@@ -499,7 +516,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $realmsIncrement = (int)ceil($unhandledDifficulty / $handledDifficultyPerRealm);
         self::assertSame($basicFormulaRealmValue + $realmsIncrement, $requiredRealmOfModerateModifiedFormula->getValue());
 
-        $requiredRealmOfHighModifiersRequirement = $formulasTable->getRequiredRealmOfModified(
+        $requiredRealmOfHighModifiersRequirement = $formulasTable->getRealmOfModified(
             $formulaCode,
             $modifiers,
             $this->createModifiersTableForDifficulty(
@@ -516,7 +533,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $formulaCode = FormulaCode::getIt(FormulaCode::DISCHARGE);
         $modifiers = ['foo', 'BAR'];
         $formulasTable = new FormulasTable();
-        $requiredRealmOfHeavilyModifiedFormula = $formulasTable->getRequiredRealmOfModified(
+        $requiredRealmOfHeavilyModifiedFormula = $formulasTable->getRealmOfModified(
             $formulaCode,
             $modifiers,
             $this->createModifiersTableForDifficulty($modifiers, $difficultyChangeValue = 159, 1)
@@ -535,7 +552,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
             $basicFormulaRealmValue + $realmsIncrement,
             $requiredRealmOfHeavilyModifiedFormula->getValue()
         );
-        $requiredRealmOfHighModifiersRequirement = $formulasTable->getRequiredRealmOfModified(
+        $requiredRealmOfHighModifiersRequirement = $formulasTable->getRealmOfModified(
             $formulaCode,
             $modifiers,
             $this->createModifiersTableForDifficulty($modifiers, $difficultyChangeValue = 159, $requiredRealmOfHeavilyModifiedFormula->getValue() + 1)
@@ -563,7 +580,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $modifiers = ['foo'];
         /** @var FormulasTable $formulasTable */
         try {
-            $formulasTable->getRequiredRealmOfModified(
+            $formulasTable->getRealmOfModified(
                 FormulaCode::getIt(FormulaCode::FLOW_OF_TIME),
                 $modifiers,
                 $this->createModifiersTableForDifficulty($modifiers, $difficultyChangeValue = 333, 1)
@@ -572,7 +589,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
             self::fail('No exception expected so far: ' . $exception->getMessage());
         }
 
-        $formulasTable->getRequiredRealmOfModified(
+        $formulasTable->getRealmOfModified(
             FormulaCode::getIt(FormulaCode::FLOW_OF_TIME),
             $modifiers,
             $this->createModifiersTableForDifficulty($modifiers, $difficultyChangeValue = 334, 1)

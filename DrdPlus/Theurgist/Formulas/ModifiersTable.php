@@ -2,6 +2,7 @@
 namespace DrdPlus\Theurgist\Formulas;
 
 use DrdPlus\Tables\Measurements\Distance\DistanceTable;
+use DrdPlus\Tables\Measurements\Time\TimeTable;
 use DrdPlus\Tables\Partials\AbstractFileTable;
 use DrdPlus\Tables\Partials\Exceptions\RequiredRowNotFound;
 use DrdPlus\Theurgist\Codes\FormCode;
@@ -127,12 +128,13 @@ class ModifiersTable extends AbstractFileTable
 
     /**
      * @param ModifierCode $modifierCode
+     * @param TimeTable $timeTable
      * @return Casting
      */
-    public function getCasting(ModifierCode $modifierCode): Casting
+    public function getCasting(ModifierCode $modifierCode, TimeTable $timeTable): Casting
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new Casting($this->getValue($modifierCode, self::CASTING));
+        return new Casting($this->getValue($modifierCode, self::CASTING), $timeTable);
     }
 
     /**
