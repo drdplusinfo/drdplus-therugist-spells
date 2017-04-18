@@ -413,7 +413,7 @@ class FormulasTable extends AbstractFileTable
 
         return [
             'realm' => $minimalPossibleRealm,
-            'difficulty' => $basicFormulaDifficultyLimit->getMinimal() + $additionsCount * $formulaAdditionByRealmsValue,
+            'difficulty' => $difficultyOfModifiedWithoutRealmChange + $additionsCount * $formulaAdditionByRealmsValue,
         ];
     }
 
