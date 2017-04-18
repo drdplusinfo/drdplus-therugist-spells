@@ -49,13 +49,13 @@ abstract class AbstractTheurgistTableTest extends TestWithMockery
         $sut = new $sutClass();
         $tableArgument = $this->findOutTableArgument($sutClass, $getObligatoryParameter);
         foreach ($codeClass::getPossibleValues() as $modifierCode) {
-            $expectedParameterValueValue = $this->getValueFromTable($sut, $modifierCode, $obligatoryParameter);
+            $expectedParameterValue = $this->getValueFromTable($sut, $modifierCode, $obligatoryParameter);
             if ($tableArgument) {
                 $parameterObject = $sut->$getObligatoryParameter($codeClass::getIt($modifierCode), $tableArgument);
-                $expectedParameterObject = new $parameterClass($expectedParameterValueValue, $tableArgument);
+                $expectedParameterObject = new $parameterClass($expectedParameterValue, $tableArgument);
             } else {
                 $parameterObject = $sut->$getObligatoryParameter($codeClass::getIt($modifierCode));
-                $expectedParameterObject = new $parameterClass($expectedParameterValueValue);
+                $expectedParameterObject = new $parameterClass($expectedParameterValue);
             }
             self::assertEquals($expectedParameterObject, $parameterObject);
         }
