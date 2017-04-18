@@ -452,11 +452,23 @@ class FormulasTableTest extends AbstractTheurgistTableTest
             $this->createModifiersTable(
                 $modifiers,
                 $difficultyChangeValue = 6 /* 14 + 6 = 20, still can be handled by formula minimal realm */,
-                1 // highest required realm
+                1 // highest required realm by modifiers
             )
         );
         self::assertInstanceOf(Realm::class, $requiredRealmOfSlightlyModifiedFormula);
         self::assertSame($formulasTable->getRealm($formulaCode)->getValue(), $requiredRealmOfSlightlyModifiedFormula->getValue());
+
+        $requiredRealmOnHighModifiersRequirement = $formulasTable->getRequiredRealmOfModified(
+            $formulaCode,
+            $modifiers,
+            $this->createModifiersTable(
+                $modifiers,
+                $difficultyChangeValue = 6 /* 14 + 6 = 20, still can be handled by formula minimal realm */,
+                123 // highest required realm by modifiers
+            )
+        );
+        self::assertInstanceOf(Realm::class, $requiredRealmOnHighModifiersRequirement);
+        self::assertSame(123, $requiredRealmOnHighModifiersRequirement->getValue());
     }
 
     private function I_can_get_minimal_required_realm_of_moderate_modified_formula()
@@ -483,10 +495,18 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $unhandledDifficulty = ($difficultyChangeValue + $portalDifficultyLimit->getMinimal()) - $portalDifficultyLimit->getMaximal();
         $handledDifficultyPerRealm = $portalDifficultyLimit->getAdditionByRealms()->getAddition();
         $realmsIncrement = (int)ceil($unhandledDifficulty / $handledDifficultyPerRealm);
-        self::assertSame(
-            $basicFormulaRealmValue + $realmsIncrement,
-            $requiredRealmOfModerateModifiedFormula->getValue()
+        self::assertSame($basicFormulaRealmValue + $realmsIncrement, $requiredRealmOfModerateModifiedFormula->getValue());
+
+        $requiredRealmOfHighModifiersRequirement = $formulasTable->getRequiredRealmOfModified(
+            $formulaCode,
+            $modifiers,
+            $this->createModifiersTable(
+                $modifiers,
+                $difficultyChangeValue = 9 /* 2 + 9 = 11, can not be handled by formula minimal realm */,
+                456
+            )
         );
+        self::assertSame(456, $requiredRealmOfHighModifiersRequirement->getValue());
     }
 
     private function I_can_get_minimal_required_realm_of_heavily_modified_formula()
@@ -513,6 +533,12 @@ class FormulasTableTest extends AbstractTheurgistTableTest
             $basicFormulaRealmValue + $realmsIncrement,
             $requiredRealmOfHeavilyModifiedFormula->getValue()
         );
+        $requiredRealmOfHighModifiersRequirement = $formulasTable->getRequiredRealmOfModified(
+            $formulaCode,
+            $modifiers,
+            $this->createModifiersTable($modifiers, $difficultyChangeValue = 159, $requiredRealmOfHeavilyModifiedFormula->getValue() + 1)
+        );
+        self::assertSame($requiredRealmOfHeavilyModifiedFormula->getValue() + 1, $requiredRealmOfHighModifiersRequirement->getValue());
     }
 
     /**

@@ -391,10 +391,14 @@ class FormulasTable extends AbstractFileTable
             );
         }
         $realmIncrementToHandleAdditionalDifficulty = $formulaAdditionByRealms->getRealmIncrement();
-        while ($maximalDifficultyHandledByFormula < $difficultyOfModifiedWithoutRealmChange
-            || $minimalPossibleRealm->getValue() < $highestRequiredRealmByModifiers->getValue()
-        ) {
+        while ($maximalDifficultyHandledByFormula < $difficultyOfModifiedWithoutRealmChange) {
             $maximalDifficultyHandledByFormula += $difficultyHandledByAdditionalRealm;
+            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+            $minimalPossibleRealm = $minimalPossibleRealm->add($realmIncrementToHandleAdditionalDifficulty);
+        }
+        // handled difficulty is enough, but realm is still needed higher
+        /** @var Realm $minimalPossibleRealm */
+        while ($minimalPossibleRealm->getValue() < $highestRequiredRealmByModifiers->getValue()) {
             /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
             $minimalPossibleRealm = $minimalPossibleRealm->add($realmIncrementToHandleAdditionalDifficulty);
         }
