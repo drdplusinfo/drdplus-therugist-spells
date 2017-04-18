@@ -393,7 +393,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $difficultyOfModifiedFormula = $formulasTable->getDifficultyOfModified(
             $fire,
             $modifiers,
-            $this->createModifiersTable($modifiers, 123)
+            $this->createModifiersTable($modifiers, 123, 456)
         );
         self::assertSame(
             $formulasTable->getDifficultyLimit($fire)->getMinimal() + 123,
@@ -404,14 +404,17 @@ class FormulasTableTest extends AbstractTheurgistTableTest
     /**
      * @param array $expectedModifiers
      * @param int $difficultyChange
+     * @param int $highestRequiredReam
      * @return \Mockery\MockInterface|ModifiersTable
      */
-    private function createModifiersTable(array $expectedModifiers, int $difficultyChange)
+    private function createModifiersTable(array $expectedModifiers, int $difficultyChange, int $highestRequiredReam)
     {
         $modifiersTable = $this->mockery(ModifiersTable::class);
         $modifiersTable->shouldReceive('sumDifficultyChange')
             ->with($expectedModifiers)
             ->andReturn(new IntegerObject($difficultyChange));
+        $modifiersTable->shouldReceive('getHighestRequiredRealm')
+            ->andReturn(new Realm($highestRequiredReam));
 
         return $modifiersTable;
     }
@@ -421,54 +424,88 @@ class FormulasTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_get_minimal_required_realm_of_modified_formula()
     {
+        $this->I_can_get_minimal_required_realm_of_non_modified_formula();
+
+        $this->I_can_get_minimal_required_realm_of_slightly_modified_formula();
+
+        $this->I_can_get_minimal_required_realm_of_moderate_modified_formula();
+
+        $this->I_can_get_minimal_required_realm_of_heavily_modified_formula();
+    }
+
+    private function I_can_get_minimal_required_realm_of_non_modified_formula()
+    {
         $formulasTable = new FormulasTable();
-        $modifiersTable = new ModifiersTable();
-        $portal = FormulaCode::getIt(FormulaCode::PORTAL);
+        $formulaCode = FormulaCode::getIt(FormulaCode::PORTAL);
+        $requiredRealmOfNonModified = $formulasTable->getRequiredRealmOfModified($formulaCode, [], new ModifiersTable());
+        self::assertEquals($formulasTable->getRealm($formulaCode), $requiredRealmOfNonModified);
+    }
 
-        $requiredRealmOfNonModified = $formulasTable->getRequiredRealmOfModified($portal, [], $modifiersTable);
-        self::assertEquals($formulasTable->getRealm($portal), $requiredRealmOfNonModified);
-
+    private function I_can_get_minimal_required_realm_of_slightly_modified_formula()
+    {
+        $formulaCode = FormulaCode::getIt(FormulaCode::BARRIER);
         $modifiers = ['foo', 'bar', 'baz'];
+        $formulasTable = new FormulasTable();
         $requiredRealmOfSlightlyModifiedFormula = $formulasTable->getRequiredRealmOfModified(
-            $portal,
+            $formulaCode,
             $modifiers,
-            $this->createModifiersTable($modifiers, $difficultyChangeValue = 6 /* 14 + 6 = 20, still can be handled by formula minimal realm */)
+            $this->createModifiersTable(
+                $modifiers,
+                $difficultyChangeValue = 6 /* 14 + 6 = 20, still can be handled by formula minimal realm */,
+                1 // highest required realm
+            )
         );
         self::assertInstanceOf(Realm::class, $requiredRealmOfSlightlyModifiedFormula);
-        self::assertSame($formulasTable->getRealm($portal)->getValue(), $requiredRealmOfSlightlyModifiedFormula->getValue());
+        self::assertSame($formulasTable->getRealm($formulaCode)->getValue(), $requiredRealmOfSlightlyModifiedFormula->getValue());
+    }
 
-        $requiredRealmOfMoreModifiedFormula = $formulasTable->getRequiredRealmOfModified(
-            $portal,
+    private function I_can_get_minimal_required_realm_of_moderate_modified_formula()
+    {
+        $formulaCode = FormulaCode::getIt(FormulaCode::ILLUSION);
+        $modifiers = ['foo', 'bar', 'baz'];
+        $formulasTable = new FormulasTable();
+        $requiredRealmOfModerateModifiedFormula = $formulasTable->getRequiredRealmOfModified(
+            $formulaCode,
             $modifiers,
-            $this->createModifiersTable($modifiers, $difficultyChangeValue = 7 /* 14 + 7 = 21, can not be handled by formula minimal realm */)
+            $this->createModifiersTable(
+                $modifiers,
+                $difficultyChangeValue = 9 /* 2 + 9 = 11, can not be handled by formula minimal realm */,
+                1
+            )
         );
-        self::assertInstanceOf(Realm::class, $requiredRealmOfMoreModifiedFormula);
+        self::assertInstanceOf(Realm::class, $requiredRealmOfModerateModifiedFormula);
         self::assertGreaterThan(
-            $formulasTable->getRealm($portal)->getValue(),
-            $requiredRealmOfMoreModifiedFormula->getValue()
+            $formulasTable->getRealm($formulaCode)->getValue(),
+            $requiredRealmOfModerateModifiedFormula->getValue()
         );
-        $basicFormulaRealmValue = $formulasTable->getRealm($portal)->getValue();
-        $portalDifficultyLimit = $formulasTable->getDifficultyLimit($portal);
+        $basicFormulaRealmValue = $formulasTable->getRealm($formulaCode)->getValue();
+        $portalDifficultyLimit = $formulasTable->getDifficultyLimit($formulaCode);
         $unhandledDifficulty = ($difficultyChangeValue + $portalDifficultyLimit->getMinimal()) - $portalDifficultyLimit->getMaximal();
         $handledDifficultyPerRealm = $portalDifficultyLimit->getAdditionByRealms()->getAddition();
         $realmsIncrement = (int)ceil($unhandledDifficulty / $handledDifficultyPerRealm);
         self::assertSame(
             $basicFormulaRealmValue + $realmsIncrement,
-            $requiredRealmOfMoreModifiedFormula->getValue()
+            $requiredRealmOfModerateModifiedFormula->getValue()
         );
+    }
 
+    private function I_can_get_minimal_required_realm_of_heavily_modified_formula()
+    {
+        $formulaCode = FormulaCode::getIt(FormulaCode::DISCHARGE);
+        $modifiers = ['foo', 'BAR'];
+        $formulasTable = new FormulasTable();
         $requiredRealmOfHeavilyModifiedFormula = $formulasTable->getRequiredRealmOfModified(
-            $portal,
+            $formulaCode,
             $modifiers,
-            $this->createModifiersTable($modifiers, $difficultyChangeValue = 159)
+            $this->createModifiersTable($modifiers, $difficultyChangeValue = 159, 1)
         );
         self::assertInstanceOf(Realm::class, $requiredRealmOfHeavilyModifiedFormula);
         self::assertGreaterThan(
-            $formulasTable->getRealm($portal)->getValue(),
+            $formulasTable->getRealm($formulaCode)->getValue(),
             $requiredRealmOfHeavilyModifiedFormula->getValue()
         );
-        $basicFormulaRealmValue = $formulasTable->getRealm($portal)->getValue();
-        $portalDifficultyLimit = $formulasTable->getDifficultyLimit($portal);
+        $basicFormulaRealmValue = $formulasTable->getRealm($formulaCode)->getValue();
+        $portalDifficultyLimit = $formulasTable->getDifficultyLimit($formulaCode);
         $unhandledDifficulty = ($difficultyChangeValue + $portalDifficultyLimit->getMinimal()) - $portalDifficultyLimit->getMaximal();
         $handledDifficultyPerRealm = $portalDifficultyLimit->getAdditionByRealms()->getAddition();
         $realmsIncrement = (int)ceil($unhandledDifficulty / $handledDifficultyPerRealm);
@@ -501,7 +538,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
             $formulasTable->getRequiredRealmOfModified(
                 FormulaCode::getIt(FormulaCode::FLOW_OF_TIME),
                 $modifiers,
-                $this->createModifiersTable($modifiers, $difficultyChangeValue = 333)
+                $this->createModifiersTable($modifiers, $difficultyChangeValue = 333, 1)
             );
         } catch (\Exception $exception) {
             self::fail('No exception expected so far: ' . $exception->getMessage());
@@ -510,7 +547,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $formulasTable->getRequiredRealmOfModified(
             FormulaCode::getIt(FormulaCode::FLOW_OF_TIME),
             $modifiers,
-            $this->createModifiersTable($modifiers, $difficultyChangeValue = 334)
+            $this->createModifiersTable($modifiers, $difficultyChangeValue = 334, 1)
         );
     }
 }
