@@ -495,6 +495,7 @@ class ModifiersTable extends AbstractFileTable
      */
     public function getHighestRequiredRealm(array $modifierCodes): Realm
     {
+        $modifierCodes = $this->toFlatArray($modifierCodes);
         if (count($modifierCodes) === 0) {
             /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
             return new Realm(0);
