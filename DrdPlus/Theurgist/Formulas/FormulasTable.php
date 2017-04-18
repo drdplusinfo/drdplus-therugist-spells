@@ -410,7 +410,7 @@ class FormulasTable extends AbstractFileTable
      * @param FormulaCode $formulaCode
      * @param array $modifiers
      * @param ModifiersTable $modifiersTable
-     * @return array
+     * @return array|Affection[]
      * @throws \DrdPlus\Theurgist\Formulas\Exceptions\CanNotBuildFormulaWithRequiredModification
      */
     public function getAffectionsOfModified(

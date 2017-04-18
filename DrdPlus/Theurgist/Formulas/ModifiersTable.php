@@ -519,7 +519,7 @@ class ModifiersTable extends AbstractFileTable
 
     /**
      * @param array|ModifierCode[] $modifierCodes
-     * @return array
+     * @return array|Affection[]
      */
     public function getAffectionsOfModifiers(array $modifierCodes): array
     {
