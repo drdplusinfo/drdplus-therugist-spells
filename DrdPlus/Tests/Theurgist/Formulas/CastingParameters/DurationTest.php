@@ -12,7 +12,7 @@ class DurationTest extends PositiveCastingParameterTest
     {
         $duration = new Duration(['0', '78=321'], $timeTable = new TimeTable());
         self::assertSame(0, $duration->getValue());
-        self::assertEquals(new TimeBonus(0, $timeTable), $duration->getDuration());
+        self::assertEquals(new TimeBonus(0, $timeTable), $duration->getDurationTimeBonus());
         self::assertEquals(new AdditionByRealms('78=321'), $duration->getAdditionByRealms());
         self::assertSame('0 (' . $duration->getAdditionByRealms() . ')', (string)$duration);
     }
@@ -21,7 +21,7 @@ class DurationTest extends PositiveCastingParameterTest
     {
         $duration = new Duration(['35689', '332211'], $timeTable = new TimeTable());
         self::assertSame(35689, $duration->getValue());
-        self::assertEquals(new TimeBonus(35689, $timeTable), $duration->getDuration());
+        self::assertEquals(new TimeBonus(35689, $timeTable), $duration->getDurationTimeBonus());
         self::assertEquals(new AdditionByRealms('332211'), $duration->getAdditionByRealms());
         self::assertSame('35689 (' . $duration->getAdditionByRealms() . ')', (string)$duration);
     }

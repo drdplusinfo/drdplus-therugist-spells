@@ -9,7 +9,7 @@ class Duration extends PositiveCastingParameter
     /**
      * @var TimeBonus
      */
-    private $duration;
+    private $durationTimeBonus;
 
     /**
      * @param array $values
@@ -23,15 +23,15 @@ class Duration extends PositiveCastingParameter
     public function __construct(array $values, TimeTable $timeTable)
     {
         parent::__construct($values);
-        $this->duration = new TimeBonus($this->getValue(), $timeTable);
+        $this->durationTimeBonus = new TimeBonus($this->getValue(), $timeTable);
     }
 
     /**
      * @return TimeBonus
      */
-    public function getDuration(): TimeBonus
+    public function getDurationTimeBonus(): TimeBonus
     {
-        return $this->duration;
+        return $this->durationTimeBonus;
     }
 
 }
