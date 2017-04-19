@@ -15,6 +15,7 @@ use DrdPlus\Theurgist\Formulas\FormulasTable;
 use DrdPlus\Theurgist\Formulas\ModifiersTable;
 use DrdPlus\Theurgist\Formulas\ProfilesTable;
 use Granam\Integer\IntegerInterface;
+use Granam\Integer\IntegerObject;
 
 class ModifiersTableTest extends AbstractTheurgistTableTest
 {
@@ -607,6 +608,29 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
                     ModifierCode::getIt(ModifierCode::STEP_TO_FUTURE) // -1 live
                 ],
             ])
+        );
+    }
+
+    /**
+     * @test
+     */
+    public function I_can_get_sum_of_modifiers_radius()
+    {
+        $modifiersTable = new ModifiersTable();
+
+        self::assertEquals(new IntegerObject(0), $modifiersTable->sumRadii([], $this->distanceTable));
+
+        self::assertEquals(
+            new IntegerObject(-6),
+            $modifiersTable->sumRadii(
+                [
+                    ModifierCode::getIt(ModifierCode::GATE), // -6
+                    ModifierCode::getIt(ModifierCode::BREACH), // null
+                    ModifierCode::getIt(ModifierCode::EXPLOSION), // 0
+                    ModifierCode::getIt(ModifierCode::TRANSPOSITION), // 0
+                ],
+                $this->distanceTable
+            )
         );
     }
 

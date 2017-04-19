@@ -560,4 +560,23 @@ class ModifiersTable extends AbstractFileTable
 
         return $summedAffections;
     }
+
+    /**
+     * @param array|ModifierCode[] $modifierCodes
+     * @param DistanceTable $distanceTable
+     * @return IntegerInterface
+     */
+    public function sumRadii(array $modifierCodes, DistanceTable $distanceTable): IntegerInterface
+    {
+        $radiusValue = 0;
+        foreach ($modifierCodes as $modifierCode) {
+            $radius = $this->getRadius($modifierCode, $distanceTable);
+            if (!$radius) {
+                continue;
+            }
+            $radiusValue += $radius->getValue();
+        }
+
+        return new IntegerObject($radiusValue);
+    }
 }
