@@ -1,6 +1,8 @@
 <?php
 namespace DrdPlus\Tests\Theurgist\Formulas;
 
+use DrdPlus\Tables\Measurements\Distance\DistanceBonus;
+use DrdPlus\Tables\Measurements\Distance\DistanceTable;
 use DrdPlus\Theurgist\Codes\AffectionPeriodCode;
 use DrdPlus\Theurgist\Codes\FormCode;
 use DrdPlus\Theurgist\Codes\FormulaCode;
@@ -158,7 +160,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         FormulaCode::LOCK => [SpellTraitCode::AFFECTING, SpellTraitCode::INVISIBLE, SpellTraitCode::SILENT, SpellTraitCode::ODORLESS, SpellTraitCode::CYCLIC, SpellTraitCode::MEMORY, SpellTraitCode::DEFORMATION, SpellTraitCode::UNIDIRECTIONAL, SpellTraitCode::BIDIRECTIONAL, SpellTraitCode::INACRID, SpellTraitCode::EVERY_SENSE, SpellTraitCode::SITUATIONAL, SpellTraitCode::SHAPESHIFT, SpellTraitCode::STATE_CHANGE, SpellTraitCode::NATURE_CHANGE, SpellTraitCode::NO_SMOKE, SpellTraitCode::TRANSPARENCY, SpellTraitCode::MULTIPLE_ENTRY, SpellTraitCode::OMNIPRESENT],
     ];
 
-    private function getExpectedSpellTraitCodeValues(string $formulaValue)
+    private function getExpectedSpellTraitCodeValues(string $formulaValue): array
     {
         $excludedTraitValues = self::$excludedTraitValues[$formulaValue];
 
@@ -680,6 +682,60 @@ class FormulasTableTest extends AbstractTheurgistTableTest
                     return new Affection($affectionParts);
                 }, $affectionsOfModifiers)
             );
+
+        return $modifiersTable;
+    }
+
+    /**
+     * @test
+     */
+    public function I_can_get_radius_of_modified_formula()
+    {
+        $formulasTable = new FormulasTable();
+        $distanceTable = new DistanceTable();
+        $modifiers = ['foo', 'bar'];
+
+        $radiusOfLock = $formulasTable->getRadiusOfModified(
+            FormulaCode::getIt(FormulaCode::LOCK), // no radius (null)
+            $modifiers,
+            $this->createModifiersTableForRadius($modifiers, $distanceTable, 132456),
+            $distanceTable
+        );
+        self::assertNull($radiusOfLock);
+
+        $radiusOfDischargeWithoutChange = $formulasTable->getRadiusOfModified(
+            FormulaCode::getIt(FormulaCode::DISCHARGE), // +10
+            $modifiers,
+            $this->createModifiersTableForRadius($modifiers, $distanceTable, 0),
+            $distanceTable
+        );
+        self::assertEquals(new DistanceBonus(10, $distanceTable), $radiusOfDischargeWithoutChange);
+
+        $radiusOfModifiedDischarge = $formulasTable->getRadiusOfModified(
+            FormulaCode::getIt(FormulaCode::DISCHARGE), // +10
+            $modifiers,
+            $this->createModifiersTableForRadius($modifiers, $distanceTable, 789),
+            $distanceTable
+        );
+        self::assertEquals(new DistanceBonus(799, $distanceTable), $radiusOfModifiedDischarge);
+    }
+
+    /**
+     * @param array $expectedModifiers
+     * @param int $sumOfRadii
+     * @param DistanceTable $expectedDistanceTable
+     * @return \Mockery\MockInterface|ModifiersTable
+     */
+    private function createModifiersTableForRadius(
+        array $expectedModifiers,
+        DistanceTable $expectedDistanceTable,
+        int $sumOfRadii
+    )
+    {
+        $modifiersTable = $this->mockery(ModifiersTable::class);
+        $modifiersTable->shouldReceive('sumRadii')
+            ->with($expectedModifiers, $expectedDistanceTable)
+            ->andReturn(new IntegerObject($sumOfRadii));
 
         return $modifiersTable;
     }

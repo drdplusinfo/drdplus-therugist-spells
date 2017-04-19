@@ -1,6 +1,7 @@
 <?php
 namespace DrdPlus\Theurgist\Formulas;
 
+use DrdPlus\Tables\Measurements\Distance\DistanceBonus;
 use DrdPlus\Tables\Measurements\Distance\DistanceTable;
 use DrdPlus\Tables\Measurements\Time\TimeTable;
 use DrdPlus\Tables\Partials\AbstractFileTable;
@@ -339,33 +340,33 @@ class FormulasTable extends AbstractFileTable
 
     /**
      * @param FormulaCode $formulaCode
-     * @param array $modifiers
+     * @param array|ModifierCode[] $modifierCodes
      * @param ModifiersTable $modifiersTable
      * @return IntegerInterface
      * @throws \DrdPlus\Theurgist\Formulas\Exceptions\CanNotBuildFormulaWithRequiredModification
      */
     public function getDifficultyOfModified(
         FormulaCode $formulaCode,
-        array $modifiers,
+        array $modifierCodes,
         ModifiersTable $modifiersTable
     ): IntegerInterface
     {
         return new IntegerObject(
             $this->getDifficultyLimit($formulaCode)->getMinimal()
-            + $modifiersTable->sumDifficultyChange($modifiers)->getValue()
+            + $modifiersTable->sumDifficultyChange($modifierCodes)->getValue()
         );
     }
 
     /**
      * @param FormulaCode $formulaCode
-     * @param array $modifiers
+     * @param array|ModifierCode[] $modifierCodes
      * @param ModifiersTable $modifiersTable
      * @return Realm
      * @throws \DrdPlus\Theurgist\Formulas\Exceptions\CanNotBuildFormulaWithRequiredModification
      */
     public function getRealmOfModified(
         FormulaCode $formulaCode,
-        array $modifiers,
+        array $modifierCodes,
         ModifiersTable $modifiersTable
     ): Realm
     {
@@ -374,10 +375,10 @@ class FormulasTable extends AbstractFileTable
         $minimalPossibleRealm = $this->getRealm($formulaCode);
         $difficultyOfModifiedWithoutRealmChange = $this->getDifficultyOfModified(
             $formulaCode,
-            $modifiers,
+            $modifierCodes,
             $modifiersTable
         )->getValue();
-        $highestRequiredRealmByModifiers = $modifiersTable->getHighestRequiredRealm($modifiers);
+        $highestRequiredRealmByModifiers = $modifiersTable->getHighestRequiredRealm($modifierCodes);
         if ($maximalDifficultyHandledByFormula >= $difficultyOfModifiedWithoutRealmChange
             && $minimalPossibleRealm->getValue() >= $highestRequiredRealmByModifiers->getValue()
         ) {
@@ -411,21 +412,21 @@ class FormulasTable extends AbstractFileTable
 
     /**
      * @param FormulaCode $formulaCode
-     * @param array $modifiers
+     * @param array|ModifierCode[] $modifierCodes
      * @param ModifiersTable $modifiersTable
      * @return array|Affection[]
      * @throws \DrdPlus\Theurgist\Formulas\Exceptions\CanNotBuildFormulaWithRequiredModification
      */
     public function getAffectionsOfModified(
         FormulaCode $formulaCode,
-        array $modifiers,
+        array $modifierCodes,
         ModifiersTable $modifiersTable
     ): array
     {
         $formulaAffection = $this->getAffection($formulaCode);
         $summedAffections = [$formulaAffection->getAffectionPeriod()->getValue() => $formulaAffection];
         /** @var Affection $modifiersAffection */
-        foreach ($modifiersTable->getAffectionsOfModifiers($modifiers) as $modifiersAffection) {
+        foreach ($modifiersTable->getAffectionsOfModifiers($modifierCodes) as $modifiersAffection) {
             $affectionPeriodValue = $modifiersAffection->getAffectionPeriod()->getValue();
             if (!array_key_exists($affectionPeriodValue, $summedAffections)) {
                 $summedAffections[$affectionPeriodValue] = $modifiersAffection;
@@ -441,5 +442,32 @@ class FormulasTable extends AbstractFileTable
         }
 
         return $summedAffections;
+    }
+
+    /**
+     * @param FormulaCode $formulaCode
+     * @param array|ModifierCode[] $modifierCodes
+     * @param ModifiersTable $modifiersTable
+     * @param DistanceTable $distanceTable
+     * @return DistanceBonus|null
+     * @throws \DrdPlus\Theurgist\Formulas\Exceptions\CanNotBuildFormulaWithRequiredModification
+     */
+    public function getRadiusOfModified(
+        FormulaCode $formulaCode,
+        array $modifierCodes,
+        ModifiersTable $modifiersTable,
+        DistanceTable $distanceTable
+    )
+    {
+        $formulaRadius = $this->getRadius($formulaCode, $distanceTable);
+        if (!$formulaRadius) {
+            return null;
+        }
+
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new DistanceBonus(
+            $formulaRadius->getValue() + $modifiersTable->sumRadii($modifierCodes, $distanceTable)->getValue(),
+            $distanceTable
+        );
     }
 }
