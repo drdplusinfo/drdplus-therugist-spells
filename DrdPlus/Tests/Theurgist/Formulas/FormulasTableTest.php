@@ -740,4 +740,48 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         return $modifiersTable;
     }
 
+    /**
+     * @test
+     */
+    public function I_can_get_power_of_modified_formula()
+    {
+        $formulasTable = new FormulasTable();
+        $modifiers = ['foo', 'bar'];
+
+        $powerOfDischarge = $formulasTable->getPowerOfModified(
+            FormulaCode::getIt(FormulaCode::DISCHARGE), // null
+            $modifiers,
+            $this->createModifiersTableForPower($modifiers, 132456)
+        );
+        self::assertNull($powerOfDischarge);
+
+        $powerOfLockWithoutChange = $formulasTable->getPowerOfModified(
+            FormulaCode::getIt(FormulaCode::LOCK), // 0
+            $modifiers,
+            $this->createModifiersTableForPower($modifiers, 0)
+        );
+        self::assertEquals(new IntegerObject(0), $powerOfLockWithoutChange);
+
+        $powerOfGreatMassacreWithChange = $formulasTable->getPowerOfModified(
+            FormulaCode::getIt(FormulaCode::GREAT_MASSACRE), // 6
+            $modifiers,
+            $this->createModifiersTableForPower($modifiers, 789)
+        );
+        self::assertEquals(new IntegerObject(795), $powerOfGreatMassacreWithChange);
+    }
+
+    /**
+     * @param array $expectedModifiers
+     * @param int $sumOfPower
+     * @return \Mockery\MockInterface|ModifiersTable
+     */
+    private function createModifiersTableForPower(array $expectedModifiers, int $sumOfPower)
+    {
+        $modifiersTable = $this->mockery(ModifiersTable::class);
+        $modifiersTable->shouldReceive('sumPower')
+            ->with($expectedModifiers)
+            ->andReturn(new IntegerObject($sumOfPower));
+
+        return $modifiersTable;
+    }
 }

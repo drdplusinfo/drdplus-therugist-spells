@@ -24,7 +24,6 @@ use DrdPlus\Theurgist\Formulas\CastingParameters\SizeChange;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Speed;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Transposition;
-use Granam\Integer\IntegerInterface;
 use Granam\Integer\IntegerObject;
 
 class FormulasTable extends AbstractFileTable
@@ -342,14 +341,14 @@ class FormulasTable extends AbstractFileTable
      * @param FormulaCode $formulaCode
      * @param array|ModifierCode[] $modifierCodes
      * @param ModifiersTable $modifiersTable
-     * @return IntegerInterface
+     * @return IntegerObject
      * @throws \DrdPlus\Theurgist\Formulas\Exceptions\CanNotBuildFormulaWithRequiredModification
      */
     public function getDifficultyOfModified(
         FormulaCode $formulaCode,
         array $modifierCodes,
         ModifiersTable $modifiersTable
-    ): IntegerInterface
+    ): IntegerObject
     {
         return new IntegerObject(
             $this->getDifficultyLimit($formulaCode)->getMinimal()
@@ -469,5 +468,21 @@ class FormulasTable extends AbstractFileTable
             $formulaRadius->getValue() + $modifiersTable->sumRadii($modifierCodes, $distanceTable)->getValue(),
             $distanceTable
         );
+    }
+
+    /**
+     * @param FormulaCode $formulaCode
+     * @param array|ModifierCode[] $modifierCodes
+     * @param ModifiersTable $modifiersTable
+     * @return IntegerObject|null
+     */
+    public function getPowerOfModified(FormulaCode $formulaCode, array $modifierCodes, ModifiersTable $modifiersTable)
+    {
+        $formulaPower = $this->getPower($formulaCode);
+        if (!$formulaPower) {
+            return null;
+        }
+
+        return new IntegerObject($formulaPower->getValue() + $modifiersTable->sumPower($modifierCodes)->getValue());
     }
 }

@@ -564,9 +564,9 @@ class ModifiersTable extends AbstractFileTable
     /**
      * @param array|ModifierCode[] $modifierCodes
      * @param DistanceTable $distanceTable
-     * @return IntegerInterface
+     * @return IntegerObject
      */
-    public function sumRadii(array $modifierCodes, DistanceTable $distanceTable): IntegerInterface
+    public function sumRadii(array $modifierCodes, DistanceTable $distanceTable): IntegerObject
     {
         $radiusValue = 0;
         foreach ($modifierCodes as $modifierCode) {
@@ -578,5 +578,23 @@ class ModifiersTable extends AbstractFileTable
         }
 
         return new IntegerObject($radiusValue);
+    }
+
+    /**
+     * @param array|ModifierCode[] $modifierCodes
+     * @return IntegerObject
+     */
+    public function sumPower(array $modifierCodes): IntegerObject
+    {
+        $powerValue = 0;
+        foreach ($modifierCodes as $modifierCode) {
+            $power = $this->getPower($modifierCode);
+            if (!$power) {
+                continue;
+            }
+            $powerValue += $power->getValue();
+        }
+
+        return new IntegerObject($powerValue);
     }
 }

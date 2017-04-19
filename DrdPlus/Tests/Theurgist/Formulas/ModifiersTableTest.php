@@ -634,4 +634,27 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
         );
     }
 
+    /**
+     * @test
+     */
+    public function I_can_get_sum_of_modifiers_power()
+    {
+        $modifiersTable = new ModifiersTable();
+
+        self::assertEquals(new IntegerObject(0), $modifiersTable->sumPower([]));
+
+        self::assertEquals(
+            new IntegerObject(13),
+            $modifiersTable->sumPower(
+                [
+                    ModifierCode::getIt(ModifierCode::GATE), // null
+                    ModifierCode::getIt(ModifierCode::EXPLOSION), // +6
+                    ModifierCode::getIt(ModifierCode::FILTER), // null
+                    ModifierCode::getIt(ModifierCode::THUNDER), // +10
+                    ModifierCode::getIt(ModifierCode::INTERACTIVE_ILLUSION), // -3
+                ]
+            )
+        );
+    }
+
 }
