@@ -10,5 +10,5 @@ flow_of_time,1,-1,30,5;15;3,6;1,0;3,0;2=1,,,,,,,direct;volume;intangible;invisib
 tsunami_from_clay_and_stones,10,-2,45,6;16;3,29;3,29;3,0;3=1,,,,,0;1,,indirect;volume;intangible;invisible,,transposition_venus;release_venus,transposition;release
 hit,1,-1,35,3;10;2,,0;1,0;1=2,,,,,,,indirect;beam;tangible;invisible,,transposition_venus,transposition
 great_massacre,8,-4,45,6;16;3,6;1=2,4;2=3,6;2=3,,,,,,20;0=0,indirect;volume;tangible;visible,,movement_venus;transposition_venus;release_venus,movement;transposition;release
-discharge,1,-1,40,3;10;2,10;2,0;2,,4;2,,,,,20;0=0,indirect;beam;tangible;visible,,spark_venus;release_venus;discharge_venus,color;thunder;hammer;invisibility;movement;transposition;release
+discharge,1,-1,40,3;10;2,10;2,0;2,,4;2,,,,,,indirect;beam;tangible;visible,,spark_venus;release_venus;discharge_venus,color;thunder;hammer;invisibility;movement;transposition;release
 lock,1,-1,40,2;10;2,,0;3,0;2,,,,,,,direct;beam;intangible;invisible,active=9,breach_venus;transposition_venus;watcher_venus,transposition;watcher;breach
