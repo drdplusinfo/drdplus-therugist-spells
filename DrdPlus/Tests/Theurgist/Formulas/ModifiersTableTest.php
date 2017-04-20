@@ -676,9 +676,11 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
                 [
                     ModifierCode::getIt(ModifierCode::GATE), // null
                     ModifierCode::getIt(ModifierCode::EXPLOSION), // null
-                    ModifierCode::getIt(ModifierCode::FILTER), // null
-                    ModifierCode::getIt(ModifierCode::THUNDER), // null
-                    ModifierCode::getIt(ModifierCode::INTERACTIVE_ILLUSION), // null
+                    [
+                        ModifierCode::getIt(ModifierCode::FILTER), // null
+                        ModifierCode::getIt(ModifierCode::THUNDER), // null
+                        ModifierCode::getIt(ModifierCode::INTERACTIVE_ILLUSION), // null
+                    ],
                 ],
                 $this->distanceTable
             )
@@ -688,11 +690,15 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
             new IntegerObject(0),
             $modifiersTable->sumEpicenterShiftChange(
                 [
-                    ModifierCode::getIt(ModifierCode::TRANSPOSITION), // 0
-                    ModifierCode::getIt(ModifierCode::EXPLOSION), // null
-                    ModifierCode::getIt(ModifierCode::FILTER), // null
-                    ModifierCode::getIt(ModifierCode::TRANSPOSITION), // 0
-                    ModifierCode::getIt(ModifierCode::TRANSPOSITION), // 0
+                    [ModifierCode::getIt(ModifierCode::TRANSPOSITION), // 0
+                        [ModifierCode::getIt(ModifierCode::EXPLOSION), // null
+                            [ModifierCode::getIt(ModifierCode::FILTER), // null
+                                [ModifierCode::getIt(ModifierCode::TRANSPOSITION), // 0
+                                    [ModifierCode::getIt(ModifierCode::TRANSPOSITION)], // 0
+                                ],
+                            ],
+                        ],
+                    ],
                 ],
                 $this->distanceTable
             )

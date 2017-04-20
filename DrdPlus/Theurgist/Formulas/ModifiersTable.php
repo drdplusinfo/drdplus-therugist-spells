@@ -627,7 +627,7 @@ class ModifiersTable extends AbstractFileTable
     public function sumEpicenterShiftChange(array $modifierCodes, DistanceTable $distanceTable): IntegerObject
     {
         $shiftValues = [];
-        foreach ($modifierCodes as $modifierCode) {
+        foreach ($this->toFlatArray($modifierCodes) as $modifierCode) {
             $shift = $this->getEpicenterShift($modifierCode, $distanceTable);
             if (!$shift) {
                 continue;
