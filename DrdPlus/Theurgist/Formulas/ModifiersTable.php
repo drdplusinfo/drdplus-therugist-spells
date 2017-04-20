@@ -1,6 +1,7 @@
 <?php
 namespace DrdPlus\Theurgist\Formulas;
 
+use DrdPlus\Tables\Measurements\Distance\DistanceBonus;
 use DrdPlus\Tables\Measurements\Distance\DistanceTable;
 use DrdPlus\Tables\Measurements\Time\TimeTable;
 use DrdPlus\Tables\Partials\AbstractFileTable;
@@ -23,6 +24,7 @@ use DrdPlus\Theurgist\Formulas\CastingParameters\Radius;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Realm;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Resistance;
 use DrdPlus\Theurgist\Formulas\CastingParameters\NumberOfSituations;
+use DrdPlus\Theurgist\Formulas\CastingParameters\Shift;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Speed;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Threshold;
@@ -45,6 +47,7 @@ class ModifiersTable extends AbstractFileTable
     const CASTING = 'casting';
     const DIFFICULTY_CHANGE = 'difficulty_change';
     const RADIUS = 'radius';
+    const SHIFT = 'shift';
     const POWER = 'power';
     const ATTACK = 'attack';
     const GRAFTS = 'grafts';
@@ -71,6 +74,7 @@ class ModifiersTable extends AbstractFileTable
             self::CASTING => self::POSITIVE_INTEGER,
             self::DIFFICULTY_CHANGE => self::POSITIVE_INTEGER,
             self::RADIUS => self::ARRAY,
+            self::SHIFT => self::ARRAY,
             self::POWER => self::ARRAY,
             self::ATTACK => self::ARRAY,
             self::GRAFTS => self::ARRAY,
@@ -162,6 +166,23 @@ class ModifiersTable extends AbstractFileTable
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new Radius($radiusValues, $distanceTable);
+    }
+
+    /**
+     * @param ModifierCode $modifierCode
+     * @param DistanceTable $distanceTable
+     * @return Shift|null
+     */
+    public function getShift(ModifierCode $modifierCode, DistanceTable $distanceTable)
+    {
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        $shiftValues = $this->getValue($modifierCode, self::SHIFT);
+        if (!$shiftValues) {
+            return null;
+        }
+
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new Shift($shiftValues, $distanceTable);
     }
 
     /**
@@ -596,5 +617,30 @@ class ModifiersTable extends AbstractFileTable
         }
 
         return new IntegerObject($powerValue);
+    }
+
+    /**
+     * @param array|ModifierCode[] $modifierCodes
+     * @param DistanceTable $distanceTable
+     * @return DistanceBonus
+     */
+    public function sumShift(array $modifierCodes, DistanceTable $distanceTable): DistanceBonus
+    {
+        $shiftValues = [];
+        foreach ($modifierCodes as $modifierCode) {
+            $shift = $this->getShift($modifierCode, $distanceTable);
+            if (!$shift) {
+                continue;
+            }
+            $shiftValues[] = $shift->getValue();
+        }
+
+        if (count($shiftValues) === 0) {
+            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+            return new DistanceBonus(-40, $distanceTable); // lowest possible (0.01 meter)
+        }
+
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new DistanceBonus(array_sum($shiftValues), $distanceTable);
     }
 }

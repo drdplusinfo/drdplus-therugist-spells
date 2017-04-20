@@ -1,6 +1,7 @@
 <?php
 namespace DrdPlus\Tests\Theurgist\Formulas;
 
+use DrdPlus\Tables\Measurements\Distance\DistanceBonus;
 use DrdPlus\Tables\Measurements\Distance\DistanceTable;
 use DrdPlus\Theurgist\Codes\AffectionPeriodCode;
 use DrdPlus\Theurgist\Codes\FormCode;
@@ -60,6 +61,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
          * @see ModifiersTable::getAffection()
          * @see ModifiersTable::getCasting()
          * @see ModifiersTable::getRadius()
+         * @see ModifiersTable::getShift()
          * @see ModifiersTable::getPower()
          * @see ModifiersTable::getAttack()
          * @see ModifiersTable::getGrafts()
@@ -73,7 +75,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
          * @see ModifiersTable::getThreshold()
          */
         $optionalParameters = [
-            'affection', 'casting', 'radius', 'power', 'attack', 'grafts', 'speed', 'points',
+            'affection', 'casting', 'radius', 'shift', 'power', 'attack', 'grafts', 'speed', 'points',
             'invisibility', 'quality', 'conditions', 'resistance', 'number_of_situations', 'threshold',
         ];
         foreach ($optionalParameters as $optionalParameter) {
@@ -653,6 +655,47 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
                     ModifierCode::getIt(ModifierCode::THUNDER), // +10
                     ModifierCode::getIt(ModifierCode::INTERACTIVE_ILLUSION), // -3
                 ]
+            )
+        );
+    }
+
+    /**
+     * @test
+     */
+    public function I_can_get_sum_of_modifiers_shift()
+    {
+        $modifiersTable = new ModifiersTable();
+
+        self::assertEquals(
+            new DistanceBonus(-40, $this->distanceTable),
+            $modifiersTable->sumShift([], $this->distanceTable)
+        );
+
+        self::assertEquals(
+            new DistanceBonus(-40, $this->distanceTable),
+            $modifiersTable->sumShift(
+                [
+                    ModifierCode::getIt(ModifierCode::GATE), // null
+                    ModifierCode::getIt(ModifierCode::EXPLOSION), // null
+                    ModifierCode::getIt(ModifierCode::FILTER), // null
+                    ModifierCode::getIt(ModifierCode::THUNDER), // null
+                    ModifierCode::getIt(ModifierCode::INTERACTIVE_ILLUSION), // null
+                ],
+                $this->distanceTable
+            )
+        );
+
+        self::assertEquals(
+            new DistanceBonus(0, $this->distanceTable),
+            $modifiersTable->sumShift(
+                [
+                    ModifierCode::getIt(ModifierCode::TRANSPOSITION), // 0
+                    ModifierCode::getIt(ModifierCode::EXPLOSION), // null
+                    ModifierCode::getIt(ModifierCode::FILTER), // null
+                    ModifierCode::getIt(ModifierCode::TRANSPOSITION), // 0
+                    ModifierCode::getIt(ModifierCode::TRANSPOSITION), // 0
+                ],
+                $this->distanceTable
             )
         );
     }
