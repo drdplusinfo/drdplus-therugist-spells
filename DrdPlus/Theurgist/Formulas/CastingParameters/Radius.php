@@ -1,15 +1,16 @@
 <?php
 namespace DrdPlus\Theurgist\Formulas\CastingParameters;
 
+use DrdPlus\Tables\Measurements\Distance\Distance;
 use DrdPlus\Tables\Measurements\Distance\DistanceBonus;
 use DrdPlus\Tables\Measurements\Distance\DistanceTable;
 
 class Radius extends IntegerCastingParameter
 {
     /**
-     * @var DistanceBonus
+     * @var Distance
      */
-    private $distanceBonus;
+    private $distance;
 
     /**
      * @param array $values
@@ -24,14 +25,14 @@ class Radius extends IntegerCastingParameter
     {
         parent::__construct($values);
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        $this->distanceBonus = new DistanceBonus($this->getValue(), $distanceTable);
+        $this->distance = (new DistanceBonus($this->getValue(), $distanceTable))->getDistance();
     }
 
     /**
-     * @return DistanceBonus
+     * @return Distance
      */
-    public function getDistanceBonus(): DistanceBonus
+    public function getDistance(): Distance
     {
-        return $this->distanceBonus;
+        return $this->distance;
     }
 }

@@ -1,13 +1,14 @@
 <?php
 namespace DrdPlus\Theurgist\Formulas\CastingParameters;
 
+use DrdPlus\Tables\Measurements\Distance\Distance;
 use DrdPlus\Tables\Measurements\Distance\DistanceBonus;
 use DrdPlus\Tables\Measurements\Distance\DistanceTable;
 
 class EpicenterShift extends IntegerCastingParameter
 {
     /**
-     * @var DistanceBonus
+     * @var Distance
      */
     private $distance;
 
@@ -24,13 +25,13 @@ class EpicenterShift extends IntegerCastingParameter
     {
         parent::__construct($values);
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        $this->distance = new DistanceBonus($this->getValue(), $distanceTable);
+        $this->distance = (new DistanceBonus($this->getValue(), $distanceTable))->getDistance();
     }
 
     /**
-     * @return DistanceBonus
+     * @return Distance
      */
-    public function getDistance(): DistanceBonus
+    public function getDistance(): Distance
     {
         return $this->distance;
     }

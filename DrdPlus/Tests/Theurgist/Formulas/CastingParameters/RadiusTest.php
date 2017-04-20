@@ -21,28 +21,28 @@ class RadiusTest extends TestWithMockery
 
     protected function I_can_create_it_negative()
     {
-        $radius = new Radius(['-456', '4=6'], $distanceTable = new DistanceTable());
-        self::assertSame(-456, $radius->getValue());
-        self::assertEquals(new DistanceBonus(-456, $distanceTable), $radius->getDistanceBonus());
+        $radius = new Radius(['-13', '4=6'], $distanceTable = new DistanceTable());
+        self::assertSame(-13, $radius->getValue());
+        self::assertEquals((new DistanceBonus(-13, $distanceTable))->getDistance(), $radius->getDistance());
         self::assertEquals(new AdditionByRealms('4=6'), $radius->getAdditionByRealms());
-        self::assertSame('-456 (' . $radius->getAdditionByRealms() . ')', (string)$radius);
+        self::assertSame('-13 (' . $radius->getAdditionByRealms() . ')', (string)$radius);
     }
 
     protected function I_can_create_it_with_zero()
     {
         $radius = new Radius(['0', '78=321'], $distanceTable = new DistanceTable());
         self::assertSame(0, $radius->getValue());
-        self::assertEquals(new DistanceBonus(0, $distanceTable), $radius->getDistanceBonus());
+        self::assertEquals((new DistanceBonus(0, $distanceTable))->getDistance(), $radius->getDistance());
         self::assertEquals(new AdditionByRealms('78=321'), $radius->getAdditionByRealms());
         self::assertSame('0 (' . $radius->getAdditionByRealms() . ')', (string)$radius);
     }
 
     protected function I_can_create_it_positive()
     {
-        $radius = new Radius(['35689', '332211'], $distanceTable = new DistanceTable());
-        self::assertSame(35689, $radius->getValue());
-        self::assertEquals(new DistanceBonus(35689, $distanceTable), $radius->getDistanceBonus());
+        $radius = new Radius(['63', '332211'], $distanceTable = new DistanceTable());
+        self::assertSame(63, $radius->getValue());
+        self::assertEquals((new DistanceBonus(63, $distanceTable))->getDistance(), $radius->getDistance());
         self::assertEquals(new AdditionByRealms('332211'), $radius->getAdditionByRealms());
-        self::assertSame('35689 (' . $radius->getAdditionByRealms() . ')', (string)$radius);
+        self::assertSame('63 (' . $radius->getAdditionByRealms() . ')', (string)$radius);
     }
 }

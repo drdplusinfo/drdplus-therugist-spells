@@ -21,28 +21,28 @@ class EpicenterShiftTest extends TestWithMockery
 
     protected function I_can_create_it_negative()
     {
-        $shift = new EpicenterShift(['-456', '4=6'], $distanceTable = new DistanceTable());
-        self::assertSame(-456, $shift->getValue());
-        self::assertEquals(new DistanceBonus(-456, $distanceTable), $shift->getDistance());
+        $shift = new EpicenterShift(['-12', '4=6'], $distanceTable = new DistanceTable());
+        self::assertSame(-12, $shift->getValue());
+        self::assertEquals((new DistanceBonus(-12, $distanceTable))->getDistance(), $shift->getDistance());
         self::assertEquals(new AdditionByRealms('4=6'), $shift->getAdditionByRealms());
-        self::assertSame('-456 (' . $shift->getAdditionByRealms() . ')', (string)$shift);
+        self::assertSame('-12 (' . $shift->getAdditionByRealms() . ')', (string)$shift);
     }
 
     protected function I_can_create_it_with_zero()
     {
         $shift = new EpicenterShift(['0', '78=321'], $distanceTable = new DistanceTable());
         self::assertSame(0, $shift->getValue());
-        self::assertEquals(new DistanceBonus(0, $distanceTable), $shift->getDistance());
+        self::assertEquals((new DistanceBonus(0, $distanceTable))->getDistance(), $shift->getDistance());
         self::assertEquals(new AdditionByRealms('78=321'), $shift->getAdditionByRealms());
         self::assertSame('0 (' . $shift->getAdditionByRealms() . ')', (string)$shift);
     }
 
     protected function I_can_create_it_positive()
     {
-        $shift = new EpicenterShift(['35689', '332211'], $distanceTable = new DistanceTable());
-        self::assertSame(35689, $shift->getValue());
-        self::assertEquals(new DistanceBonus(35689, $distanceTable), $shift->getDistance());
+        $shift = new EpicenterShift(['35', '332211'], $distanceTable = new DistanceTable());
+        self::assertSame(35, $shift->getValue());
+        self::assertEquals((new DistanceBonus(35, $distanceTable))->getDistance(), $shift->getDistance());
         self::assertEquals(new AdditionByRealms('332211'), $shift->getAdditionByRealms());
-        self::assertSame('35689 (' . $shift->getAdditionByRealms() . ')', (string)$shift);
+        self::assertSame('35 (' . $shift->getAdditionByRealms() . ')', (string)$shift);
     }
 }
