@@ -61,10 +61,10 @@ class FormulasTableTest extends AbstractTheurgistTableTest
          * @see FormulasTable::getDetailLevel()
          * @see FormulasTable::getBrightness()
          * @see FormulasTable::getSpeed()
-         * @see FormulasTable::getTransposition()
+         * @see FormulasTable::getEpicenterShift()
          */
         $optionalParameters = [
-            'radius', 'power', 'attack', 'size_change', 'detail_level', 'brightness', 'speed', 'transposition',
+            'radius', 'power', 'attack', 'size_change', 'detail_level', 'brightness', 'speed', 'epicenter_shift',
         ];
         foreach ($optionalParameters as $optionalParameter) {
             $this->I_can_get_optional_parameter($optionalParameter, FormulaCode::class);
@@ -431,7 +431,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
     private function createModifiersTableForDifficulty(array $expectedModifiers, int $difficultyChange, int $highestRequiredReam)
     {
         $modifiersTable = $this->mockery(ModifiersTable::class);
-        $modifiersTable->shouldReceive('sumDifficultyChange')
+        $modifiersTable->shouldReceive('sumDifficultyChanges')
             ->with($expectedModifiers)
             ->andReturn(new IntegerObject($difficultyChange));
         $modifiersTable->shouldReceive('getHighestRequiredRealm')
@@ -735,7 +735,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $modifiersTable = $this->mockery(ModifiersTable::class);
         $modifiersTable->shouldReceive('sumRadii')
             ->with($expectedModifiers, $expectedDistanceTable)
-            ->andReturn(new IntegerObject($sumOfRadii));
+            ->andReturn(new DistanceBonus($sumOfRadii, $expectedDistanceTable));
 
         return $modifiersTable;
     }
@@ -778,10 +778,65 @@ class FormulasTableTest extends AbstractTheurgistTableTest
     private function createModifiersTableForPower(array $expectedModifiers, int $sumOfPower)
     {
         $modifiersTable = $this->mockery(ModifiersTable::class);
-        $modifiersTable->shouldReceive('sumPower')
+        $modifiersTable->shouldReceive('sumPowers')
             ->with($expectedModifiers)
             ->andReturn(new IntegerObject($sumOfPower));
 
         return $modifiersTable;
     }
+
+    /**
+     * @test
+     */
+    public function I_can_get_epicenter_shift_of_modified_formula()
+    {
+        $formulasTable = new FormulasTable();
+        $distanceTable = new DistanceTable();
+        $modifiers = ['foo', 'bar'];
+
+        $epicenterShiftOfLock = $formulasTable->getEpicenterShiftOfModified(
+            FormulaCode::getIt(FormulaCode::LOCK), // no epicenter shift (null)
+            $modifiers,
+            $this->createModifiersTableForEpicenterShift($modifiers, $distanceTable, 132456),
+            $distanceTable
+        );
+        self::assertNull($epicenterShiftOfLock);
+
+        $epicenterShiftOfGreatMassacreWithoutChange = $formulasTable->getEpicenterShiftOfModified(
+            FormulaCode::getIt(FormulaCode::GREAT_MASSACRE), // +20
+            $modifiers,
+            $this->createModifiersTableForEpicenterShift($modifiers, $distanceTable, 0),
+            $distanceTable
+        );
+        self::assertEquals(new DistanceBonus(20, $distanceTable), $epicenterShiftOfGreatMassacreWithoutChange);
+
+        $epicenterShiftOfModifiedEpicenterShift = $formulasTable->getEpicenterShiftOfModified(
+            FormulaCode::getIt(FormulaCode::GREAT_MASSACRE), // +20
+            $modifiers,
+            $this->createModifiersTableForEpicenterShift($modifiers, $distanceTable, 789),
+            $distanceTable
+        );
+        self::assertEquals(new DistanceBonus(809, $distanceTable), $epicenterShiftOfModifiedEpicenterShift);
+    }
+
+    /**
+     * @param array $expectedModifiers
+     * @param int $sumOfShifts
+     * @param DistanceTable $expectedDistanceTable
+     * @return \Mockery\MockInterface|ModifiersTable
+     */
+    private function createModifiersTableForEpicenterShift(
+        array $expectedModifiers,
+        DistanceTable $expectedDistanceTable,
+        int $sumOfShifts
+    )
+    {
+        $modifiersTable = $this->mockery(ModifiersTable::class);
+        $modifiersTable->shouldReceive('sumEpicenterShifts')
+            ->with($expectedModifiers, $expectedDistanceTable)
+            ->andReturn(new DistanceBonus($sumOfShifts, $expectedDistanceTable));
+
+        return $modifiersTable;
+    }
+
 }

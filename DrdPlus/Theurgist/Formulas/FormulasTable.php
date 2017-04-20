@@ -17,13 +17,13 @@ use DrdPlus\Theurgist\Formulas\CastingParameters\Casting;
 use DrdPlus\Theurgist\Formulas\CastingParameters\DetailLevel;
 use DrdPlus\Theurgist\Formulas\CastingParameters\DifficultyLimit;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Duration;
+use DrdPlus\Theurgist\Formulas\CastingParameters\EpicenterShift;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Power;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Radius;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Realm;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SizeChange;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Speed;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
-use DrdPlus\Theurgist\Formulas\CastingParameters\Transposition;
 use Granam\Integer\IntegerObject;
 
 class FormulasTable extends AbstractFileTable
@@ -45,7 +45,7 @@ class FormulasTable extends AbstractFileTable
     const DETAIL_LEVEL = 'detail_level';
     const BRIGHTNESS = 'brightness';
     const SPEED = 'speed';
-    const TRANSPOSITION = 'transposition';
+    const EPICENTER_SHIFT = 'epicenter_shift';
     const FORMS = 'forms';
     const TRAITS = 'traits';
     const PROFILES = 'profiles';
@@ -66,7 +66,7 @@ class FormulasTable extends AbstractFileTable
             self::DETAIL_LEVEL => self::ARRAY,
             self::BRIGHTNESS => self::ARRAY,
             self::SPEED => self::ARRAY,
-            self::TRANSPOSITION => self::ARRAY,
+            self::EPICENTER_SHIFT => self::ARRAY,
             self::FORMS => self::ARRAY,
             self::TRAITS => self::ARRAY,
             self::PROFILES => self::ARRAY,
@@ -252,18 +252,19 @@ class FormulasTable extends AbstractFileTable
 
     /**
      * @param FormulaCode $formulaCode
-     * @return Transposition|null
+     * @param DistanceTable $distanceTable
+     * @return EpicenterShift|null
      */
-    public function getTransposition(FormulaCode $formulaCode)
+    public function getEpicenterShift(FormulaCode $formulaCode, DistanceTable $distanceTable)
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        $transpositionValues = $this->getValue($formulaCode, self::TRANSPOSITION);
-        if (!$transpositionValues) {
+        $epicenterShift = $this->getValue($formulaCode, self::EPICENTER_SHIFT);
+        if (!$epicenterShift) {
             return null;
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new Transposition($transpositionValues);
+        return new EpicenterShift($epicenterShift, $distanceTable);
     }
 
     /**
@@ -352,7 +353,7 @@ class FormulasTable extends AbstractFileTable
     {
         return new IntegerObject(
             $this->getDifficultyLimit($formulaCode)->getMinimal()
-            + $modifiersTable->sumDifficultyChange($modifierCodes)->getValue()
+            + $modifiersTable->sumDifficultyChanges($modifierCodes)->getValue()
         );
     }
 
@@ -483,6 +484,33 @@ class FormulasTable extends AbstractFileTable
             return null;
         }
 
-        return new IntegerObject($formulaPower->getValue() + $modifiersTable->sumPower($modifierCodes)->getValue());
+        return new IntegerObject($formulaPower->getValue() + $modifiersTable->sumPowers($modifierCodes)->getValue());
+    }
+
+    /**
+     * @param FormulaCode $formulaCode
+     * @param array $modifierCodes
+     * @param ModifiersTable $modifiersTable
+     * @param DistanceTable $distanceTable
+     * @return DistanceBonus|null
+     */
+    public function getEpicenterShiftOfModified(
+        FormulaCode $formulaCode,
+        array $modifierCodes,
+        ModifiersTable $modifiersTable,
+        DistanceTable $distanceTable
+    )
+    {
+        $formulaEpicenterShift = $this->getEpicenterShift($formulaCode, $distanceTable);
+        if (!$formulaEpicenterShift) {
+            return null;
+        }
+
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new DistanceBonus(
+            $formulaEpicenterShift->getValue()
+            + $modifiersTable->sumEpicenterShifts($modifierCodes, $distanceTable)->getValue(),
+            $distanceTable
+        );
     }
 }

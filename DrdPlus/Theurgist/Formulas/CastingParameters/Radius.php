@@ -9,7 +9,7 @@ class Radius extends IntegerCastingParameter
     /**
      * @var DistanceBonus
      */
-    private $distance;
+    private $distanceBonus;
 
     /**
      * @param array $values
@@ -24,14 +24,14 @@ class Radius extends IntegerCastingParameter
     {
         parent::__construct($values);
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        $this->distance = new DistanceBonus($this->getValue(), $distanceTable);
+        $this->distanceBonus = new DistanceBonus($this->getValue(), $distanceTable);
     }
 
     /**
      * @return DistanceBonus
      */
-    public function getDistance(): DistanceBonus
+    public function getDistanceBonus(): DistanceBonus
     {
-        return $this->distance;
+        return $this->distanceBonus;
     }
 }

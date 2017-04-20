@@ -24,7 +24,7 @@ use DrdPlus\Theurgist\Formulas\CastingParameters\Radius;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Realm;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Resistance;
 use DrdPlus\Theurgist\Formulas\CastingParameters\NumberOfSituations;
-use DrdPlus\Theurgist\Formulas\CastingParameters\Shift;
+use DrdPlus\Theurgist\Formulas\CastingParameters\EpicenterShift;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Speed;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Threshold;
@@ -47,7 +47,7 @@ class ModifiersTable extends AbstractFileTable
     const CASTING = 'casting';
     const DIFFICULTY_CHANGE = 'difficulty_change';
     const RADIUS = 'radius';
-    const SHIFT = 'shift';
+    const EPICENTER_SHIFT = 'epicenter_shift';
     const POWER = 'power';
     const ATTACK = 'attack';
     const GRAFTS = 'grafts';
@@ -74,7 +74,7 @@ class ModifiersTable extends AbstractFileTable
             self::CASTING => self::POSITIVE_INTEGER,
             self::DIFFICULTY_CHANGE => self::POSITIVE_INTEGER,
             self::RADIUS => self::ARRAY,
-            self::SHIFT => self::ARRAY,
+            self::EPICENTER_SHIFT => self::ARRAY,
             self::POWER => self::ARRAY,
             self::ATTACK => self::ARRAY,
             self::GRAFTS => self::ARRAY,
@@ -171,18 +171,18 @@ class ModifiersTable extends AbstractFileTable
     /**
      * @param ModifierCode $modifierCode
      * @param DistanceTable $distanceTable
-     * @return Shift|null
+     * @return EpicenterShift|null
      */
-    public function getShift(ModifierCode $modifierCode, DistanceTable $distanceTable)
+    public function getEpicenterShift(ModifierCode $modifierCode, DistanceTable $distanceTable)
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        $shiftValues = $this->getValue($modifierCode, self::SHIFT);
+        $shiftValues = $this->getValue($modifierCode, self::EPICENTER_SHIFT);
         if (!$shiftValues) {
             return null;
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new Shift($shiftValues, $distanceTable);
+        return new EpicenterShift($shiftValues, $distanceTable);
     }
 
     /**
@@ -480,7 +480,7 @@ class ModifiersTable extends AbstractFileTable
      * @param array|ModifierCode[] $modifierCodes
      * @return IntegerInterface
      */
-    public function sumDifficultyChange(array $modifierCodes): IntegerInterface
+    public function sumDifficultyChanges(array $modifierCodes): IntegerInterface
     {
         return new IntegerObject(
             array_sum(
@@ -585,9 +585,9 @@ class ModifiersTable extends AbstractFileTable
     /**
      * @param array|ModifierCode[] $modifierCodes
      * @param DistanceTable $distanceTable
-     * @return IntegerObject
+     * @return DistanceBonus
      */
-    public function sumRadii(array $modifierCodes, DistanceTable $distanceTable): IntegerObject
+    public function sumRadii(array $modifierCodes, DistanceTable $distanceTable): DistanceBonus
     {
         $radiusValue = 0;
         foreach ($modifierCodes as $modifierCode) {
@@ -598,14 +598,15 @@ class ModifiersTable extends AbstractFileTable
             $radiusValue += $radius->getValue();
         }
 
-        return new IntegerObject($radiusValue);
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new DistanceBonus($radiusValue, $distanceTable);
     }
 
     /**
      * @param array|ModifierCode[] $modifierCodes
      * @return IntegerObject
      */
-    public function sumPower(array $modifierCodes): IntegerObject
+    public function sumPowers(array $modifierCodes): IntegerObject
     {
         $powerValue = 0;
         foreach ($modifierCodes as $modifierCode) {
@@ -624,11 +625,11 @@ class ModifiersTable extends AbstractFileTable
      * @param DistanceTable $distanceTable
      * @return DistanceBonus
      */
-    public function sumShift(array $modifierCodes, DistanceTable $distanceTable): DistanceBonus
+    public function sumEpicenterShifts(array $modifierCodes, DistanceTable $distanceTable): DistanceBonus
     {
         $shiftValues = [];
         foreach ($modifierCodes as $modifierCode) {
-            $shift = $this->getShift($modifierCode, $distanceTable);
+            $shift = $this->getEpicenterShift($modifierCode, $distanceTable);
             if (!$shift) {
                 continue;
             }

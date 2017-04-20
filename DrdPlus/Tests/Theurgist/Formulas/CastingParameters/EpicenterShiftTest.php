@@ -4,10 +4,10 @@ namespace DrdPlus\Tests\Theurgist\Formulas\CastingParameters;
 use DrdPlus\Tables\Measurements\Distance\DistanceBonus;
 use DrdPlus\Tables\Measurements\Distance\DistanceTable;
 use DrdPlus\Theurgist\Formulas\CastingParameters\AdditionByRealms;
-use DrdPlus\Theurgist\Formulas\CastingParameters\Shift;
+use DrdPlus\Theurgist\Formulas\CastingParameters\EpicenterShift;
 use Granam\Tests\Tools\TestWithMockery;
 
-class ShiftTest extends TestWithMockery
+class EpicenterShiftTest extends TestWithMockery
 {
     /**
      * @test
@@ -21,7 +21,7 @@ class ShiftTest extends TestWithMockery
 
     protected function I_can_create_it_negative()
     {
-        $shift = new Shift(['-456', '4=6'], $distanceTable = new DistanceTable());
+        $shift = new EpicenterShift(['-456', '4=6'], $distanceTable = new DistanceTable());
         self::assertSame(-456, $shift->getValue());
         self::assertEquals(new DistanceBonus(-456, $distanceTable), $shift->getDistance());
         self::assertEquals(new AdditionByRealms('4=6'), $shift->getAdditionByRealms());
@@ -30,7 +30,7 @@ class ShiftTest extends TestWithMockery
 
     protected function I_can_create_it_with_zero()
     {
-        $shift = new Shift(['0', '78=321'], $distanceTable = new DistanceTable());
+        $shift = new EpicenterShift(['0', '78=321'], $distanceTable = new DistanceTable());
         self::assertSame(0, $shift->getValue());
         self::assertEquals(new DistanceBonus(0, $distanceTable), $shift->getDistance());
         self::assertEquals(new AdditionByRealms('78=321'), $shift->getAdditionByRealms());
@@ -39,7 +39,7 @@ class ShiftTest extends TestWithMockery
 
     protected function I_can_create_it_positive()
     {
-        $shift = new Shift(['35689', '332211'], $distanceTable = new DistanceTable());
+        $shift = new EpicenterShift(['35689', '332211'], $distanceTable = new DistanceTable());
         self::assertSame(35689, $shift->getValue());
         self::assertEquals(new DistanceBonus(35689, $distanceTable), $shift->getDistance());
         self::assertEquals(new AdditionByRealms('332211'), $shift->getAdditionByRealms());

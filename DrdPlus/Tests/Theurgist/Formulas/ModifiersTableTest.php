@@ -61,7 +61,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
          * @see ModifiersTable::getAffection()
          * @see ModifiersTable::getCasting()
          * @see ModifiersTable::getRadius()
-         * @see ModifiersTable::getShift()
+         * @see ModifiersTable::getEpicenterShift()
          * @see ModifiersTable::getPower()
          * @see ModifiersTable::getAttack()
          * @see ModifiersTable::getGrafts()
@@ -75,7 +75,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
          * @see ModifiersTable::getThreshold()
          */
         $optionalParameters = [
-            'affection', 'casting', 'radius', 'shift', 'power', 'attack', 'grafts', 'speed', 'points',
+            'affection', 'casting', 'radius', 'epicenter_shift', 'power', 'attack', 'grafts', 'speed', 'points',
             'invisibility', 'quality', 'conditions', 'resistance', 'number_of_situations', 'threshold',
         ];
         foreach ($optionalParameters as $optionalParameter) {
@@ -493,7 +493,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
         $singleModifier = ModifierCode::getIt(ModifierCode::INVISIBILITY);
         $singleModifierSum = $modifiersTable->getDifficultyChange($singleModifier)->getValue();
         self::assertNotEquals(0, $singleModifierSum);
-        $difficultyChangeSum = $modifiersTable->sumDifficultyChange([$singleModifier]);
+        $difficultyChangeSum = $modifiersTable->sumDifficultyChanges([$singleModifier]);
         self::assertInstanceOf(IntegerInterface::class, $difficultyChangeSum);
         self::assertSame($singleModifierSum, $difficultyChangeSum->getValue());
 
@@ -508,7 +508,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
             $flatArraySum += $modifiersTable->getDifficultyChange($modifierCode)->getValue();
         }
         self::assertGreaterThan($singleModifierSum, $flatArraySum);
-        self::assertSame($flatArraySum, $modifiersTable->sumDifficultyChange($flatArray)->getValue());
+        self::assertSame($flatArraySum, $modifiersTable->sumDifficultyChanges($flatArray)->getValue());
 
         $treeArray = $flatArray;
         $treeArraySum = $flatArraySum;
@@ -519,7 +519,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
         $treeArraySum += $modifiersTable->getDifficultyChange(ModifierCode::getIt(ModifierCode::RELEASE))->getValue();
         $treeArraySum += $modifiersTable->getDifficultyChange(ModifierCode::getIt(ModifierCode::THUNDER))->getValue();
         self::assertGreaterThan($flatArraySum, $treeArraySum);
-        self::assertSame($treeArraySum, $modifiersTable->sumDifficultyChange($treeArray)->getValue());
+        self::assertSame($treeArraySum, $modifiersTable->sumDifficultyChanges($treeArray)->getValue());
     }
 
     /**
@@ -620,10 +620,10 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
     {
         $modifiersTable = new ModifiersTable();
 
-        self::assertEquals(new IntegerObject(0), $modifiersTable->sumRadii([], $this->distanceTable));
+        self::assertEquals(new DistanceBonus(0, $this->distanceTable), $modifiersTable->sumRadii([], $this->distanceTable));
 
         self::assertEquals(
-            new IntegerObject(-6),
+            new DistanceBonus(-6, $this->distanceTable),
             $modifiersTable->sumRadii(
                 [
                     ModifierCode::getIt(ModifierCode::GATE), // -6
@@ -643,11 +643,11 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
     {
         $modifiersTable = new ModifiersTable();
 
-        self::assertEquals(new IntegerObject(0), $modifiersTable->sumPower([]));
+        self::assertEquals(new IntegerObject(0), $modifiersTable->sumPowers([]));
 
         self::assertEquals(
             new IntegerObject(13),
-            $modifiersTable->sumPower(
+            $modifiersTable->sumPowers(
                 [
                     ModifierCode::getIt(ModifierCode::GATE), // null
                     ModifierCode::getIt(ModifierCode::EXPLOSION), // +6
@@ -662,18 +662,18 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
     /**
      * @test
      */
-    public function I_can_get_sum_of_modifiers_shift()
+    public function I_can_get_sum_of_modifiers_epicenter_shift()
     {
         $modifiersTable = new ModifiersTable();
 
         self::assertEquals(
             new DistanceBonus(-40, $this->distanceTable),
-            $modifiersTable->sumShift([], $this->distanceTable)
+            $modifiersTable->sumEpicenterShifts([], $this->distanceTable)
         );
 
         self::assertEquals(
             new DistanceBonus(-40, $this->distanceTable),
-            $modifiersTable->sumShift(
+            $modifiersTable->sumEpicenterShifts(
                 [
                     ModifierCode::getIt(ModifierCode::GATE), // null
                     ModifierCode::getIt(ModifierCode::EXPLOSION), // null
@@ -687,7 +687,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
 
         self::assertEquals(
             new DistanceBonus(0, $this->distanceTable),
-            $modifiersTable->sumShift(
+            $modifiersTable->sumEpicenterShifts(
                 [
                     ModifierCode::getIt(ModifierCode::TRANSPOSITION), // 0
                     ModifierCode::getIt(ModifierCode::EXPLOSION), // null

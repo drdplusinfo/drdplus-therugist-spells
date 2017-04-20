@@ -4,7 +4,7 @@ namespace DrdPlus\Theurgist\Formulas\CastingParameters;
 use DrdPlus\Tables\Measurements\Distance\DistanceBonus;
 use DrdPlus\Tables\Measurements\Distance\DistanceTable;
 
-class Shift extends IntegerCastingParameter
+class EpicenterShift extends IntegerCastingParameter
 {
     /**
      * @var DistanceBonus
