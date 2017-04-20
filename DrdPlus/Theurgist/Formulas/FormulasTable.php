@@ -466,7 +466,7 @@ class FormulasTable extends AbstractFileTable
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new DistanceBonus(
-            $formulaRadius->getValue() + $modifiersTable->sumRadii($modifierCodes, $distanceTable)->getValue(),
+            $formulaRadius->getValue() + $modifiersTable->sumRadiusChange($modifierCodes, $distanceTable)->getValue(),
             $distanceTable
         );
     }
@@ -484,7 +484,7 @@ class FormulasTable extends AbstractFileTable
             return null;
         }
 
-        return new IntegerObject($formulaPower->getValue() + $modifiersTable->sumPowers($modifierCodes)->getValue());
+        return new IntegerObject($formulaPower->getValue() + $modifiersTable->sumPowerChange($modifierCodes)->getValue());
     }
 
     /**
@@ -509,7 +509,7 @@ class FormulasTable extends AbstractFileTable
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new DistanceBonus(
             $formulaEpicenterShift->getValue()
-            + $modifiersTable->sumEpicenterShifts($modifierCodes, $distanceTable)->getValue(),
+            + $modifiersTable->sumEpicenterShiftChange($modifierCodes, $distanceTable)->getValue(),
             $distanceTable
         );
     }

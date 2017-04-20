@@ -1,7 +1,6 @@
 <?php
 namespace DrdPlus\Tests\Theurgist\Formulas;
 
-use DrdPlus\Tables\Measurements\Distance\DistanceBonus;
 use DrdPlus\Tables\Measurements\Distance\DistanceTable;
 use DrdPlus\Theurgist\Codes\AffectionPeriodCode;
 use DrdPlus\Theurgist\Codes\FormCode;
@@ -620,11 +619,11 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
     {
         $modifiersTable = new ModifiersTable();
 
-        self::assertEquals(new DistanceBonus(0, $this->distanceTable), $modifiersTable->sumRadii([], $this->distanceTable));
+        self::assertEquals(new IntegerObject(0), $modifiersTable->sumRadiusChange([], $this->distanceTable));
 
         self::assertEquals(
-            new DistanceBonus(-6, $this->distanceTable),
-            $modifiersTable->sumRadii(
+            new IntegerObject(-6),
+            $modifiersTable->sumRadiusChange(
                 [
                     ModifierCode::getIt(ModifierCode::GATE), // -6
                     ModifierCode::getIt(ModifierCode::BREACH), // null
@@ -643,11 +642,11 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
     {
         $modifiersTable = new ModifiersTable();
 
-        self::assertEquals(new IntegerObject(0), $modifiersTable->sumPowers([]));
+        self::assertEquals(new IntegerObject(0), $modifiersTable->sumPowerChange([]));
 
         self::assertEquals(
             new IntegerObject(13),
-            $modifiersTable->sumPowers(
+            $modifiersTable->sumPowerChange(
                 [
                     ModifierCode::getIt(ModifierCode::GATE), // null
                     ModifierCode::getIt(ModifierCode::EXPLOSION), // +6
@@ -667,13 +666,13 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
         $modifiersTable = new ModifiersTable();
 
         self::assertEquals(
-            new DistanceBonus(-40, $this->distanceTable),
-            $modifiersTable->sumEpicenterShifts([], $this->distanceTable)
+            new IntegerObject(0),
+            $modifiersTable->sumEpicenterShiftChange([], $this->distanceTable)
         );
 
         self::assertEquals(
-            new DistanceBonus(-40, $this->distanceTable),
-            $modifiersTable->sumEpicenterShifts(
+            new IntegerObject(0),
+            $modifiersTable->sumEpicenterShiftChange(
                 [
                     ModifierCode::getIt(ModifierCode::GATE), // null
                     ModifierCode::getIt(ModifierCode::EXPLOSION), // null
@@ -686,8 +685,8 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
         );
 
         self::assertEquals(
-            new DistanceBonus(0, $this->distanceTable),
-            $modifiersTable->sumEpicenterShifts(
+            new IntegerObject(0),
+            $modifiersTable->sumEpicenterShiftChange(
                 [
                     ModifierCode::getIt(ModifierCode::TRANSPOSITION), // 0
                     ModifierCode::getIt(ModifierCode::EXPLOSION), // null

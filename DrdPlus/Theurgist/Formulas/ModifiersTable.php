@@ -1,7 +1,6 @@
 <?php
 namespace DrdPlus\Theurgist\Formulas;
 
-use DrdPlus\Tables\Measurements\Distance\DistanceBonus;
 use DrdPlus\Tables\Measurements\Distance\DistanceTable;
 use DrdPlus\Tables\Measurements\Time\TimeTable;
 use DrdPlus\Tables\Partials\AbstractFileTable;
@@ -585,9 +584,9 @@ class ModifiersTable extends AbstractFileTable
     /**
      * @param array|ModifierCode[] $modifierCodes
      * @param DistanceTable $distanceTable
-     * @return DistanceBonus
+     * @return IntegerObject
      */
-    public function sumRadii(array $modifierCodes, DistanceTable $distanceTable): DistanceBonus
+    public function sumRadiusChange(array $modifierCodes, DistanceTable $distanceTable): IntegerObject
     {
         $radiusValue = 0;
         foreach ($modifierCodes as $modifierCode) {
@@ -599,14 +598,14 @@ class ModifiersTable extends AbstractFileTable
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new DistanceBonus($radiusValue, $distanceTable);
+        return new IntegerObject($radiusValue);
     }
 
     /**
      * @param array|ModifierCode[] $modifierCodes
      * @return IntegerObject
      */
-    public function sumPowers(array $modifierCodes): IntegerObject
+    public function sumPowerChange(array $modifierCodes): IntegerObject
     {
         $powerValue = 0;
         foreach ($modifierCodes as $modifierCode) {
@@ -623,9 +622,9 @@ class ModifiersTable extends AbstractFileTable
     /**
      * @param array|ModifierCode[] $modifierCodes
      * @param DistanceTable $distanceTable
-     * @return DistanceBonus
+     * @return IntegerObject
      */
-    public function sumEpicenterShifts(array $modifierCodes, DistanceTable $distanceTable): DistanceBonus
+    public function sumEpicenterShiftChange(array $modifierCodes, DistanceTable $distanceTable): IntegerObject
     {
         $shiftValues = [];
         foreach ($modifierCodes as $modifierCode) {
@@ -636,12 +635,7 @@ class ModifiersTable extends AbstractFileTable
             $shiftValues[] = $shift->getValue();
         }
 
-        if (count($shiftValues) === 0) {
-            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-            return new DistanceBonus(-40, $distanceTable); // lowest possible (0.01 meter)
-        }
-
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new DistanceBonus(array_sum($shiftValues), $distanceTable);
+        return new IntegerObject(array_sum($shiftValues), $distanceTable);
     }
 }

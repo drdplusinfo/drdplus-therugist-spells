@@ -733,9 +733,9 @@ class FormulasTableTest extends AbstractTheurgistTableTest
     )
     {
         $modifiersTable = $this->mockery(ModifiersTable::class);
-        $modifiersTable->shouldReceive('sumRadii')
+        $modifiersTable->shouldReceive('sumRadiusChange')
             ->with($expectedModifiers, $expectedDistanceTable)
-            ->andReturn(new DistanceBonus($sumOfRadii, $expectedDistanceTable));
+            ->andReturn(new IntegerObject($sumOfRadii));
 
         return $modifiersTable;
     }
@@ -778,7 +778,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
     private function createModifiersTableForPower(array $expectedModifiers, int $sumOfPower)
     {
         $modifiersTable = $this->mockery(ModifiersTable::class);
-        $modifiersTable->shouldReceive('sumPowers')
+        $modifiersTable->shouldReceive('sumPowerChange')
             ->with($expectedModifiers)
             ->andReturn(new IntegerObject($sumOfPower));
 
@@ -832,9 +832,9 @@ class FormulasTableTest extends AbstractTheurgistTableTest
     )
     {
         $modifiersTable = $this->mockery(ModifiersTable::class);
-        $modifiersTable->shouldReceive('sumEpicenterShifts')
+        $modifiersTable->shouldReceive('sumEpicenterShiftChange')
             ->with($expectedModifiers, $expectedDistanceTable)
-            ->andReturn(new DistanceBonus($sumOfShifts, $expectedDistanceTable));
+            ->andReturn(new IntegerObject($sumOfShifts));
 
         return $modifiersTable;
     }
