@@ -1,8 +1,8 @@
 {
-  "name": "drd-plus/theurgist-formulas",
+  "name": "drd-plus/theurgist-spells",
   "license": "MIT",
   "type": "project",
-  "description": "Formulas for Drd+ theurgist",
+  "description": "Formulas with modifiers and demons for Drd+ theurgist",
   "autoload": {
     "psr-4": {
       "DrdPlus\\": "DrdPlus/"
