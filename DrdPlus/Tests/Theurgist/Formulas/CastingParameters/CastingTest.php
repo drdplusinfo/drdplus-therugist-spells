@@ -19,13 +19,13 @@ class CastingTest extends TestCase
         self::assertInstanceOf(PositiveInteger::class, $zeroCasting);
         self::assertSame(0, $zeroCasting->getValue());
         self::assertSame('0', (string)$zeroCasting);
-        $zeroCastingTimeBonus = $zeroCasting->getCastingTimeBonus();
-        self::assertEquals(new TimeBonus(0, $timeTable), $zeroCastingTimeBonus);
+        $zeroCastingTime = $zeroCasting->getCastingTime();
+        self::assertEquals((new TimeBonus(0, $timeTable))->getTime(), $zeroCastingTime);
 
         $positiveCasting = new Casting(123, $timeTable);
         self::assertSame(123, $positiveCasting->getValue());
         self::assertSame('123', (string)$positiveCasting);
-        $positiveCastingTimeBonus = $positiveCasting->getCastingTimeBonus();
-        self::assertEquals(new TimeBonus(123, $timeTable), $positiveCastingTimeBonus);
+        $positiveCastingTimeBonus = $positiveCasting->getCastingTime();
+        self::assertEquals((new TimeBonus(123, $timeTable))->getTime(), $positiveCastingTimeBonus);
     }
 }

@@ -60,11 +60,11 @@ class FormulasTableTest extends AbstractTheurgistTableTest
          * @see FormulasTable::getSizeChange()
          * @see FormulasTable::getDetailLevel()
          * @see FormulasTable::getBrightness()
-         * @see FormulasTable::getSpeed()
+         * @see FormulasTable::getSpellSpeed()
          * @see FormulasTable::getEpicenterShift()
          */
         $optionalParameters = [
-            'radius', 'power', 'attack', 'size_change', 'detail_level', 'brightness', 'speed', 'epicenter_shift',
+            'radius', 'power', 'attack', 'size_change', 'detail_level', 'brightness', 'spell_speed', 'epicenter_shift',
         ];
         foreach ($optionalParameters as $optionalParameter) {
             $this->I_can_get_optional_parameter($optionalParameter, FormulaCode::class);

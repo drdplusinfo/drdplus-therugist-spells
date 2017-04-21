@@ -1,6 +1,7 @@
 <?php
 namespace DrdPlus\Theurgist\Formulas\CastingParameters;
 
+use DrdPlus\Tables\Measurements\Time\Time;
 use DrdPlus\Tables\Measurements\Time\TimeBonus;
 use DrdPlus\Tables\Measurements\Time\TimeTable;
 use Granam\Integer\PositiveIntegerObject;
@@ -8,14 +9,15 @@ use Granam\Integer\PositiveIntegerObject;
 class Casting extends PositiveIntegerObject
 {
     /**
-     * @var TimeBonus
+     * @var Time
      */
-    private $castingTimeBonus;
+    private $castingTime;
 
     /**
      * @param $value
      * @param TimeTable $timeTable
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidValueForPositiveCastingParameter
+     * @throws \DrdPlus\Tables\Measurements\Time\Exceptions\CanNotConvertThatBonusToTime
      */
     public function __construct($value, TimeTable $timeTable)
     {
@@ -26,15 +28,16 @@ class Casting extends PositiveIntegerObject
                 'Expected positive integer: ' . $exception->getMessage()
             );
         }
-        $this->castingTimeBonus = new TimeBonus($this->getValue(), $timeTable);
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        $this->castingTime = (new TimeBonus($this->getValue(), $timeTable))->getTime();
     }
 
     /**
-     * @return TimeBonus
+     * @return Time
      */
-    public function getCastingTimeBonus(): TimeBonus
+    public function getCastingTime(): Time
     {
-        return $this->castingTimeBonus;
+        return $this->castingTime;
     }
 
 }

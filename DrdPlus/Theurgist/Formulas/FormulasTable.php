@@ -3,6 +3,8 @@ namespace DrdPlus\Theurgist\Formulas;
 
 use DrdPlus\Tables\Measurements\Distance\DistanceBonus;
 use DrdPlus\Tables\Measurements\Distance\DistanceTable;
+use DrdPlus\Tables\Measurements\Speed\SpeedBonus;
+use DrdPlus\Tables\Measurements\Speed\SpeedTable;
 use DrdPlus\Tables\Measurements\Time\TimeTable;
 use DrdPlus\Tables\Partials\AbstractFileTable;
 use DrdPlus\Tables\Partials\Exceptions\RequiredRowNotFound;
@@ -22,7 +24,7 @@ use DrdPlus\Theurgist\Formulas\CastingParameters\Power;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Radius;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Realm;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SizeChange;
-use DrdPlus\Theurgist\Formulas\CastingParameters\Speed;
+use DrdPlus\Theurgist\Formulas\CastingParameters\SpellSpeed;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
 use Granam\Integer\IntegerObject;
 
@@ -44,7 +46,7 @@ class FormulasTable extends AbstractFileTable
     const SIZE_CHANGE = 'size_change';
     const DETAIL_LEVEL = 'detail_level';
     const BRIGHTNESS = 'brightness';
-    const SPEED = 'speed';
+    const SPELL_SPEED = 'spell_speed';
     const EPICENTER_SHIFT = 'epicenter_shift';
     const FORMS = 'forms';
     const TRAITS = 'traits';
@@ -65,7 +67,7 @@ class FormulasTable extends AbstractFileTable
             self::SIZE_CHANGE => self::ARRAY,
             self::DETAIL_LEVEL => self::ARRAY,
             self::BRIGHTNESS => self::ARRAY,
-            self::SPEED => self::ARRAY,
+            self::SPELL_SPEED => self::ARRAY,
             self::EPICENTER_SHIFT => self::ARRAY,
             self::FORMS => self::ARRAY,
             self::TRAITS => self::ARRAY,
@@ -236,18 +238,19 @@ class FormulasTable extends AbstractFileTable
 
     /**
      * @param FormulaCode $formulaCode
-     * @return Speed|null
+     * @param SpeedTable $speedTable
+     * @return SpellSpeed|null
      */
-    public function getSpeed(FormulaCode $formulaCode)
+    public function getSpellSpeed(FormulaCode $formulaCode, SpeedTable $speedTable)
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        $speedValues = $this->getValue($formulaCode, self::SPEED);
+        $speedValues = $this->getValue($formulaCode, self::SPELL_SPEED);
         if (!$speedValues) {
             return null;
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new Speed($speedValues);
+        return new SpellSpeed($speedValues, $speedTable);
     }
 
     /**
@@ -511,6 +514,33 @@ class FormulasTable extends AbstractFileTable
             $formulaEpicenterShift->getValue()
             + $modifiersTable->sumEpicenterShiftChange($modifierCodes, $distanceTable)->getValue(),
             $distanceTable
+        );
+    }
+
+    /**
+     * @param FormulaCode $formulaCode
+     * @param array $modifierCodes
+     * @param ModifiersTable $modifiersTable
+     * @param SpeedTable $speedTable
+     * @return SpeedBonus|null
+     */
+    public function getSpeedOfModified(
+        FormulaCode $formulaCode,
+        array $modifierCodes,
+        ModifiersTable $modifiersTable,
+        SpeedTable $speedTable
+    )
+    {
+        $formulaSpeed = $this->getSpellSpeed($formulaCode, $speedTable);
+        if (!$formulaSpeed) {
+            return null;
+        }
+
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new SpeedBonus(
+            $formulaSpeed->getValue()
+            + $modifiersTable->sumSpeedChange($modifierCodes, $speedTable)->getValue(),
+            $speedTable
         );
     }
 }

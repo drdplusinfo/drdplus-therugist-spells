@@ -2,6 +2,7 @@
 namespace DrdPlus\Theurgist\Formulas;
 
 use DrdPlus\Tables\Measurements\Distance\DistanceTable;
+use DrdPlus\Tables\Measurements\Speed\SpeedTable;
 use DrdPlus\Tables\Measurements\Time\TimeTable;
 use DrdPlus\Tables\Partials\AbstractFileTable;
 use DrdPlus\Tables\Partials\Exceptions\RequiredRowNotFound;
@@ -24,7 +25,7 @@ use DrdPlus\Theurgist\Formulas\CastingParameters\Realm;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Resistance;
 use DrdPlus\Theurgist\Formulas\CastingParameters\NumberOfSituations;
 use DrdPlus\Theurgist\Formulas\CastingParameters\EpicenterShift;
-use DrdPlus\Theurgist\Formulas\CastingParameters\Speed;
+use DrdPlus\Theurgist\Formulas\CastingParameters\SpellSpeed;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Threshold;
 use Granam\Integer\IntegerInterface;
@@ -50,7 +51,7 @@ class ModifiersTable extends AbstractFileTable
     const POWER = 'power';
     const ATTACK = 'attack';
     const GRAFTS = 'grafts';
-    const SPEED = 'speed';
+    const SPELL_SPEED = 'spell_speed';
     const POINTS = 'points';
     const INVISIBILITY = 'invisibility';
     const QUALITY = 'quality';
@@ -77,7 +78,7 @@ class ModifiersTable extends AbstractFileTable
             self::POWER => self::ARRAY,
             self::ATTACK => self::ARRAY,
             self::GRAFTS => self::ARRAY,
-            self::SPEED => self::ARRAY,
+            self::SPELL_SPEED => self::ARRAY,
             self::POINTS => self::ARRAY,
             self::INVISIBILITY => self::ARRAY,
             self::QUALITY => self::ARRAY,
@@ -234,18 +235,19 @@ class ModifiersTable extends AbstractFileTable
 
     /**
      * @param ModifierCode $modifierCode
-     * @return Speed|null
+     * @param SpeedTable $speedTable
+     * @return SpellSpeed|null
      */
-    public function getSpeed(ModifierCode $modifierCode)
+    public function getSpellSpeed(ModifierCode $modifierCode, SpeedTable $speedTable)
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        $speedValues = $this->getValue($modifierCode, self::SPEED);
+        $speedValues = $this->getValue($modifierCode, self::SPELL_SPEED);
         if (!$speedValues) {
             return null;
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new Speed($speedValues);
+        return new SpellSpeed($speedValues, $speedTable);
     }
 
     /**
@@ -636,6 +638,26 @@ class ModifiersTable extends AbstractFileTable
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new IntegerObject(array_sum($shiftValues), $distanceTable);
+        return new IntegerObject(array_sum($shiftValues));
+    }
+
+    /**
+     * @param array|ModifierCode[] $modifierCodes
+     * @param SpeedTable $speedTable
+     * @return IntegerObject
+     */
+    public function sumSpeedChange(array $modifierCodes, SpeedTable $speedTable): IntegerObject
+    {
+        $speedValues = [];
+        foreach ($this->toFlatArray($modifierCodes) as $modifierCode) {
+            $speed = $this->getSpellSpeed($modifierCode, $speedTable);
+            if (!$speed) {
+                continue;
+            }
+            $speedValues[] = $speed->getValue();
+        }
+
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new IntegerObject(array_sum($speedValues));
     }
 }
