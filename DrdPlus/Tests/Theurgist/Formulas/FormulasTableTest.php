@@ -3,6 +3,8 @@ namespace DrdPlus\Tests\Theurgist\Formulas;
 
 use DrdPlus\Tables\Measurements\Distance\DistanceBonus;
 use DrdPlus\Tables\Measurements\Distance\DistanceTable;
+use DrdPlus\Tables\Measurements\Speed\SpeedBonus;
+use DrdPlus\Tables\Measurements\Speed\SpeedTable;
 use DrdPlus\Theurgist\Codes\AffectionPeriodCode;
 use DrdPlus\Theurgist\Codes\FormCode;
 use DrdPlus\Theurgist\Codes\FormulaCode;
@@ -835,6 +837,60 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $modifiersTable->shouldReceive('sumEpicenterShiftChange')
             ->with($expectedModifiers, $expectedDistanceTable)
             ->andReturn(new IntegerObject($sumOfShifts));
+
+        return $modifiersTable;
+    }
+
+    /**
+     * @test
+     */
+    public function I_can_get_spell_speed_of_modified_formula()
+    {
+        $formulasTable = new FormulasTable();
+        $speedTable = new SpeedTable();
+        $modifiers = ['foo', 'bar'];
+
+        $spellSpeedOfLock = $formulasTable->getSpellSpeedOfModified(
+            FormulaCode::getIt(FormulaCode::LOCK), // no spell speed (null)
+            $modifiers,
+            $this->createModifiersTableForSpellSpeed($modifiers, $speedTable, 132456),
+            $speedTable
+        );
+        self::assertNull($spellSpeedOfLock);
+
+        $epicenterShiftOfTsunamiWithoutChange = $formulasTable->getSpellSpeedOfModified(
+            FormulaCode::getIt(FormulaCode::TSUNAMI_FROM_CLAY_AND_STONES), // +0
+            $modifiers,
+            $this->createModifiersTableForSpellSpeed($modifiers, $speedTable, 0),
+            $speedTable
+        );
+        self::assertEquals(new SpeedBonus(0, $speedTable), $epicenterShiftOfTsunamiWithoutChange);
+
+        $epicenterShiftOfModifiedSpellSpeed = $formulasTable->getSpellSpeedOfModified(
+            FormulaCode::getIt(FormulaCode::TSUNAMI_FROM_CLAY_AND_STONES), // +0
+            $modifiers,
+            $this->createModifiersTableForSpellSpeed($modifiers, $speedTable, 789),
+            $speedTable
+        );
+        self::assertEquals(new SpeedBonus(789, $speedTable), $epicenterShiftOfModifiedSpellSpeed);
+    }
+
+    /**
+     * @param array $expectedModifiers
+     * @param int $sumOfSpeedChange
+     * @param SpeedTable $expectedSpeedTable
+     * @return \Mockery\MockInterface|ModifiersTable
+     */
+    private function createModifiersTableForSpellSpeed(
+        array $expectedModifiers,
+        SpeedTable $expectedSpeedTable,
+        int $sumOfSpeedChange
+    )
+    {
+        $modifiersTable = $this->mockery(ModifiersTable::class);
+        $modifiersTable->shouldReceive('sumSpellSpeedChange')
+            ->with($expectedModifiers, $expectedSpeedTable)
+            ->andReturn(new IntegerObject($sumOfSpeedChange));
 
         return $modifiersTable;
     }

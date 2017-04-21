@@ -524,7 +524,7 @@ class FormulasTable extends AbstractFileTable
      * @param SpeedTable $speedTable
      * @return SpeedBonus|null
      */
-    public function getSpeedOfModified(
+    public function getSpellSpeedOfModified(
         FormulaCode $formulaCode,
         array $modifierCodes,
         ModifiersTable $modifiersTable,
@@ -539,7 +539,7 @@ class FormulasTable extends AbstractFileTable
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new SpeedBonus(
             $formulaSpeed->getValue()
-            + $modifiersTable->sumSpeedChange($modifierCodes, $speedTable)->getValue(),
+            + $modifiersTable->sumSpellSpeedChange($modifierCodes, $speedTable)->getValue(),
             $speedTable
         );
     }

@@ -2,6 +2,7 @@
 namespace DrdPlus\Tests\Theurgist\Formulas;
 
 use DrdPlus\Tables\Measurements\Distance\DistanceTable;
+use DrdPlus\Tables\Measurements\Speed\SpeedTable;
 use DrdPlus\Theurgist\Codes\AffectionPeriodCode;
 use DrdPlus\Theurgist\Codes\FormCode;
 use DrdPlus\Theurgist\Codes\FormulaCode;
@@ -32,12 +33,17 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
      * @var DistanceTable
      */
     private $distanceTable;
+    /**
+     * @var SpeedTable
+     */
+    private $speedTable;
 
     protected function setUp()
     {
         $this->formulasTable = new FormulasTable();
         $this->profilesTable = new ProfilesTable();
         $this->distanceTable = new DistanceTable();
+        $this->speedTable = new SpeedTable();
     }
 
     /**
@@ -615,7 +621,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
     /**
      * @test
      */
-    public function I_can_get_sum_of_modifiers_radius()
+    public function I_can_get_sum_of_modifiers_radius_change()
     {
         $modifiersTable = new ModifiersTable();
 
@@ -638,7 +644,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
     /**
      * @test
      */
-    public function I_can_get_sum_of_modifiers_power()
+    public function I_can_get_sum_of_modifiers_power_change()
     {
         $modifiersTable = new ModifiersTable();
 
@@ -661,7 +667,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
     /**
      * @test
      */
-    public function I_can_get_sum_of_modifiers_epicenter_shift()
+    public function I_can_get_sum_of_modifiers_epicenter_shift_change()
     {
         $modifiersTable = new ModifiersTable();
 
@@ -701,6 +707,51 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
                     ],
                 ],
                 $this->distanceTable
+            )
+        );
+    }
+
+    /**
+     * @test
+     */
+    public function I_can_get_sum_of_modifiers_speed_change()
+    {
+        $modifiersTable = new ModifiersTable();
+
+        self::assertEquals(
+            new IntegerObject(0),
+            $modifiersTable->sumSpellSpeedChange([], $this->speedTable)
+        );
+
+        self::assertEquals(
+            new IntegerObject(0),
+            $modifiersTable->sumSpellSpeedChange(
+                [
+                    ModifierCode::getIt(ModifierCode::GATE), // null
+                    ModifierCode::getIt(ModifierCode::EXPLOSION), // null
+                    [
+                        ModifierCode::getIt(ModifierCode::FILTER), // null
+                        ModifierCode::getIt(ModifierCode::THUNDER), // null
+                        ModifierCode::getIt(ModifierCode::INTERACTIVE_ILLUSION), // null
+                    ],
+                ],
+                $this->speedTable
+            )
+        );
+
+        self::assertEquals(
+            new IntegerObject(0),
+            $modifiersTable->sumSpellSpeedChange(
+                [
+                    [ModifierCode::getIt(ModifierCode::TRANSPOSITION), // null
+                        [ModifierCode::getIt(ModifierCode::EXPLOSION), // null
+                            [ModifierCode::getIt(ModifierCode::FILTER), // null
+                                [ModifierCode::getIt(ModifierCode::MOVEMENT)], // 0
+                            ],
+                        ],
+                    ],
+                ],
+                $this->speedTable
             )
         );
     }

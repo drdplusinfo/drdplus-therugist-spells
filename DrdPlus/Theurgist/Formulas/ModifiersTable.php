@@ -646,7 +646,7 @@ class ModifiersTable extends AbstractFileTable
      * @param SpeedTable $speedTable
      * @return IntegerObject
      */
-    public function sumSpeedChange(array $modifierCodes, SpeedTable $speedTable): IntegerObject
+    public function sumSpellSpeedChange(array $modifierCodes, SpeedTable $speedTable): IntegerObject
     {
         $speedValues = [];
         foreach ($this->toFlatArray($modifierCodes) as $modifierCode) {
