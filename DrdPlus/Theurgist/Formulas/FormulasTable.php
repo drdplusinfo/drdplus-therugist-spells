@@ -491,6 +491,8 @@ class FormulasTable extends AbstractFileTable
     }
 
     /**
+     * Transposition can shift epicenter.
+     *
      * @param FormulaCode $formulaCode
      * @param array $modifierCodes
      * @param ModifiersTable $modifiersTable
@@ -506,12 +508,17 @@ class FormulasTable extends AbstractFileTable
     {
         $formulaEpicenterShift = $this->getEpicenterShift($formulaCode, $distanceTable);
         if (!$formulaEpicenterShift) {
-            return null;
+            $formulaEpicenterShiftValue = 0;
+            if (!$modifiersTable->epicenterShifted($modifierCodes, $distanceTable)) {
+                return null; // no shift at all
+            }
+        } else {
+            $formulaEpicenterShiftValue = $formulaEpicenterShift->getValue();
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new DistanceBonus(
-            $formulaEpicenterShift->getValue()
+            $formulaEpicenterShiftValue
             + $modifiersTable->sumEpicenterShiftChange($modifierCodes, $distanceTable)->getValue(),
             $distanceTable
         );

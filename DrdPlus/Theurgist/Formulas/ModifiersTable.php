@@ -622,6 +622,27 @@ class ModifiersTable extends AbstractFileTable
     }
 
     /**
+     * Transposition can shift epicenter.
+     *
+     * @param array|ModifierCode[] $modifierCodes
+     * @param DistanceTable $distanceTable
+     * @return bool
+     */
+    public function epicenterShifted(array $modifierCodes, DistanceTable $distanceTable): bool
+    {
+        foreach ($this->toFlatArray($modifierCodes) as $modifierCode) {
+            $shift = $this->getEpicenterShift($modifierCode, $distanceTable);
+            if ($shift) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Transposition can shift epicenter.
+     *
      * @param array|ModifierCode[] $modifierCodes
      * @param DistanceTable $distanceTable
      * @return IntegerObject

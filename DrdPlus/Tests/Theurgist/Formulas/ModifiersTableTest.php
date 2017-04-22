@@ -667,6 +667,48 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
     /**
      * @test
      */
+    public function I_can_detect_if_epicenter_has_been_shifted_by_modifiers()
+    {
+        $modifiersTable = new ModifiersTable();
+
+        self::assertFalse($modifiersTable->epicenterShifted([], $this->distanceTable));
+
+        self::assertFalse(
+            $modifiersTable->epicenterShifted(
+                [
+                    ModifierCode::getIt(ModifierCode::GATE), // null
+                    ModifierCode::getIt(ModifierCode::EXPLOSION), // null
+                    [
+                        ModifierCode::getIt(ModifierCode::FILTER), // null
+                        ModifierCode::getIt(ModifierCode::THUNDER), // null
+                        ModifierCode::getIt(ModifierCode::INTERACTIVE_ILLUSION), // null
+                    ],
+                ],
+                $this->distanceTable
+            )
+        );
+
+        self::assertTrue(
+            $modifiersTable->epicenterShifted(
+                [
+                    [ModifierCode::getIt(ModifierCode::THUNDER), // null
+                        [ModifierCode::getIt(ModifierCode::EXPLOSION), // null
+                            [ModifierCode::getIt(ModifierCode::FILTER), // null
+                                [ModifierCode::getIt(ModifierCode::TRANSPOSITION), // 0
+                                    [ModifierCode::getIt(ModifierCode::BREACH)], // null
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                $this->distanceTable
+            )
+        );
+    }
+
+    /**
+     * @test
+     */
     public function I_can_get_sum_of_modifiers_epicenter_shift_change()
     {
         $modifiersTable = new ModifiersTable();

@@ -796,18 +796,26 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $distanceTable = new DistanceTable();
         $modifiers = ['foo', 'bar'];
 
-        $epicenterShiftOfLock = $formulasTable->getEpicenterShiftOfModified(
+        $epicenterShiftOfNotShiftedLock = $formulasTable->getEpicenterShiftOfModified(
             FormulaCode::getIt(FormulaCode::LOCK), // no epicenter shift (null)
             $modifiers,
-            $this->createModifiersTableForEpicenterShift($modifiers, $distanceTable, 132456),
+            $this->createModifiersTableForEpicenterShift($modifiers, $distanceTable, false /* not shifted */, 123456),
             $distanceTable
         );
-        self::assertNull($epicenterShiftOfLock);
+        self::assertNull($epicenterShiftOfNotShiftedLock);
+
+        $epicenterShiftOfShiftedLock = $formulasTable->getEpicenterShiftOfModified(
+            FormulaCode::getIt(FormulaCode::LOCK), // no epicenter shift (null)
+            $modifiers,
+            $this->createModifiersTableForEpicenterShift($modifiers, $distanceTable, true /* shifted */, 123456),
+            $distanceTable
+        );
+        self::assertEquals(new DistanceBonus(123456, $distanceTable), $epicenterShiftOfShiftedLock);
 
         $epicenterShiftOfGreatMassacreWithoutChange = $formulasTable->getEpicenterShiftOfModified(
             FormulaCode::getIt(FormulaCode::GREAT_MASSACRE), // +20
             $modifiers,
-            $this->createModifiersTableForEpicenterShift($modifiers, $distanceTable, 0),
+            $this->createModifiersTableForEpicenterShift($modifiers, $distanceTable, true /* shifted */, 0),
             $distanceTable
         );
         self::assertEquals(new DistanceBonus(20, $distanceTable), $epicenterShiftOfGreatMassacreWithoutChange);
@@ -815,7 +823,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $epicenterShiftOfModifiedEpicenterShift = $formulasTable->getEpicenterShiftOfModified(
             FormulaCode::getIt(FormulaCode::GREAT_MASSACRE), // +20
             $modifiers,
-            $this->createModifiersTableForEpicenterShift($modifiers, $distanceTable, 789),
+            $this->createModifiersTableForEpicenterShift($modifiers, $distanceTable, true /* shifted */, 789),
             $distanceTable
         );
         self::assertEquals(new DistanceBonus(809, $distanceTable), $epicenterShiftOfModifiedEpicenterShift);
@@ -825,11 +833,13 @@ class FormulasTableTest extends AbstractTheurgistTableTest
      * @param array $expectedModifiers
      * @param int $sumOfShifts
      * @param DistanceTable $expectedDistanceTable
+     * @param bool $epicenterShifted
      * @return \Mockery\MockInterface|ModifiersTable
      */
     private function createModifiersTableForEpicenterShift(
         array $expectedModifiers,
         DistanceTable $expectedDistanceTable,
+        bool $epicenterShifted,
         int $sumOfShifts
     )
     {
@@ -837,6 +847,8 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $modifiersTable->shouldReceive('sumEpicenterShiftChange')
             ->with($expectedModifiers, $expectedDistanceTable)
             ->andReturn(new IntegerObject($sumOfShifts));
+        $modifiersTable->shouldReceive('epicenterShifted')
+            ->andReturn($epicenterShifted);
 
         return $modifiersTable;
     }
