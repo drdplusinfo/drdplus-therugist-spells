@@ -649,17 +649,17 @@ class ModifiersTable extends AbstractFileTable
      */
     public function sumEpicenterShiftChange(array $modifierCodes, DistanceTable $distanceTable): IntegerObject
     {
-        $shiftValues = [];
+        $shiftSum = 0;
         foreach ($this->toFlatArray($modifierCodes) as $modifierCode) {
             $shift = $this->getEpicenterShift($modifierCode, $distanceTable);
             if (!$shift) {
                 continue;
             }
-            $shiftValues[] = $shift->getValue();
+            $shiftSum += $shift->getValue();
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new IntegerObject(array_sum($shiftValues));
+        return new IntegerObject($shiftSum);
     }
 
     /**
@@ -669,16 +669,35 @@ class ModifiersTable extends AbstractFileTable
      */
     public function sumSpellSpeedChange(array $modifierCodes, SpeedTable $speedTable): IntegerObject
     {
-        $speedValues = [];
+        $speedSum = 0;
         foreach ($this->toFlatArray($modifierCodes) as $modifierCode) {
             $speed = $this->getSpellSpeed($modifierCode, $speedTable);
             if (!$speed) {
                 continue;
             }
-            $speedValues[] = $speed->getValue();
+            $speedSum += $speed->getValue();
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new IntegerObject(array_sum($speedValues));
+        return new IntegerObject($speedSum);
+    }
+
+    /**
+     * @param array|ModifierCode[] $modifierCodes
+     * @return IntegerObject
+     */
+    public function sumAttackChange(array $modifierCodes): IntegerObject
+    {
+        $attackSum = 0;
+        foreach ($this->toFlatArray($modifierCodes) as $modifierCode) {
+            $attack = $this->getAttack($modifierCode);
+            if (!$attack) {
+                continue;
+            }
+            $attackSum += $attack->getValue();
+        }
+
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new IntegerObject($attackSum);
     }
 }

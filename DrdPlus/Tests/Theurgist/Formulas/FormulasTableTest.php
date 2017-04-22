@@ -820,13 +820,13 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         );
         self::assertEquals(new DistanceBonus(20, $distanceTable), $epicenterShiftOfGreatMassacreWithoutChange);
 
-        $epicenterShiftOfModifiedEpicenterShift = $formulasTable->getEpicenterShiftOfModified(
+        $epicenterShiftOfModifiedGreatMassacre = $formulasTable->getEpicenterShiftOfModified(
             FormulaCode::getIt(FormulaCode::GREAT_MASSACRE), // +20
             $modifiers,
             $this->createModifiersTableForEpicenterShift($modifiers, $distanceTable, true /* shifted */, 789),
             $distanceTable
         );
-        self::assertEquals(new DistanceBonus(809, $distanceTable), $epicenterShiftOfModifiedEpicenterShift);
+        self::assertEquals(new DistanceBonus(809, $distanceTable), $epicenterShiftOfModifiedGreatMassacre);
     }
 
     /**
@@ -870,21 +870,21 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         );
         self::assertNull($spellSpeedOfLock);
 
-        $epicenterShiftOfTsunamiWithoutChange = $formulasTable->getSpellSpeedOfModified(
+        $spellSpeedOfTsunamiWithoutChange = $formulasTable->getSpellSpeedOfModified(
             FormulaCode::getIt(FormulaCode::TSUNAMI_FROM_CLAY_AND_STONES), // +0
             $modifiers,
             $this->createModifiersTableForSpellSpeed($modifiers, $speedTable, 0),
             $speedTable
         );
-        self::assertEquals(new SpeedBonus(0, $speedTable), $epicenterShiftOfTsunamiWithoutChange);
+        self::assertEquals(new SpeedBonus(0, $speedTable), $spellSpeedOfTsunamiWithoutChange);
 
-        $epicenterShiftOfModifiedSpellSpeed = $formulasTable->getSpellSpeedOfModified(
+        $spellSpeedOfModifiedTsunami = $formulasTable->getSpellSpeedOfModified(
             FormulaCode::getIt(FormulaCode::TSUNAMI_FROM_CLAY_AND_STONES), // +0
             $modifiers,
             $this->createModifiersTableForSpellSpeed($modifiers, $speedTable, 789),
             $speedTable
         );
-        self::assertEquals(new SpeedBonus(789, $speedTable), $epicenterShiftOfModifiedSpellSpeed);
+        self::assertEquals(new SpeedBonus(789, $speedTable), $spellSpeedOfModifiedTsunami);
     }
 
     /**
@@ -902,6 +902,51 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $modifiersTable = $this->mockery(ModifiersTable::class);
         $modifiersTable->shouldReceive('sumSpellSpeedChange')
             ->with($expectedModifiers, $expectedSpeedTable)
+            ->andReturn(new IntegerObject($sumOfSpeedChange));
+
+        return $modifiersTable;
+    }
+
+    /**
+     * @test
+     */
+    public function I_can_get_attack_of_modified_formula()
+    {
+        $formulasTable = new FormulasTable();
+        $modifiers = ['foo', 'bar'];
+
+        $attackOfLock = $formulasTable->getAttackOfModified(
+            FormulaCode::getIt(FormulaCode::LOCK), // no spell speed (null)
+            $modifiers,
+            $this->createModifiersTableForAttack($modifiers, 132456)
+        );
+        self::assertNull($attackOfLock);
+
+        $attackOfDischargeWithoutChange = $formulasTable->getAttackOfModified(
+            FormulaCode::getIt(FormulaCode::DISCHARGE), // +4
+            $modifiers,
+            $this->createModifiersTableForAttack($modifiers, 0)
+        );
+        self::assertEquals(new IntegerObject(4), $attackOfDischargeWithoutChange);
+
+        $attackOfModifiedDischarge = $formulasTable->getAttackOfModified(
+            FormulaCode::getIt(FormulaCode::DISCHARGE), // +0
+            $modifiers,
+            $this->createModifiersTableForAttack($modifiers, 789)
+        );
+        self::assertEquals(new IntegerObject(793), $attackOfModifiedDischarge);
+    }
+
+    /**
+     * @param array $expectedModifiers
+     * @param int $sumOfSpeedChange
+     * @return \Mockery\MockInterface|ModifiersTable
+     */
+    private function createModifiersTableForAttack(array $expectedModifiers, int $sumOfSpeedChange)
+    {
+        $modifiersTable = $this->mockery(ModifiersTable::class);
+        $modifiersTable->shouldReceive('sumAttackChange')
+            ->with($expectedModifiers)
             ->andReturn(new IntegerObject($sumOfSpeedChange));
 
         return $modifiersTable;

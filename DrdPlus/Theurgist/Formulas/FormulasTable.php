@@ -550,4 +550,28 @@ class FormulasTable extends AbstractFileTable
             $speedTable
         );
     }
+
+    /**
+     * @param FormulaCode $formulaCode
+     * @param array $modifierCodes
+     * @param ModifiersTable $modifiersTable
+     * @return IntegerObject|null
+     */
+    public function getAttackOfModified(
+        FormulaCode $formulaCode,
+        array $modifierCodes,
+        ModifiersTable $modifiersTable
+    )
+    {
+        $formulaAttack = $this->getAttack($formulaCode);
+        if (!$formulaAttack) {
+            return null;
+        }
+
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new IntegerObject(
+            $formulaAttack->getValue()
+            + $modifiersTable->sumAttackChange($modifierCodes)->getValue()
+        );
+    }
 }

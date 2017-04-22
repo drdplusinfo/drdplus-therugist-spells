@@ -798,4 +798,48 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
         );
     }
 
+    /**
+     * @test
+     */
+    public function I_can_get_sum_of_modifiers_attack_change()
+    {
+        $modifiersTable = new ModifiersTable();
+
+        self::assertEquals(new IntegerObject(0), $modifiersTable->sumAttackChange([]));
+
+        self::assertEquals(
+            new IntegerObject(0),
+            $modifiersTable->sumAttackChange(
+                [
+                    ModifierCode::getIt(ModifierCode::GATE), // null
+                    ModifierCode::getIt(ModifierCode::EXPLOSION), // null
+                    [
+                        ModifierCode::getIt(ModifierCode::FILTER), // null
+                        ModifierCode::getIt(ModifierCode::THUNDER), // null
+                        ModifierCode::getIt(ModifierCode::INTERACTIVE_ILLUSION), // null
+                    ],
+                ]
+            )
+        );
+
+        self::assertEquals(
+            new IntegerObject(8),
+            $modifiersTable->sumAttackChange(
+                [
+                    [ModifierCode::getIt(ModifierCode::MOVEMENT), // null
+                        [ModifierCode::getIt(ModifierCode::EXPLOSION), // null
+                            [ModifierCode::getIt(ModifierCode::FILTER), // null
+                                [ModifierCode::getIt(ModifierCode::TRANSPOSITION)], // +4
+                                [
+                                    ModifierCode::getIt(ModifierCode::INTERACTIVE_ILLUSION), // null
+                                    ModifierCode::getIt(ModifierCode::TRANSPOSITION), // +4
+                                ],
+                            ],
+                        ],
+                    ],
+                ]
+            )
+        );
+    }
+
 }
