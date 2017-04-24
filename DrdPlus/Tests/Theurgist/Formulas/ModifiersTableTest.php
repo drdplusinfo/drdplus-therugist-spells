@@ -671,10 +671,10 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
     {
         $modifiersTable = new ModifiersTable();
 
-        self::assertFalse($modifiersTable->epicenterShifted([], $this->distanceTable));
+        self::assertFalse($modifiersTable->isEpicenterShifted([], $this->distanceTable));
 
         self::assertFalse(
-            $modifiersTable->epicenterShifted(
+            $modifiersTable->isEpicenterShifted(
                 [
                     ModifierCode::getIt(ModifierCode::GATE), // null
                     ModifierCode::getIt(ModifierCode::EXPLOSION), // null
@@ -689,7 +689,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
         );
 
         self::assertTrue(
-            $modifiersTable->epicenterShifted(
+            $modifiersTable->isEpicenterShifted(
                 [
                     [ModifierCode::getIt(ModifierCode::THUNDER), // null
                         [ModifierCode::getIt(ModifierCode::EXPLOSION), // null

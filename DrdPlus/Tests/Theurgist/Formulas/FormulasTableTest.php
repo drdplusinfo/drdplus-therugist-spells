@@ -847,7 +847,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $modifiersTable->shouldReceive('sumEpicenterShiftChange')
             ->with($expectedModifiers, $expectedDistanceTable)
             ->andReturn(new IntegerObject($sumOfShifts));
-        $modifiersTable->shouldReceive('epicenterShifted')
+        $modifiersTable->shouldReceive('isEpicenterShifted')
             ->andReturn($epicenterShifted);
 
         return $modifiersTable;

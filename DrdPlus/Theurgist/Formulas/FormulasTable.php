@@ -97,12 +97,99 @@ class FormulasTable extends AbstractFileTable
 
     /**
      * @param FormulaCode $formulaCode
+     * @param array|ModifierCode[] $modifierCodes
+     * @param ModifiersTable $modifiersTable
+     * @return Realm
+     * @throws \DrdPlus\Theurgist\Formulas\Exceptions\CanNotBuildFormulaWithRequiredModification
+     */
+    public function getRealmOfModified(
+        FormulaCode $formulaCode,
+        array $modifierCodes,
+        ModifiersTable $modifiersTable
+    ): Realm
+    {
+        $basicFormulaDifficultyLimit = $this->getDifficultyLimit($formulaCode);
+        $maximalDifficultyHandledByFormula = $basicFormulaDifficultyLimit->getMaximal();
+        $minimalPossibleRealm = $this->getRealm($formulaCode);
+        $difficultyOfModifiedWithoutRealmChange = $this->getDifficultyOfModified(
+            $formulaCode,
+            $modifierCodes,
+            $modifiersTable
+        )->getValue();
+        $highestRequiredRealmByModifiers = $modifiersTable->getHighestRequiredRealm($modifierCodes);
+        if ($maximalDifficultyHandledByFormula >= $difficultyOfModifiedWithoutRealmChange
+            && $minimalPossibleRealm->getValue() >= $highestRequiredRealmByModifiers->getValue()
+        ) {
+            return $minimalPossibleRealm;
+        }
+        $formulaAdditionByRealms = $basicFormulaDifficultyLimit->getAdditionByRealms();
+        $difficultyHandledByAdditionalRealm = $formulaAdditionByRealms->getAddition();
+        if ($difficultyHandledByAdditionalRealm <= 0) {
+            // this should never happen, because every formula addition is currently greater than zero
+            throw new Exceptions\CanNotBuildFormulaWithRequiredModification(
+                "Formula {$formulaCode} with basic difficulty {$basicFormulaDifficultyLimit}"
+                . " can not be build with difficulty {$difficultyOfModifiedWithoutRealmChange}"
+                . " because of its addition by realms {$formulaAdditionByRealms}"
+            );
+        }
+        $realmIncrementToHandleAdditionalDifficulty = $formulaAdditionByRealms->getRealmIncrement();
+        while ($maximalDifficultyHandledByFormula < $difficultyOfModifiedWithoutRealmChange) {
+            $maximalDifficultyHandledByFormula += $difficultyHandledByAdditionalRealm;
+            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+            $minimalPossibleRealm = $minimalPossibleRealm->add($realmIncrementToHandleAdditionalDifficulty);
+        }
+        // handled difficulty is enough, but realm is still needed higher
+        /** @var Realm $minimalPossibleRealm */
+        while ($minimalPossibleRealm->getValue() < $highestRequiredRealmByModifiers->getValue()) {
+            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+            $minimalPossibleRealm = $minimalPossibleRealm->add($realmIncrementToHandleAdditionalDifficulty);
+        }
+
+        return $minimalPossibleRealm;
+    }
+
+    /**
+     * @param FormulaCode $formulaCode
      * @return Affection
      */
     public function getAffection(FormulaCode $formulaCode): Affection
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new Affection($this->getValue($formulaCode, self::AFFECTION));
+    }
+
+    /**
+     * @param FormulaCode $formulaCode
+     * @param array|ModifierCode[] $modifierCodes
+     * @param ModifiersTable $modifiersTable
+     * @return array|Affection[]
+     * @throws \DrdPlus\Theurgist\Formulas\Exceptions\CanNotBuildFormulaWithRequiredModification
+     */
+    public function getAffectionsOfModified(
+        FormulaCode $formulaCode,
+        array $modifierCodes,
+        ModifiersTable $modifiersTable
+    ): array
+    {
+        $formulaAffection = $this->getAffection($formulaCode);
+        $summedAffections = [$formulaAffection->getAffectionPeriod()->getValue() => $formulaAffection];
+        /** @var Affection $modifiersAffection */
+        foreach ($modifiersTable->getAffectionsOfModifiers($modifierCodes) as $modifiersAffection) {
+            $affectionPeriodValue = $modifiersAffection->getAffectionPeriod()->getValue();
+            if (!array_key_exists($affectionPeriodValue, $summedAffections)) {
+                $summedAffections[$affectionPeriodValue] = $modifiersAffection;
+                continue;
+            }
+            /** @var Affection $summedAffection */
+            $summedAffection = $summedAffections[$affectionPeriodValue];
+            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+            $summedAffections[$affectionPeriodValue] = new Affection([
+                $summedAffection->getValue() + $modifiersAffection->getValue(),
+                $affectionPeriodValue,
+            ]);
+        }
+
+        return $summedAffections;
     }
 
     /**
@@ -130,6 +217,25 @@ class FormulasTable extends AbstractFileTable
 
     /**
      * @param FormulaCode $formulaCode
+     * @param array|ModifierCode[] $modifierCodes
+     * @param ModifiersTable $modifiersTable
+     * @return IntegerObject
+     * @throws \DrdPlus\Theurgist\Formulas\Exceptions\CanNotBuildFormulaWithRequiredModification
+     */
+    public function getDifficultyOfModified(
+        FormulaCode $formulaCode,
+        array $modifierCodes,
+        ModifiersTable $modifiersTable
+    ): IntegerObject
+    {
+        return new IntegerObject(
+            $this->getDifficultyLimit($formulaCode)->getMinimal()
+            + $modifiersTable->sumDifficultyChanges($modifierCodes)->getValue()
+        );
+    }
+
+    /**
+     * @param FormulaCode $formulaCode
      * @param DistanceTable $distanceTable
      * @return Radius|null
      */
@@ -143,6 +249,33 @@ class FormulasTable extends AbstractFileTable
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new Radius($radiusValues, $distanceTable);
+    }
+
+    /**
+     * @param FormulaCode $formulaCode
+     * @param array|ModifierCode[] $modifierCodes
+     * @param ModifiersTable $modifiersTable
+     * @param DistanceTable $distanceTable
+     * @return DistanceBonus|null
+     * @throws \DrdPlus\Theurgist\Formulas\Exceptions\CanNotBuildFormulaWithRequiredModification
+     */
+    public function getRadiusOfModified(
+        FormulaCode $formulaCode,
+        array $modifierCodes,
+        ModifiersTable $modifiersTable,
+        DistanceTable $distanceTable
+    )
+    {
+        $formulaRadius = $this->getRadius($formulaCode, $distanceTable);
+        if (!$formulaRadius) {
+            return null;
+        }
+
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new DistanceBonus(
+            $formulaRadius->getValue() + $modifiersTable->sumRadiusChange($modifierCodes, $distanceTable)->getValue(),
+            $distanceTable
+        );
     }
 
     /**
@@ -174,6 +307,22 @@ class FormulasTable extends AbstractFileTable
 
     /**
      * @param FormulaCode $formulaCode
+     * @param array|ModifierCode[] $modifierCodes
+     * @param ModifiersTable $modifiersTable
+     * @return IntegerObject|null
+     */
+    public function getPowerOfModified(FormulaCode $formulaCode, array $modifierCodes, ModifiersTable $modifiersTable)
+    {
+        $formulaPower = $this->getPower($formulaCode);
+        if (!$formulaPower) {
+            return null;
+        }
+
+        return new IntegerObject($formulaPower->getValue() + $modifiersTable->sumPowerChange($modifierCodes)->getValue());
+    }
+
+    /**
+     * @param FormulaCode $formulaCode
      * @return Attack|null
      */
     public function getAttack(FormulaCode $formulaCode)
@@ -186,6 +335,30 @@ class FormulasTable extends AbstractFileTable
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new Attack($attackValues);
+    }
+
+    /**
+     * @param FormulaCode $formulaCode
+     * @param array $modifierCodes
+     * @param ModifiersTable $modifiersTable
+     * @return IntegerObject|null
+     */
+    public function getAttackOfModified(
+        FormulaCode $formulaCode,
+        array $modifierCodes,
+        ModifiersTable $modifiersTable
+    )
+    {
+        $formulaAttack = $this->getAttack($formulaCode);
+        if (!$formulaAttack) {
+            return null;
+        }
+
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new IntegerObject(
+            $formulaAttack->getValue()
+            + $modifiersTable->sumAttackChange($modifierCodes)->getValue()
+        );
     }
 
     /**
@@ -251,6 +424,33 @@ class FormulasTable extends AbstractFileTable
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new SpellSpeed($speedValues, $speedTable);
+    }
+
+    /**
+     * @param FormulaCode $formulaCode
+     * @param array $modifierCodes
+     * @param ModifiersTable $modifiersTable
+     * @param SpeedTable $speedTable
+     * @return SpeedBonus|null
+     */
+    public function getSpellSpeedOfModified(
+        FormulaCode $formulaCode,
+        array $modifierCodes,
+        ModifiersTable $modifiersTable,
+        SpeedTable $speedTable
+    )
+    {
+        $formulaSpeed = $this->getSpellSpeed($formulaCode, $speedTable);
+        if (!$formulaSpeed) {
+            return null;
+        }
+
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new SpeedBonus(
+            $formulaSpeed->getValue()
+            + $modifiersTable->sumSpellSpeedChange($modifierCodes, $speedTable)->getValue(),
+            $speedTable
+        );
     }
 
     /**
@@ -342,155 +542,6 @@ class FormulasTable extends AbstractFileTable
     }
 
     /**
-     * @param FormulaCode $formulaCode
-     * @param array|ModifierCode[] $modifierCodes
-     * @param ModifiersTable $modifiersTable
-     * @return IntegerObject
-     * @throws \DrdPlus\Theurgist\Formulas\Exceptions\CanNotBuildFormulaWithRequiredModification
-     */
-    public function getDifficultyOfModified(
-        FormulaCode $formulaCode,
-        array $modifierCodes,
-        ModifiersTable $modifiersTable
-    ): IntegerObject
-    {
-        return new IntegerObject(
-            $this->getDifficultyLimit($formulaCode)->getMinimal()
-            + $modifiersTable->sumDifficultyChanges($modifierCodes)->getValue()
-        );
-    }
-
-    /**
-     * @param FormulaCode $formulaCode
-     * @param array|ModifierCode[] $modifierCodes
-     * @param ModifiersTable $modifiersTable
-     * @return Realm
-     * @throws \DrdPlus\Theurgist\Formulas\Exceptions\CanNotBuildFormulaWithRequiredModification
-     */
-    public function getRealmOfModified(
-        FormulaCode $formulaCode,
-        array $modifierCodes,
-        ModifiersTable $modifiersTable
-    ): Realm
-    {
-        $basicFormulaDifficultyLimit = $this->getDifficultyLimit($formulaCode);
-        $maximalDifficultyHandledByFormula = $basicFormulaDifficultyLimit->getMaximal();
-        $minimalPossibleRealm = $this->getRealm($formulaCode);
-        $difficultyOfModifiedWithoutRealmChange = $this->getDifficultyOfModified(
-            $formulaCode,
-            $modifierCodes,
-            $modifiersTable
-        )->getValue();
-        $highestRequiredRealmByModifiers = $modifiersTable->getHighestRequiredRealm($modifierCodes);
-        if ($maximalDifficultyHandledByFormula >= $difficultyOfModifiedWithoutRealmChange
-            && $minimalPossibleRealm->getValue() >= $highestRequiredRealmByModifiers->getValue()
-        ) {
-            return $minimalPossibleRealm;
-        }
-        $formulaAdditionByRealms = $basicFormulaDifficultyLimit->getAdditionByRealms();
-        $difficultyHandledByAdditionalRealm = $formulaAdditionByRealms->getAddition();
-        if ($difficultyHandledByAdditionalRealm <= 0) {
-            // this should never happen, because every formula addition is currently greater than zero
-            throw new Exceptions\CanNotBuildFormulaWithRequiredModification(
-                "Formula {$formulaCode} with basic difficulty {$basicFormulaDifficultyLimit}"
-                . " can not be build with difficulty {$difficultyOfModifiedWithoutRealmChange}"
-                . " because of its addition by realms {$formulaAdditionByRealms}"
-            );
-        }
-        $realmIncrementToHandleAdditionalDifficulty = $formulaAdditionByRealms->getRealmIncrement();
-        while ($maximalDifficultyHandledByFormula < $difficultyOfModifiedWithoutRealmChange) {
-            $maximalDifficultyHandledByFormula += $difficultyHandledByAdditionalRealm;
-            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-            $minimalPossibleRealm = $minimalPossibleRealm->add($realmIncrementToHandleAdditionalDifficulty);
-        }
-        // handled difficulty is enough, but realm is still needed higher
-        /** @var Realm $minimalPossibleRealm */
-        while ($minimalPossibleRealm->getValue() < $highestRequiredRealmByModifiers->getValue()) {
-            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-            $minimalPossibleRealm = $minimalPossibleRealm->add($realmIncrementToHandleAdditionalDifficulty);
-        }
-
-        return $minimalPossibleRealm;
-    }
-
-    /**
-     * @param FormulaCode $formulaCode
-     * @param array|ModifierCode[] $modifierCodes
-     * @param ModifiersTable $modifiersTable
-     * @return array|Affection[]
-     * @throws \DrdPlus\Theurgist\Formulas\Exceptions\CanNotBuildFormulaWithRequiredModification
-     */
-    public function getAffectionsOfModified(
-        FormulaCode $formulaCode,
-        array $modifierCodes,
-        ModifiersTable $modifiersTable
-    ): array
-    {
-        $formulaAffection = $this->getAffection($formulaCode);
-        $summedAffections = [$formulaAffection->getAffectionPeriod()->getValue() => $formulaAffection];
-        /** @var Affection $modifiersAffection */
-        foreach ($modifiersTable->getAffectionsOfModifiers($modifierCodes) as $modifiersAffection) {
-            $affectionPeriodValue = $modifiersAffection->getAffectionPeriod()->getValue();
-            if (!array_key_exists($affectionPeriodValue, $summedAffections)) {
-                $summedAffections[$affectionPeriodValue] = $modifiersAffection;
-                continue;
-            }
-            /** @var Affection $summedAffection */
-            $summedAffection = $summedAffections[$affectionPeriodValue];
-            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-            $summedAffections[$affectionPeriodValue] = new Affection([
-                $summedAffection->getValue() + $modifiersAffection->getValue(),
-                $affectionPeriodValue,
-            ]);
-        }
-
-        return $summedAffections;
-    }
-
-    /**
-     * @param FormulaCode $formulaCode
-     * @param array|ModifierCode[] $modifierCodes
-     * @param ModifiersTable $modifiersTable
-     * @param DistanceTable $distanceTable
-     * @return DistanceBonus|null
-     * @throws \DrdPlus\Theurgist\Formulas\Exceptions\CanNotBuildFormulaWithRequiredModification
-     */
-    public function getRadiusOfModified(
-        FormulaCode $formulaCode,
-        array $modifierCodes,
-        ModifiersTable $modifiersTable,
-        DistanceTable $distanceTable
-    )
-    {
-        $formulaRadius = $this->getRadius($formulaCode, $distanceTable);
-        if (!$formulaRadius) {
-            return null;
-        }
-
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new DistanceBonus(
-            $formulaRadius->getValue() + $modifiersTable->sumRadiusChange($modifierCodes, $distanceTable)->getValue(),
-            $distanceTable
-        );
-    }
-
-    /**
-     * @param FormulaCode $formulaCode
-     * @param array|ModifierCode[] $modifierCodes
-     * @param ModifiersTable $modifiersTable
-     * @return IntegerObject|null
-     */
-    public function getPowerOfModified(FormulaCode $formulaCode, array $modifierCodes, ModifiersTable $modifiersTable)
-    {
-        $formulaPower = $this->getPower($formulaCode);
-        if (!$formulaPower) {
-            return null;
-        }
-
-        return new IntegerObject($formulaPower->getValue() + $modifiersTable->sumPowerChange($modifierCodes)->getValue());
-    }
-
-    /**
      * Transposition can shift epicenter.
      *
      * @param FormulaCode $formulaCode
@@ -509,7 +560,7 @@ class FormulasTable extends AbstractFileTable
         $formulaEpicenterShift = $this->getEpicenterShift($formulaCode, $distanceTable);
         if (!$formulaEpicenterShift) {
             $formulaEpicenterShiftValue = 0;
-            if (!$modifiersTable->epicenterShifted($modifierCodes, $distanceTable)) {
+            if (!$modifiersTable->isEpicenterShifted($modifierCodes, $distanceTable)) {
                 return null; // no shift at all
             }
         } else {
@@ -524,54 +575,4 @@ class FormulasTable extends AbstractFileTable
         );
     }
 
-    /**
-     * @param FormulaCode $formulaCode
-     * @param array $modifierCodes
-     * @param ModifiersTable $modifiersTable
-     * @param SpeedTable $speedTable
-     * @return SpeedBonus|null
-     */
-    public function getSpellSpeedOfModified(
-        FormulaCode $formulaCode,
-        array $modifierCodes,
-        ModifiersTable $modifiersTable,
-        SpeedTable $speedTable
-    )
-    {
-        $formulaSpeed = $this->getSpellSpeed($formulaCode, $speedTable);
-        if (!$formulaSpeed) {
-            return null;
-        }
-
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new SpeedBonus(
-            $formulaSpeed->getValue()
-            + $modifiersTable->sumSpellSpeedChange($modifierCodes, $speedTable)->getValue(),
-            $speedTable
-        );
-    }
-
-    /**
-     * @param FormulaCode $formulaCode
-     * @param array $modifierCodes
-     * @param ModifiersTable $modifiersTable
-     * @return IntegerObject|null
-     */
-    public function getAttackOfModified(
-        FormulaCode $formulaCode,
-        array $modifierCodes,
-        ModifiersTable $modifiersTable
-    )
-    {
-        $formulaAttack = $this->getAttack($formulaCode);
-        if (!$formulaAttack) {
-            return null;
-        }
-
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new IntegerObject(
-            $formulaAttack->getValue()
-            + $modifiersTable->sumAttackChange($modifierCodes)->getValue()
-        );
-    }
 }

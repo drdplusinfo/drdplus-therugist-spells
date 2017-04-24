@@ -628,7 +628,7 @@ class ModifiersTable extends AbstractFileTable
      * @param DistanceTable $distanceTable
      * @return bool
      */
-    public function epicenterShifted(array $modifierCodes, DistanceTable $distanceTable): bool
+    public function isEpicenterShifted(array $modifierCodes, DistanceTable $distanceTable): bool
     {
         foreach ($this->toFlatArray($modifierCodes) as $modifierCode) {
             $shift = $this->getEpicenterShift($modifierCode, $distanceTable);
