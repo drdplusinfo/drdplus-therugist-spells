@@ -1,11 +1,9 @@
 <?php
 namespace DrdPlus\Theurgist\Formulas;
 
-use DrdPlus\Tables\Measurements\Distance\DistanceTable;
-use DrdPlus\Tables\Measurements\Speed\SpeedTable;
-use DrdPlus\Tables\Measurements\Time\TimeTable;
 use DrdPlus\Tables\Partials\AbstractFileTable;
 use DrdPlus\Tables\Partials\Exceptions\RequiredRowNotFound;
+use DrdPlus\Tables\Tables;
 use DrdPlus\Theurgist\Codes\FormCode;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
@@ -33,6 +31,19 @@ use Granam\Integer\IntegerObject;
 
 class ModifiersTable extends AbstractFileTable
 {
+    /**
+     * @var Tables
+     */
+    private $tables;
+
+    /**
+     * @param Tables $tables
+     */
+    public function __construct(Tables $tables)
+    {
+        $this->tables = $tables;
+    }
+
     /**
      * @return string
      */
@@ -115,6 +126,54 @@ class ModifiersTable extends AbstractFileTable
     }
 
     /**
+     * @param array|ModifierCode[] $modifierCodes
+     * @return Realm
+     */
+    public function getHighestRequiredRealm(array $modifierCodes): Realm
+    {
+        $modifierCodes = $this->toFlatArray($modifierCodes);
+        if (count($modifierCodes) === 0) {
+            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+            return new Realm(0);
+        }
+        $realms = array_map(
+            function ($modifierCodesOrCode) {
+                return $this->getRealm($modifierCodesOrCode);
+            },
+            $this->toFlatArray($modifierCodes)
+        );
+        $highestRealm = current($realms);
+        /** @var Realm $realm */
+        foreach ($realms as $realm) {
+            if ($realm->getValue() > $highestRealm->getValue()) {
+                $highestRealm = $realm;
+            }
+        }
+
+        return $highestRealm;
+    }
+
+    /**
+     * @param array $items
+     * @return array
+     */
+    private function toFlatArray(array $items): array
+    {
+        $flat = [];
+        foreach ($items as $item) {
+            if (is_array($item)) {
+                foreach ($this->toFlatArray($item) as $subItem) {
+                    $flat[] = $subItem;
+                }
+            } else {
+                $flat[] = $item;
+            }
+        }
+
+        return $flat;
+    }
+
+    /**
      * @param ModifierCode $modifierCode
      * @return Affection|null
      */
@@ -131,34 +190,74 @@ class ModifiersTable extends AbstractFileTable
     }
 
     /**
+     * @param array|ModifierCode[] $modifierCodes
+     * @return array|Affection[]
+     */
+    public function getAffectionsOfModifiers(array $modifierCodes): array
+    {
+        if (count($modifierCodes) === 0) {
+            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+            return [];
+        }
+        $affections = array_filter(
+            array_map(
+                function ($modifierCodesOrCode) {
+                    return $this->getAffection($modifierCodesOrCode);
+                },
+                $this->toFlatArray($modifierCodes)
+            ),
+            function (Affection $affection = null) {
+                return $affection !== null;
+            }
+        );
+
+        $summedAffections = [];
+        /** @var Affection $affection */
+        foreach ($affections as $affection) {
+            $affectionPeriodValue = $affection->getAffectionPeriod()->getValue();
+            if (!array_key_exists($affectionPeriodValue, $summedAffections)) {
+                $summedAffections[$affectionPeriodValue] = $affection;
+                continue;
+            }
+            /** @var Affection $summedAffection */
+            $summedAffection = $summedAffections[$affectionPeriodValue];
+            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+            $summedAffections[$affectionPeriodValue] = new Affection([
+                $summedAffection->getValue() + $affection->getValue(),
+                $affectionPeriodValue,
+            ]);
+        }
+
+        return $summedAffections;
+    }
+
+    /**
      * Gives time bonus in fact
      *
      * @param ModifierCode $modifierCode
-     * @param TimeTable $timeTable
      * @return Casting
      */
-    public function getCasting(ModifierCode $modifierCode, TimeTable $timeTable): Casting
+    public function getCasting(ModifierCode $modifierCode): Casting
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new Casting($this->getValue($modifierCode, self::CASTING), $timeTable);
+        return new Casting($this->getValue($modifierCode, self::CASTING), $this->tables->getTimeTable());
     }
 
     /**
      * Gives casting time bonus in fact.
      *
      * @param array $modifierCodes
-     * @param TimeTable $timeTable
      * @return Casting
      */
-    public function sumCastingChange(array $modifierCodes, TimeTable $timeTable): Casting
+    public function sumCastingChange(array $modifierCodes): Casting
     {
         $castingSum = 0;
         foreach ($this->toFlatArray($modifierCodes) as $modifierCode) {
-            $castingSum += $this->getCasting($modifierCode, $timeTable)->getValue();
+            $castingSum += $this->getCasting($modifierCode)->getValue();
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new Casting($castingSum, $timeTable);
+        return new Casting($castingSum, $this->tables->getTimeTable());
     }
 
     /**
@@ -172,11 +271,26 @@ class ModifiersTable extends AbstractFileTable
     }
 
     /**
+     * @param array|ModifierCode[] $modifierCodes
+     * @return IntegerInterface
+     */
+    public function sumDifficultyChanges(array $modifierCodes): IntegerInterface
+    {
+        return new IntegerObject(
+            array_sum(
+                array_map(function ($modifierCodesOrCode) {
+                    /** @var ModifierCode $modifierCodesOrCode */
+                    return $this->getDifficultyChange($modifierCodesOrCode)->getValue();
+                }, $this->toFlatArray($modifierCodes))
+            )
+        );
+    }
+
+    /**
      * @param ModifierCode $modifierCode
-     * @param DistanceTable $distanceTable
      * @return Radius|null
      */
-    public function getRadius(ModifierCode $modifierCode, DistanceTable $distanceTable)
+    public function getRadius(ModifierCode $modifierCode)
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         $radiusValues = $this->getValue($modifierCode, self::RADIUS);
@@ -185,15 +299,33 @@ class ModifiersTable extends AbstractFileTable
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new Radius($radiusValues, $distanceTable);
+        return new Radius($radiusValues, $this->tables->getDistanceTable());
+    }
+
+    /**
+     * @param array|ModifierCode[] $modifierCodes
+     * @return IntegerObject
+     */
+    public function sumRadiusChange(array $modifierCodes): IntegerObject
+    {
+        $radiusValue = 0;
+        foreach ($modifierCodes as $modifierCode) {
+            $radius = $this->getRadius($modifierCode);
+            if (!$radius) {
+                continue;
+            }
+            $radiusValue += $radius->getValue();
+        }
+
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new IntegerObject($radiusValue);
     }
 
     /**
      * @param ModifierCode $modifierCode
-     * @param DistanceTable $distanceTable
      * @return EpicenterShift|null
      */
-    public function getEpicenterShift(ModifierCode $modifierCode, DistanceTable $distanceTable)
+    public function getEpicenterShift(ModifierCode $modifierCode)
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         $shiftValues = $this->getValue($modifierCode, self::EPICENTER_SHIFT);
@@ -202,7 +334,46 @@ class ModifiersTable extends AbstractFileTable
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new EpicenterShift($shiftValues, $distanceTable);
+        return new EpicenterShift($shiftValues, $this->tables->getDistanceTable());
+    }
+
+    /**
+     * Transposition can shift epicenter.
+     *
+     * @param array|ModifierCode[] $modifierCodes
+     * @return bool
+     */
+    public function isEpicenterShifted(array $modifierCodes): bool
+    {
+        foreach ($this->toFlatArray($modifierCodes) as $modifierCode) {
+            $shift = $this->getEpicenterShift($modifierCode);
+            if ($shift) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Transposition can shift epicenter.
+     *
+     * @param array|ModifierCode[] $modifierCodes
+     * @return IntegerObject
+     */
+    public function sumEpicenterShiftChange(array $modifierCodes): IntegerObject
+    {
+        $shiftSum = 0;
+        foreach ($this->toFlatArray($modifierCodes) as $modifierCode) {
+            $shift = $this->getEpicenterShift($modifierCode);
+            if (!$shift) {
+                continue;
+            }
+            $shiftSum += $shift->getValue();
+        }
+
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new IntegerObject($shiftSum);
     }
 
     /**
@@ -222,6 +393,24 @@ class ModifiersTable extends AbstractFileTable
     }
 
     /**
+     * @param array|ModifierCode[] $modifierCodes
+     * @return IntegerObject
+     */
+    public function sumPowerChange(array $modifierCodes): IntegerObject
+    {
+        $powerValue = 0;
+        foreach ($modifierCodes as $modifierCode) {
+            $power = $this->getPower($modifierCode);
+            if (!$power) {
+                continue;
+            }
+            $powerValue += $power->getValue();
+        }
+
+        return new IntegerObject($powerValue);
+    }
+
+    /**
      * @param ModifierCode $modifierCode
      * @return Attack|null
      */
@@ -235,6 +424,25 @@ class ModifiersTable extends AbstractFileTable
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new Attack($attackValues);
+    }
+
+    /**
+     * @param array|ModifierCode[] $modifierCodes
+     * @return IntegerObject
+     */
+    public function sumAttackChange(array $modifierCodes): IntegerObject
+    {
+        $attackSum = 0;
+        foreach ($this->toFlatArray($modifierCodes) as $modifierCode) {
+            $attack = $this->getAttack($modifierCode);
+            if (!$attack) {
+                continue;
+            }
+            $attackSum += $attack->getValue();
+        }
+
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new IntegerObject($attackSum);
     }
 
     /**
@@ -255,10 +463,9 @@ class ModifiersTable extends AbstractFileTable
 
     /**
      * @param ModifierCode $modifierCode
-     * @param SpeedTable $speedTable
      * @return SpellSpeed|null
      */
-    public function getSpellSpeed(ModifierCode $modifierCode, SpeedTable $speedTable)
+    public function getSpellSpeed(ModifierCode $modifierCode)
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         $speedValues = $this->getValue($modifierCode, self::SPELL_SPEED);
@@ -267,7 +474,26 @@ class ModifiersTable extends AbstractFileTable
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new SpellSpeed($speedValues, $speedTable);
+        return new SpellSpeed($speedValues, $this->tables->getSpeedTable());
+    }
+
+    /**
+     * @param array|ModifierCode[] $modifierCodes
+     * @return IntegerObject
+     */
+    public function sumSpellSpeedChange(array $modifierCodes): IntegerObject
+    {
+        $speedSum = 0;
+        foreach ($this->toFlatArray($modifierCodes) as $modifierCode) {
+            $speed = $this->getSpellSpeed($modifierCode);
+            if (!$speed) {
+                continue;
+            }
+            $speedSum += $speed->getValue();
+        }
+
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new IntegerObject($speedSum);
     }
 
     /**
@@ -497,227 +723,4 @@ class ModifiersTable extends AbstractFileTable
         }
     }
 
-    /**
-     * @param array|ModifierCode[] $modifierCodes
-     * @return IntegerInterface
-     */
-    public function sumDifficultyChanges(array $modifierCodes): IntegerInterface
-    {
-        return new IntegerObject(
-            array_sum(
-                array_map(function ($modifierCodesOrCode) {
-                    /** @var ModifierCode $modifierCodesOrCode */
-                    return $this->getDifficultyChange($modifierCodesOrCode)->getValue();
-                }, $this->toFlatArray($modifierCodes))
-            )
-        );
-    }
-
-    /**
-     * @param array $items
-     * @return array
-     */
-    private function toFlatArray(array $items): array
-    {
-        $flat = [];
-        foreach ($items as $item) {
-            if (is_array($item)) {
-                foreach ($this->toFlatArray($item) as $subItem) {
-                    $flat[] = $subItem;
-                }
-            } else {
-                $flat[] = $item;
-            }
-        }
-
-        return $flat;
-    }
-
-    /**
-     * @param array|ModifierCode[] $modifierCodes
-     * @return Realm
-     */
-    public function getHighestRequiredRealm(array $modifierCodes): Realm
-    {
-        $modifierCodes = $this->toFlatArray($modifierCodes);
-        if (count($modifierCodes) === 0) {
-            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-            return new Realm(0);
-        }
-        $realms = array_map(
-            function ($modifierCodesOrCode) {
-                return $this->getRealm($modifierCodesOrCode);
-            },
-            $this->toFlatArray($modifierCodes)
-        );
-        $highestRealm = current($realms);
-        /** @var Realm $realm */
-        foreach ($realms as $realm) {
-            if ($realm->getValue() > $highestRealm->getValue()) {
-                $highestRealm = $realm;
-            }
-        }
-
-        return $highestRealm;
-    }
-
-    /**
-     * @param array|ModifierCode[] $modifierCodes
-     * @return array|Affection[]
-     */
-    public function getAffectionsOfModifiers(array $modifierCodes): array
-    {
-        if (count($modifierCodes) === 0) {
-            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-            return [];
-        }
-        $affections = array_filter(
-            array_map(
-                function ($modifierCodesOrCode) {
-                    return $this->getAffection($modifierCodesOrCode);
-                },
-                $this->toFlatArray($modifierCodes)
-            ),
-            function (Affection $affection = null) {
-                return $affection !== null;
-            }
-        );
-
-        $summedAffections = [];
-        /** @var Affection $affection */
-        foreach ($affections as $affection) {
-            $affectionPeriodValue = $affection->getAffectionPeriod()->getValue();
-            if (!array_key_exists($affectionPeriodValue, $summedAffections)) {
-                $summedAffections[$affectionPeriodValue] = $affection;
-                continue;
-            }
-            /** @var Affection $summedAffection */
-            $summedAffection = $summedAffections[$affectionPeriodValue];
-            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-            $summedAffections[$affectionPeriodValue] = new Affection([
-                $summedAffection->getValue() + $affection->getValue(),
-                $affectionPeriodValue,
-            ]);
-        }
-
-        return $summedAffections;
-    }
-
-    /**
-     * @param array|ModifierCode[] $modifierCodes
-     * @param DistanceTable $distanceTable
-     * @return IntegerObject
-     */
-    public function sumRadiusChange(array $modifierCodes, DistanceTable $distanceTable): IntegerObject
-    {
-        $radiusValue = 0;
-        foreach ($modifierCodes as $modifierCode) {
-            $radius = $this->getRadius($modifierCode, $distanceTable);
-            if (!$radius) {
-                continue;
-            }
-            $radiusValue += $radius->getValue();
-        }
-
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new IntegerObject($radiusValue);
-    }
-
-    /**
-     * @param array|ModifierCode[] $modifierCodes
-     * @return IntegerObject
-     */
-    public function sumPowerChange(array $modifierCodes): IntegerObject
-    {
-        $powerValue = 0;
-        foreach ($modifierCodes as $modifierCode) {
-            $power = $this->getPower($modifierCode);
-            if (!$power) {
-                continue;
-            }
-            $powerValue += $power->getValue();
-        }
-
-        return new IntegerObject($powerValue);
-    }
-
-    /**
-     * Transposition can shift epicenter.
-     *
-     * @param array|ModifierCode[] $modifierCodes
-     * @param DistanceTable $distanceTable
-     * @return bool
-     */
-    public function isEpicenterShifted(array $modifierCodes, DistanceTable $distanceTable): bool
-    {
-        foreach ($this->toFlatArray($modifierCodes) as $modifierCode) {
-            $shift = $this->getEpicenterShift($modifierCode, $distanceTable);
-            if ($shift) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Transposition can shift epicenter.
-     *
-     * @param array|ModifierCode[] $modifierCodes
-     * @param DistanceTable $distanceTable
-     * @return IntegerObject
-     */
-    public function sumEpicenterShiftChange(array $modifierCodes, DistanceTable $distanceTable): IntegerObject
-    {
-        $shiftSum = 0;
-        foreach ($this->toFlatArray($modifierCodes) as $modifierCode) {
-            $shift = $this->getEpicenterShift($modifierCode, $distanceTable);
-            if (!$shift) {
-                continue;
-            }
-            $shiftSum += $shift->getValue();
-        }
-
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new IntegerObject($shiftSum);
-    }
-
-    /**
-     * @param array|ModifierCode[] $modifierCodes
-     * @param SpeedTable $speedTable
-     * @return IntegerObject
-     */
-    public function sumSpellSpeedChange(array $modifierCodes, SpeedTable $speedTable): IntegerObject
-    {
-        $speedSum = 0;
-        foreach ($this->toFlatArray($modifierCodes) as $modifierCode) {
-            $speed = $this->getSpellSpeed($modifierCode, $speedTable);
-            if (!$speed) {
-                continue;
-            }
-            $speedSum += $speed->getValue();
-        }
-
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new IntegerObject($speedSum);
-    }
-
-    /**
-     * @param array|ModifierCode[] $modifierCodes
-     * @return IntegerObject
-     */
-    public function sumAttackChange(array $modifierCodes): IntegerObject
-    {
-        $attackSum = 0;
-        foreach ($this->toFlatArray($modifierCodes) as $modifierCode) {
-            $attack = $this->getAttack($modifierCode);
-            if (!$attack) {
-                continue;
-            }
-            $attackSum += $attack->getValue();
-        }
-
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new IntegerObject($attackSum);
-    }
 }

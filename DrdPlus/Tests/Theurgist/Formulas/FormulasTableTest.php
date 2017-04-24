@@ -5,6 +5,7 @@ use DrdPlus\Tables\Measurements\Distance\DistanceBonus;
 use DrdPlus\Tables\Measurements\Distance\DistanceTable;
 use DrdPlus\Tables\Measurements\Speed\SpeedBonus;
 use DrdPlus\Tables\Measurements\Speed\SpeedTable;
+use DrdPlus\Tables\Tables;
 use DrdPlus\Theurgist\Codes\AffectionPeriodCode;
 use DrdPlus\Theurgist\Codes\FormCode;
 use DrdPlus\Theurgist\Codes\FormulaCode;
@@ -29,7 +30,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
 
     protected function setUp()
     {
-        $this->modifiersTable = new ModifiersTable();
+        $this->modifiersTable = new ModifiersTable(Tables::getIt());
     }
 
     /**
@@ -460,7 +461,11 @@ class FormulasTableTest extends AbstractTheurgistTableTest
     {
         $formulasTable = new FormulasTable();
         $formulaCode = FormulaCode::getIt(FormulaCode::PORTAL);
-        $requiredRealmOfNonModified = $formulasTable->getRealmOfModified($formulaCode, [], new ModifiersTable());
+        $requiredRealmOfNonModified = $formulasTable->getRealmOfModified(
+            $formulaCode,
+            [],
+            new ModifiersTable(Tables::getIt())
+        );
         self::assertEquals($formulasTable->getRealm($formulaCode), $requiredRealmOfNonModified);
     }
 
@@ -700,7 +705,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $radiusOfLock = $formulasTable->getRadiusOfModified(
             FormulaCode::getIt(FormulaCode::LOCK), // no radius (null)
             $modifiers,
-            $this->createModifiersTableForRadius($modifiers, $distanceTable, 132456),
+            $this->createModifiersTableForRadius($modifiers, 132456),
             $distanceTable
         );
         self::assertNull($radiusOfLock);
@@ -708,7 +713,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $radiusOfDischargeWithoutChange = $formulasTable->getRadiusOfModified(
             FormulaCode::getIt(FormulaCode::DISCHARGE), // +10
             $modifiers,
-            $this->createModifiersTableForRadius($modifiers, $distanceTable, 0),
+            $this->createModifiersTableForRadius($modifiers, 0),
             $distanceTable
         );
         self::assertEquals(new DistanceBonus(10, $distanceTable), $radiusOfDischargeWithoutChange);
@@ -716,7 +721,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $radiusOfModifiedDischarge = $formulasTable->getRadiusOfModified(
             FormulaCode::getIt(FormulaCode::DISCHARGE), // +10
             $modifiers,
-            $this->createModifiersTableForRadius($modifiers, $distanceTable, 789),
+            $this->createModifiersTableForRadius($modifiers, 789),
             $distanceTable
         );
         self::assertEquals(new DistanceBonus(799, $distanceTable), $radiusOfModifiedDischarge);
@@ -725,18 +730,13 @@ class FormulasTableTest extends AbstractTheurgistTableTest
     /**
      * @param array $expectedModifiers
      * @param int $sumOfRadii
-     * @param DistanceTable $expectedDistanceTable
      * @return \Mockery\MockInterface|ModifiersTable
      */
-    private function createModifiersTableForRadius(
-        array $expectedModifiers,
-        DistanceTable $expectedDistanceTable,
-        int $sumOfRadii
-    )
+    private function createModifiersTableForRadius(array $expectedModifiers, int $sumOfRadii)
     {
         $modifiersTable = $this->mockery(ModifiersTable::class);
         $modifiersTable->shouldReceive('sumRadiusChange')
-            ->with($expectedModifiers, $expectedDistanceTable)
+            ->with($expectedModifiers)
             ->andReturn(new IntegerObject($sumOfRadii));
 
         return $modifiersTable;
@@ -799,7 +799,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $epicenterShiftOfNotShiftedLock = $formulasTable->getEpicenterShiftOfModified(
             FormulaCode::getIt(FormulaCode::LOCK), // no epicenter shift (null)
             $modifiers,
-            $this->createModifiersTableForEpicenterShift($modifiers, $distanceTable, false /* not shifted */, 123456),
+            $this->createModifiersTableForEpicenterShift($modifiers, false /* not shifted */, 123456),
             $distanceTable
         );
         self::assertNull($epicenterShiftOfNotShiftedLock);
@@ -807,7 +807,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $epicenterShiftOfShiftedLock = $formulasTable->getEpicenterShiftOfModified(
             FormulaCode::getIt(FormulaCode::LOCK), // no epicenter shift (null)
             $modifiers,
-            $this->createModifiersTableForEpicenterShift($modifiers, $distanceTable, true /* shifted */, 123456),
+            $this->createModifiersTableForEpicenterShift($modifiers, true /* shifted */, 123456),
             $distanceTable
         );
         self::assertEquals(new DistanceBonus(123456, $distanceTable), $epicenterShiftOfShiftedLock);
@@ -815,7 +815,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $epicenterShiftOfGreatMassacreWithoutChange = $formulasTable->getEpicenterShiftOfModified(
             FormulaCode::getIt(FormulaCode::GREAT_MASSACRE), // +20
             $modifiers,
-            $this->createModifiersTableForEpicenterShift($modifiers, $distanceTable, true /* shifted */, 0),
+            $this->createModifiersTableForEpicenterShift($modifiers, true /* shifted */, 0),
             $distanceTable
         );
         self::assertEquals(new DistanceBonus(20, $distanceTable), $epicenterShiftOfGreatMassacreWithoutChange);
@@ -823,7 +823,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $epicenterShiftOfModifiedGreatMassacre = $formulasTable->getEpicenterShiftOfModified(
             FormulaCode::getIt(FormulaCode::GREAT_MASSACRE), // +20
             $modifiers,
-            $this->createModifiersTableForEpicenterShift($modifiers, $distanceTable, true /* shifted */, 789),
+            $this->createModifiersTableForEpicenterShift($modifiers, true /* shifted */, 789),
             $distanceTable
         );
         self::assertEquals(new DistanceBonus(809, $distanceTable), $epicenterShiftOfModifiedGreatMassacre);
@@ -832,20 +832,18 @@ class FormulasTableTest extends AbstractTheurgistTableTest
     /**
      * @param array $expectedModifiers
      * @param int $sumOfShifts
-     * @param DistanceTable $expectedDistanceTable
      * @param bool $epicenterShifted
      * @return \Mockery\MockInterface|ModifiersTable
      */
     private function createModifiersTableForEpicenterShift(
         array $expectedModifiers,
-        DistanceTable $expectedDistanceTable,
         bool $epicenterShifted,
         int $sumOfShifts
     )
     {
         $modifiersTable = $this->mockery(ModifiersTable::class);
         $modifiersTable->shouldReceive('sumEpicenterShiftChange')
-            ->with($expectedModifiers, $expectedDistanceTable)
+            ->with($expectedModifiers)
             ->andReturn(new IntegerObject($sumOfShifts));
         $modifiersTable->shouldReceive('isEpicenterShifted')
             ->andReturn($epicenterShifted);
@@ -865,7 +863,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $spellSpeedOfLock = $formulasTable->getSpellSpeedOfModified(
             FormulaCode::getIt(FormulaCode::LOCK), // no spell speed (null)
             $modifiers,
-            $this->createModifiersTableForSpellSpeed($modifiers, $speedTable, 132456),
+            $this->createModifiersTableForSpellSpeed($modifiers, 132456),
             $speedTable
         );
         self::assertNull($spellSpeedOfLock);
@@ -873,7 +871,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $spellSpeedOfTsunamiWithoutChange = $formulasTable->getSpellSpeedOfModified(
             FormulaCode::getIt(FormulaCode::TSUNAMI_FROM_CLAY_AND_STONES), // +0
             $modifiers,
-            $this->createModifiersTableForSpellSpeed($modifiers, $speedTable, 0),
+            $this->createModifiersTableForSpellSpeed($modifiers, 0),
             $speedTable
         );
         self::assertEquals(new SpeedBonus(0, $speedTable), $spellSpeedOfTsunamiWithoutChange);
@@ -881,7 +879,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $spellSpeedOfModifiedTsunami = $formulasTable->getSpellSpeedOfModified(
             FormulaCode::getIt(FormulaCode::TSUNAMI_FROM_CLAY_AND_STONES), // +0
             $modifiers,
-            $this->createModifiersTableForSpellSpeed($modifiers, $speedTable, 789),
+            $this->createModifiersTableForSpellSpeed($modifiers, 789),
             $speedTable
         );
         self::assertEquals(new SpeedBonus(789, $speedTable), $spellSpeedOfModifiedTsunami);
@@ -890,18 +888,13 @@ class FormulasTableTest extends AbstractTheurgistTableTest
     /**
      * @param array $expectedModifiers
      * @param int $sumOfSpeedChange
-     * @param SpeedTable $expectedSpeedTable
      * @return \Mockery\MockInterface|ModifiersTable
      */
-    private function createModifiersTableForSpellSpeed(
-        array $expectedModifiers,
-        SpeedTable $expectedSpeedTable,
-        int $sumOfSpeedChange
-    )
+    private function createModifiersTableForSpellSpeed(array $expectedModifiers, int $sumOfSpeedChange)
     {
         $modifiersTable = $this->mockery(ModifiersTable::class);
         $modifiersTable->shouldReceive('sumSpellSpeedChange')
-            ->with($expectedModifiers, $expectedSpeedTable)
+            ->with($expectedModifiers)
             ->andReturn(new IntegerObject($sumOfSpeedChange));
 
         return $modifiersTable;

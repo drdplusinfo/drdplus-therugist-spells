@@ -248,7 +248,7 @@ class FormulasTable extends AbstractFileTable
     {
         $timeBonusSum = $baseOfWoundsTable->sumBonuses([
             $this->getCastingTime($formulaCode, $timeTable),
-            $modifiersTable->sumCastingChange($modifierCodes, $timeTable),
+            $modifiersTable->sumCastingChange($modifierCodes),
         ]);
 
         return new TimeBonus($timeBonusSum, $timeTable);
@@ -322,7 +322,7 @@ class FormulasTable extends AbstractFileTable
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new DistanceBonus(
-            $formulaRadius->getValue() + $modifiersTable->sumRadiusChange($modifierCodes, $distanceTable)->getValue(),
+            $formulaRadius->getValue() + $modifiersTable->sumRadiusChange($modifierCodes)->getValue(),
             $distanceTable
         );
     }
@@ -507,7 +507,7 @@ class FormulasTable extends AbstractFileTable
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new SpeedBonus(
             $formulaSpeed->getValue()
-            + $modifiersTable->sumSpellSpeedChange($modifierCodes, $speedTable)->getValue(),
+            + $modifiersTable->sumSpellSpeedChange($modifierCodes)->getValue(),
             $speedTable
         );
     }
@@ -619,7 +619,7 @@ class FormulasTable extends AbstractFileTable
         $formulaEpicenterShift = $this->getEpicenterShift($formulaCode, $distanceTable);
         if (!$formulaEpicenterShift) {
             $formulaEpicenterShiftValue = 0;
-            if (!$modifiersTable->isEpicenterShifted($modifierCodes, $distanceTable)) {
+            if (!$modifiersTable->isEpicenterShifted($modifierCodes)) {
                 return null; // no shift at all
             }
         } else {
@@ -629,7 +629,7 @@ class FormulasTable extends AbstractFileTable
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new DistanceBonus(
             $formulaEpicenterShiftValue
-            + $modifiersTable->sumEpicenterShiftChange($modifierCodes, $distanceTable)->getValue(),
+            + $modifiersTable->sumEpicenterShiftChange($modifierCodes)->getValue(),
             $distanceTable
         );
     }

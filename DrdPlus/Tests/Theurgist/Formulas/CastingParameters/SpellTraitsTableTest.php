@@ -1,6 +1,7 @@
 <?php
 namespace DrdPlus\Tests\Theurgist\Formulas\CastingParameters;
 
+use DrdPlus\Tables\Tables;
 use DrdPlus\Tests\Theurgist\Formulas\AbstractTheurgistTableTest;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
@@ -108,7 +109,7 @@ class SpellTraitsTableTest extends AbstractTheurgistTableTest
     private function getModifierValuesFromModifiersTable(string $spellTraitValue): array
     {
         $matchingModifierValues = [];
-        $modifiersTable = new ModifiersTable();
+        $modifiersTable = new ModifiersTable(Tables::getIt());
         foreach (ModifierCode::getPossibleValues() as $modifierValue) {
             $spellTraits = $modifiersTable->getSpellTraits(ModifierCode::getIt($modifierValue));
             foreach ($spellTraits as $spellTrait) {

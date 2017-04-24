@@ -1,9 +1,8 @@
 <?php
 namespace DrdPlus\Tests\Theurgist\Formulas;
 
-use DrdPlus\Tables\Measurements\Distance\DistanceTable;
-use DrdPlus\Tables\Measurements\Speed\SpeedTable;
 use DrdPlus\Tables\Measurements\Time\TimeTable;
+use DrdPlus\Tables\Tables;
 use DrdPlus\Theurgist\Codes\AffectionPeriodCode;
 use DrdPlus\Theurgist\Codes\FormCode;
 use DrdPlus\Theurgist\Codes\FormulaCode;
@@ -22,31 +21,6 @@ use Granam\Integer\IntegerObject;
 
 class ModifiersTableTest extends AbstractTheurgistTableTest
 {
-
-    /**
-     * @var FormulasTable
-     */
-    private $formulasTable;
-    /**
-     * @var ProfilesTable
-     */
-    private $profilesTable;
-    /**
-     * @var DistanceTable
-     */
-    private $distanceTable;
-    /**
-     * @var SpeedTable
-     */
-    private $speedTable;
-
-    protected function setUp()
-    {
-        $this->formulasTable = new FormulasTable();
-        $this->profilesTable = new ProfilesTable();
-        $this->distanceTable = new DistanceTable();
-        $this->speedTable = new SpeedTable();
-    }
 
     /**
      * @test
@@ -95,7 +69,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_get_forms()
     {
-        $modifiersTable = new ModifiersTable();
+        $modifiersTable = new ModifiersTable(Tables::getIt());
         foreach (ModifierCode::getPossibleValues() as $modifierValue) {
             $forms = $modifiersTable->getForms(ModifierCode::getIt($modifierValue));
             $formValues = [];
@@ -132,7 +106,11 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
         ModifierCode::FRAGRANCE => ['direct', 'indirect', 'volume', 'planar', 'beam', 'tangible', 'intangible', 'visible', 'invisible', 'by_formula'],
     ];
 
-    private function getExpectedFormValues(string $modifierValue)
+    /**
+     * @param string $modifierValue
+     * @return array
+     */
+    private function getExpectedFormValues(string $modifierValue): array
     {
         $excludedFormValues = self::$excludedFormValues[$modifierValue];
 
@@ -144,7 +122,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_get_spell_traits()
     {
-        $modifiersTable = new ModifiersTable();
+        $modifiersTable = new ModifiersTable(Tables::getIt());
         foreach (ModifierCode::getPossibleValues() as $modifierValue) {
             $spellTraits = $modifiersTable->getSpellTraits(ModifierCode::getIt($modifierValue));
             /** @var array|string[] $expectedTraitValues */
@@ -189,7 +167,11 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
         ModifierCode::FRAGRANCE => [SpellTraitCode::AFFECTING, SpellTraitCode::INVISIBLE, SpellTraitCode::SILENT, SpellTraitCode::ODORLESS, SpellTraitCode::CYCLIC, SpellTraitCode::MEMORY, SpellTraitCode::DEFORMATION, SpellTraitCode::UNIDIRECTIONAL, SpellTraitCode::BIDIRECTIONAL, SpellTraitCode::INACRID, SpellTraitCode::EVERY_SENSE, SpellTraitCode::SITUATIONAL, SpellTraitCode::SHAPESHIFT, SpellTraitCode::STATE_CHANGE, SpellTraitCode::NATURE_CHANGE, SpellTraitCode::NO_SMOKE, SpellTraitCode::TRANSPARENCY, SpellTraitCode::MULTIPLE_ENTRY, SpellTraitCode::OMNIPRESENT, SpellTraitCode::ACTIVE],
     ];
 
-    private function getExpectedSpellTraitCodeValues(string $formulaValue)
+    /**
+     * @param string $formulaValue
+     * @return array
+     */
+    private function getExpectedSpellTraitCodeValues(string $formulaValue): array
     {
         $excludedTraitValues = self::$excludedTraitValues[$formulaValue];
 
@@ -201,7 +183,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_get_formulas_for_modifier()
     {
-        $modifiersTable = new ModifiersTable();
+        $modifiersTable = new ModifiersTable(Tables::getIt());
         foreach (ModifierCode::getPossibleValues() as $modifierValue) {
             $formulaCodes = $modifiersTable->getFormulas(ModifierCode::getIt($modifierValue));
             self::assertTrue(is_array($formulaCodes));
@@ -241,8 +223,9 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
     private function getExpectedFormulaValues(string $modifierValue): array
     {
         $expectedFormulaValues = [];
+        $formulasTable = new FormulasTable();
         foreach (FormulaCode::getPossibleValues() as $formulaValue) {
-            $modifierCodes = $this->formulasTable->getModifiers(FormulaCode::getIt($formulaValue));
+            $modifierCodes = $formulasTable->getModifiers(FormulaCode::getIt($formulaValue));
             foreach ($modifierCodes as $modifierCode) {
                 if ($modifierCode->getValue() === $modifierValue) {
                     $expectedFormulaValues[] = $formulaValue;
@@ -261,7 +244,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_not_get_formulas_to_unknown_modifier()
     {
-        (new ModifiersTable())->getFormulas($this->createModifierCode('black and white'));
+        (new ModifiersTable(Tables::getIt()))->getFormulas($this->createModifierCode('black and white'));
     }
 
     /**
@@ -284,7 +267,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_get_profiles_to_modifier()
     {
-        $modifiersTable = new ModifiersTable();
+        $modifiersTable = new ModifiersTable(Tables::getIt());
         foreach (ModifierCode::getPossibleValues() as $modifierValue) {
             $profileCodes = $modifiersTable->getProfiles(ModifierCode::getIt($modifierValue));
             self::assertTrue(is_array($profileCodes));
@@ -356,8 +339,9 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
     private function getProfileValuesFromProfilesTable(string $modifierValue): array
     {
         $expectedProfileValues = [];
+        $profilesTable = new ProfilesTable();
         foreach (ProfileCode::getPossibleValues() as $profileValue) {
-            $modifierCodes = $this->profilesTable->getModifiersForProfile(ProfileCode::getIt($profileValue));
+            $modifierCodes = $profilesTable->getModifiersForProfile(ProfileCode::getIt($profileValue));
             foreach ($modifierCodes as $modifierCode) {
                 if ($modifierCode->getValue() === $modifierValue) {
                     $expectedProfileValues[] = $this->reverseProfileGender($profileValue);
@@ -376,7 +360,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_not_get_profiles_to_unknown_modifiers()
     {
-        (new ModifiersTable())->getProfiles($this->createModifierCode('magnified'));
+        (new ModifiersTable(Tables::getIt()))->getProfiles($this->createModifierCode('magnified'));
     }
 
     /**
@@ -384,7 +368,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_get_parent_modifiers()
     {
-        $modifiersTable = new ModifiersTable();
+        $modifiersTable = new ModifiersTable(Tables::getIt());
         $fromParentMatchingProfiles = [];
         foreach (ModifierCode::getPossibleValues() as $modifierValue) {
             $profileValues = $this->getExpectedProfileValues($modifierValue);
@@ -440,7 +424,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_get_child_modifiers()
     {
-        $modifiersTable = new ModifiersTable();
+        $modifiersTable = new ModifiersTable(Tables::getIt());
         $fromChildrenMatchingProfiles = [];
         foreach (ModifierCode::getPossibleValues() as $modifierValue) {
             $profileValues = $this->getExpectedProfileValues($modifierValue);
@@ -496,7 +480,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_sum_difficulty_change()
     {
-        $modifiersTable = new ModifiersTable();
+        $modifiersTable = new ModifiersTable(Tables::getIt());
         $singleModifier = ModifierCode::getIt(ModifierCode::INVISIBILITY);
         $singleModifierSum = $modifiersTable->getDifficultyChange($singleModifier)->getValue();
         self::assertNotEquals(0, $singleModifierSum);
@@ -534,7 +518,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_get_highest_required_realm()
     {
-        $modifiersTable = new ModifiersTable();
+        $modifiersTable = new ModifiersTable(Tables::getIt());
 
         self::assertEquals(new Realm(0), $modifiersTable->getHighestRequiredRealm([]));
 
@@ -583,7 +567,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_get_summary_of_affections()
     {
-        $modifiersTable = new ModifiersTable();
+        $modifiersTable = new ModifiersTable(Tables::getIt());
 
         self::assertEquals([], $modifiersTable->getAffectionsOfModifiers([]));
 
@@ -625,9 +609,9 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_get_sum_of_modifiers_radius_change()
     {
-        $modifiersTable = new ModifiersTable();
+        $modifiersTable = new ModifiersTable(Tables::getIt());
 
-        self::assertEquals(new IntegerObject(0), $modifiersTable->sumRadiusChange([], $this->distanceTable));
+        self::assertEquals(new IntegerObject(0), $modifiersTable->sumRadiusChange([]));
 
         self::assertEquals(
             new IntegerObject(-6),
@@ -637,8 +621,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
                     ModifierCode::getIt(ModifierCode::BREACH), // null
                     ModifierCode::getIt(ModifierCode::EXPLOSION), // 0
                     ModifierCode::getIt(ModifierCode::TRANSPOSITION), // 0
-                ],
-                $this->distanceTable
+                ]
             )
         );
     }
@@ -648,7 +631,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_get_sum_of_modifiers_power_change()
     {
-        $modifiersTable = new ModifiersTable();
+        $modifiersTable = new ModifiersTable(Tables::getIt());
 
         self::assertEquals(new IntegerObject(0), $modifiersTable->sumPowerChange([]));
 
@@ -671,9 +654,9 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_detect_if_epicenter_has_been_shifted_by_modifiers()
     {
-        $modifiersTable = new ModifiersTable();
+        $modifiersTable = new ModifiersTable(Tables::getIt());
 
-        self::assertFalse($modifiersTable->isEpicenterShifted([], $this->distanceTable));
+        self::assertFalse($modifiersTable->isEpicenterShifted([]));
 
         self::assertFalse(
             $modifiersTable->isEpicenterShifted(
@@ -685,8 +668,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
                         ModifierCode::getIt(ModifierCode::THUNDER), // null
                         ModifierCode::getIt(ModifierCode::INTERACTIVE_ILLUSION), // null
                     ],
-                ],
-                $this->distanceTable
+                ]
             )
         );
 
@@ -702,8 +684,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
                             ],
                         ],
                     ],
-                ],
-                $this->distanceTable
+                ]
             )
         );
     }
@@ -713,11 +694,11 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_get_sum_of_modifiers_epicenter_shift_change()
     {
-        $modifiersTable = new ModifiersTable();
+        $modifiersTable = new ModifiersTable(Tables::getIt());
 
         self::assertEquals(
             new IntegerObject(0),
-            $modifiersTable->sumEpicenterShiftChange([], $this->distanceTable)
+            $modifiersTable->sumEpicenterShiftChange([])
         );
 
         self::assertEquals(
@@ -731,8 +712,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
                         ModifierCode::getIt(ModifierCode::THUNDER), // null
                         ModifierCode::getIt(ModifierCode::INTERACTIVE_ILLUSION), // null
                     ],
-                ],
-                $this->distanceTable
+                ]
             )
         );
 
@@ -749,8 +729,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
                             ],
                         ],
                     ],
-                ],
-                $this->distanceTable
+                ]
             )
         );
     }
@@ -760,11 +739,11 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_get_sum_of_modifiers_speed_change()
     {
-        $modifiersTable = new ModifiersTable();
+        $modifiersTable = new ModifiersTable(Tables::getIt());
 
         self::assertEquals(
             new IntegerObject(0),
-            $modifiersTable->sumSpellSpeedChange([], $this->speedTable)
+            $modifiersTable->sumSpellSpeedChange([])
         );
 
         self::assertEquals(
@@ -778,8 +757,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
                         ModifierCode::getIt(ModifierCode::THUNDER), // null
                         ModifierCode::getIt(ModifierCode::INTERACTIVE_ILLUSION), // null
                     ],
-                ],
-                $this->speedTable
+                ]
             )
         );
 
@@ -794,8 +772,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
                             ],
                         ],
                     ],
-                ],
-                $this->speedTable
+                ]
             )
         );
     }
@@ -805,7 +782,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_get_sum_of_modifiers_attack_change()
     {
-        $modifiersTable = new ModifiersTable();
+        $modifiersTable = new ModifiersTable(Tables::getIt());
 
         self::assertEquals(new IntegerObject(0), $modifiersTable->sumAttackChange([]));
 
@@ -849,10 +826,10 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_get_sum_of_casting_time_change()
     {
-        $modifiersTable = new ModifiersTable();
+        $modifiersTable = new ModifiersTable(Tables::getIt());
         $timeTable = new TimeTable();
 
-        self::assertEquals(new Casting(0, $timeTable), $modifiersTable->sumCastingChange([], $timeTable));
+        self::assertEquals(new Casting(0, $timeTable), $modifiersTable->sumCastingChange([]));
 
         self::assertEquals(
             new Casting(0, $timeTable),
@@ -864,8 +841,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
                         ModifierCode::getIt(ModifierCode::THUNDER), // null
                         ModifierCode::getIt(ModifierCode::INTERACTIVE_ILLUSION), // null
                     ],
-                ],
-                $timeTable
+                ]
             )
         );
 
@@ -884,8 +860,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
                             ],
                         ],
                     ],
-                ],
-                $timeTable
+                ]
             )
         );
     }

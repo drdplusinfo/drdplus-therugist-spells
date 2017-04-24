@@ -3,6 +3,7 @@ namespace DrdPlus\Tests\Theurgist\Formulas;
 
 use DrdPlus\Tables\Partials\AbstractTable;
 use DrdPlus\Tables\Table;
+use DrdPlus\Tables\Tables;
 use DrdPlus\Theurgist\Codes\AbstractTheurgistCode;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Attack;
 use Granam\String\StringTools;
@@ -46,8 +47,8 @@ abstract class AbstractTheurgistTableTest extends TestWithMockery
         $getObligatoryParameter = StringTools::assembleGetterForName($obligatoryParameter);
         $parameterClass = $this->assembleParameterClassName($obligatoryParameter);
         $sutClass = self::getSutClass();
-        $sut = new $sutClass();
-        $tableArgument = $this->findOutTableArgument($sutClass, $getObligatoryParameter);
+        $sut = new $sutClass(Tables::getIt());
+        $tableArgument = $this->findOutTableArgument($parameterClass);
         foreach ($codeClass::getPossibleValues() as $modifierCode) {
             $expectedParameterValue = $this->getValueFromTable($sut, $modifierCode, $obligatoryParameter);
             if ($tableArgument) {
@@ -84,22 +85,22 @@ abstract class AbstractTheurgistTableTest extends TestWithMockery
         $getOptionalParameter = StringTools::assembleGetterForName($optionalParameter);
         $parameterClass = $this->assembleParameterClassName($optionalParameter);
         $sutClass = self::getSutClass();
-        $sut = new $sutClass();
-        $tableArgument = $this->findOutTableArgument($sutClass, $getOptionalParameter);
+        $sut = new $sutClass(Tables::getIt());
+        $tableArgument = $this->findOutTableArgument($parameterClass);
         foreach ($codeClass::getPossibleValues() as $modifierCode) {
-            $expectedParameterValueValue = $this->getValueFromTable($sut, $modifierCode, $optionalParameter);
+            $expectedParameterValue = $this->getValueFromTable($sut, $modifierCode, $optionalParameter);
             if ($tableArgument) {
                 $parameterObject = $sut->$getOptionalParameter(
                     $codeClass::getIt($modifierCode),
                     $tableArgument
                 );
-                $expectedParameterObject = count($expectedParameterValueValue) !== 0
-                    ? new $parameterClass($expectedParameterValueValue, $tableArgument)
+                $expectedParameterObject = count($expectedParameterValue) !== 0
+                    ? new $parameterClass($expectedParameterValue, $tableArgument)
                     : null;
             } else {
                 $parameterObject = $sut->$getOptionalParameter($codeClass::getIt($modifierCode));
-                $expectedParameterObject = count($expectedParameterValueValue) !== 0
-                    ? new $parameterClass($expectedParameterValueValue)
+                $expectedParameterObject = count($expectedParameterValue) !== 0
+                    ? new $parameterClass($expectedParameterValue)
                     : null;
             }
             self::assertEquals($expectedParameterObject, $parameterObject);
@@ -107,20 +108,24 @@ abstract class AbstractTheurgistTableTest extends TestWithMockery
     }
 
     /**
-     * @param string $sutClass
-     * @param string $getterName
+     * @param string $parameterClass
      * @return bool|Table
      */
-    private function findOutTableArgument(string $sutClass, string $getterName)
+    private function findOutTableArgument(string $parameterClass)
     {
-        $reflectionClass = new \ReflectionClass($sutClass);
-        $reflectionMethod = $reflectionClass->getMethod($getterName);
-        $parameters = $reflectionMethod->getParameters();
+        $reflectionClass = new \ReflectionClass($parameterClass);
+        $constructorReflection = $reflectionClass->getMethod('__construct');
+        $parameters = $constructorReflection->getParameters();
         if (count($parameters) === 1) {
             return false;
         }
         $tableParameter = $parameters[1];
+        $tableParameterClassReflection = $tableParameter->getClass();
+        if (!$tableParameterClassReflection) {
+            return null;
+        }
         $tableClass = $tableParameter->getClass()->getName();
+        self::assertTrue(is_a($tableClass, Table::class, true));
 
         return new $tableClass;
     }
