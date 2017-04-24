@@ -1,10 +1,12 @@
 <?php
 namespace DrdPlus\Theurgist\Formulas;
 
+use DrdPlus\Tables\Measurements\BaseOfWounds\BaseOfWoundsTable;
 use DrdPlus\Tables\Measurements\Distance\DistanceBonus;
 use DrdPlus\Tables\Measurements\Distance\DistanceTable;
 use DrdPlus\Tables\Measurements\Speed\SpeedBonus;
 use DrdPlus\Tables\Measurements\Speed\SpeedTable;
+use DrdPlus\Tables\Measurements\Time\TimeBonus;
 use DrdPlus\Tables\Measurements\Time\TimeTable;
 use DrdPlus\Tables\Partials\AbstractFileTable;
 use DrdPlus\Tables\Partials\Exceptions\RequiredRowNotFound;
@@ -15,7 +17,7 @@ use DrdPlus\Theurgist\Codes\ProfileCode;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Affection;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Attack;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Brightness;
-use DrdPlus\Theurgist\Formulas\CastingParameters\Casting;
+use DrdPlus\Theurgist\Formulas\CastingParameters\Evocation;
 use DrdPlus\Theurgist\Formulas\CastingParameters\DetailLevel;
 use DrdPlus\Theurgist\Formulas\CastingParameters\DifficultyLimit;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Duration;
@@ -37,7 +39,7 @@ class FormulasTable extends AbstractFileTable
 
     const REALM = 'realm';
     const AFFECTION = 'affection';
-    const CASTING = 'casting';
+    const EVOCATION = 'evocation';
     const DIFFICULTY_LIMIT = 'difficulty_limit';
     const RADIUS = 'radius';
     const DURATION = 'duration';
@@ -58,7 +60,7 @@ class FormulasTable extends AbstractFileTable
         return [
             self::REALM => self::POSITIVE_INTEGER,
             self::AFFECTION => self::ARRAY,
-            self::CASTING => self::POSITIVE_INTEGER,
+            self::EVOCATION => self::POSITIVE_INTEGER,
             self::DIFFICULTY_LIMIT => self::ARRAY,
             self::RADIUS => self::ARRAY,
             self::DURATION => self::ARRAY,
@@ -193,16 +195,63 @@ class FormulasTable extends AbstractFileTable
     }
 
     /**
-     * Return time bonus value in fact.
+     * Time needed to invoke (assemble) a spell. Gives time bonus value in fact.
      *
      * @param FormulaCode $formulaCode
      * @param TimeTable $timeTable
-     * @return Casting
+     * @return Evocation
      */
-    public function getCasting(FormulaCode $formulaCode, TimeTable $timeTable): Casting
+    public function getEvocation(FormulaCode $formulaCode, TimeTable $timeTable): Evocation
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new Casting($this->getValue($formulaCode, self::CASTING), $timeTable);
+        return new Evocation($this->getValue($formulaCode, self::EVOCATION), $timeTable);
+    }
+
+    /**
+     * @param FormulaCode $formulaCode
+     * @param TimeTable $timeTable
+     * @return TimeBonus
+     */
+    public function getEvocationOfModified(FormulaCode $formulaCode, TimeTable $timeTable): TimeBonus
+    {
+        // no modifier affects evocation time
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new TimeBonus(
+            $this->getEvocation($formulaCode, $timeTable)->getValue(),
+            $timeTable
+        );
+    }
+
+    /**
+     * @param FormulaCode $formulaCode
+     * @param TimeTable $timeTable
+     * @return TimeBonus
+     */
+    public function getCastingTime(FormulaCode $formulaCode, TimeTable $timeTable): TimeBonus
+    {
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new TimeBonus(0 /* = 1 round */, $timeTable);
+    }
+
+    /**
+     * @param FormulaCode $formulaCode
+     * @param TimeTable $timeTable
+     * @return TimeBonus
+     */
+    public function getCastingTimeOfModified(
+        FormulaCode $formulaCode,
+        array $modifierCodes,
+        ModifiersTable $modifiersTable,
+        TimeTable $timeTable,
+        BaseOfWoundsTable $baseOfWoundsTable
+    ): TimeBonus
+    {
+        $timeBonusSum = $baseOfWoundsTable->sumBonuses([
+            $this->getCastingTime($formulaCode, $timeTable),
+            $modifiersTable->sumCastingChange($modifierCodes, $timeTable),
+        ]);
+
+        return new TimeBonus($timeBonusSum, $timeTable);
     }
 
     /**
@@ -407,6 +456,16 @@ class FormulasTable extends AbstractFileTable
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new Brightness($brightnessValues);
+    }
+
+    /**
+     * @param FormulaCode $formulaCode
+     * @return Brightness|null
+     */
+    public function getBrightnessOfModified(FormulaCode $formulaCode)
+    {
+        // no modifier affects brightness
+        return $this->getBrightness($formulaCode);
     }
 
     /**

@@ -40,11 +40,11 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         /**
          * @see FormulasTable::getRealm()
          * @see FormulasTable::getAffection()
-         * @see FormulasTable::getCasting()
+         * @see FormulasTable::getEvocation()
          * @see FormulasTable::getDifficultyLimit()
          * @see FormulasTable::getDuration()
          */
-        $obligatoryParameters = ['realm', 'affection', 'casting', 'difficulty_limit', 'duration'];
+        $obligatoryParameters = ['realm', 'affection', 'evocation', 'difficulty_limit', 'duration'];
         foreach ($obligatoryParameters as $obligatoryParameter) {
             $this->I_can_get_obligatory_parameter($obligatoryParameter, FormulaCode::class);
         }

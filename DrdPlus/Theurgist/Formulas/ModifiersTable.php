@@ -131,6 +131,8 @@ class ModifiersTable extends AbstractFileTable
     }
 
     /**
+     * Gives time bonus in fact
+     *
      * @param ModifierCode $modifierCode
      * @param TimeTable $timeTable
      * @return Casting
@@ -139,6 +141,24 @@ class ModifiersTable extends AbstractFileTable
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new Casting($this->getValue($modifierCode, self::CASTING), $timeTable);
+    }
+
+    /**
+     * Gives casting time bonus in fact.
+     *
+     * @param array $modifierCodes
+     * @param TimeTable $timeTable
+     * @return Casting
+     */
+    public function sumCastingChange(array $modifierCodes, TimeTable $timeTable): Casting
+    {
+        $castingSum = 0;
+        foreach ($this->toFlatArray($modifierCodes) as $modifierCode) {
+            $castingSum += $this->getCasting($modifierCode, $timeTable)->getValue();
+        }
+
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new Casting($castingSum, $timeTable);
     }
 
     /**

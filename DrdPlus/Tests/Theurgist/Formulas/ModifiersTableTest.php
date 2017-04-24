@@ -3,6 +3,7 @@ namespace DrdPlus\Tests\Theurgist\Formulas;
 
 use DrdPlus\Tables\Measurements\Distance\DistanceTable;
 use DrdPlus\Tables\Measurements\Speed\SpeedTable;
+use DrdPlus\Tables\Measurements\Time\TimeTable;
 use DrdPlus\Theurgist\Codes\AffectionPeriodCode;
 use DrdPlus\Theurgist\Codes\FormCode;
 use DrdPlus\Theurgist\Codes\FormulaCode;
@@ -10,6 +11,7 @@ use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ProfileCode;
 use DrdPlus\Theurgist\Codes\SpellTraitCode;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Affection;
+use DrdPlus\Theurgist\Formulas\CastingParameters\Casting;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Realm;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
 use DrdPlus\Theurgist\Formulas\FormulasTable;
@@ -838,6 +840,52 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
                         ],
                     ],
                 ]
+            )
+        );
+    }
+
+    /**
+     * @test
+     */
+    public function I_can_get_sum_of_casting_time_change()
+    {
+        $modifiersTable = new ModifiersTable();
+        $timeTable = new TimeTable();
+
+        self::assertEquals(new Casting(0, $timeTable), $modifiersTable->sumCastingChange([], $timeTable));
+
+        self::assertEquals(
+            new Casting(0, $timeTable),
+            $modifiersTable->sumCastingChange(
+                [
+                    ModifierCode::getIt(ModifierCode::EXPLOSION), // null
+                    [
+                        ModifierCode::getIt(ModifierCode::FILTER), // null
+                        ModifierCode::getIt(ModifierCode::THUNDER), // null
+                        ModifierCode::getIt(ModifierCode::INTERACTIVE_ILLUSION), // null
+                    ],
+                ],
+                $timeTable
+            )
+        );
+
+        self::assertEquals(
+            new Casting(8, $timeTable),
+            $modifiersTable->sumCastingChange(
+                [
+                    [ModifierCode::getIt(ModifierCode::MOVEMENT), // null
+                        [ModifierCode::getIt(ModifierCode::GATE), // +4
+                            [ModifierCode::getIt(ModifierCode::FILTER), // null
+                                [ModifierCode::getIt(ModifierCode::TRANSPOSITION)], // null
+                                [
+                                    ModifierCode::getIt(ModifierCode::GATE), // +4
+                                    ModifierCode::getIt(ModifierCode::TRANSPOSITION), // null
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                $timeTable
             )
         );
     }
