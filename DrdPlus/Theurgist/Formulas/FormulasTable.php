@@ -14,6 +14,7 @@ use DrdPlus\Theurgist\Codes\ProfileCode;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Affection;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Attack;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Brightness;
+use DrdPlus\Theurgist\Formulas\CastingParameters\Casting;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Evocation;
 use DrdPlus\Theurgist\Formulas\CastingParameters\DetailLevel;
 use DrdPlus\Theurgist\Formulas\CastingParameters\DifficultyLimit;
@@ -222,28 +223,36 @@ class FormulasTable extends AbstractFileTable
     }
 
     /**
+     * Gives time bonus in fact.
+     * Currently every unmodified formula can be casted in one round.
+     *
      * @param FormulaCode $formulaCode
-     * @return TimeBonus
+     * @return Casting
      */
-    public function getCastingTime(FormulaCode $formulaCode): TimeBonus
+    public function getCasting(/** @noinspection PhpUnusedParameterInspection to keep same interface with others */
+        FormulaCode $formulaCode): Casting
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new TimeBonus(0 /* = 1 round */, $this->tables->getTimeTable());
+        return new Casting(0 /* = 1 round */, $this->tables->getTimeTable());
     }
 
     /**
+     * Gives time bonus in fact
+     *
      * @param FormulaCode $formulaCode
      * @param array|ModifierCode[] $modifierCodes
-     * @return TimeBonus
+     * @return Casting
      */
-    public function getCastingTimeOfModified(FormulaCode $formulaCode, array $modifierCodes): TimeBonus
+    public function getCastingOfModified(FormulaCode $formulaCode, array $modifierCodes): Casting
     {
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         $timeBonusSum = $this->tables->getBaseOfWoundsTable()->sumBonuses([
-            $this->getCastingTime($formulaCode),
+            $this->getCasting($formulaCode),
             $this->modifiersTable->sumCastingChange($modifierCodes),
         ]);
 
-        return new TimeBonus($timeBonusSum, $this->tables->getTimeTable());
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new Casting($timeBonusSum, $this->tables->getTimeTable());
     }
 
     /**

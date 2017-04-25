@@ -1,6 +1,7 @@
 <?php
 namespace DrdPlus\Tests\Theurgist\Formulas;
 
+use DrdPlus\Codes\TimeUnitCode;
 use DrdPlus\Tables\Measurements\Distance\DistanceBonus;
 use DrdPlus\Tables\Measurements\Distance\DistanceTable;
 use DrdPlus\Tables\Measurements\Speed\SpeedBonus;
@@ -13,6 +14,7 @@ use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ProfileCode;
 use DrdPlus\Theurgist\Codes\SpellTraitCode;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Affection;
+use DrdPlus\Theurgist\Formulas\CastingParameters\Casting;
 use DrdPlus\Theurgist\Formulas\CastingParameters\DifficultyLimit;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Realm;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
@@ -36,7 +38,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
     /**
      * @test
      */
-    public function I_can_get_every_obligatory_parameter()
+    public function I_can_get_every_mandatory_parameter()
     {
         /**
          * @see FormulasTable::getRealm()
@@ -45,9 +47,9 @@ class FormulasTableTest extends AbstractTheurgistTableTest
          * @see FormulasTable::getDifficultyLimit()
          * @see FormulasTable::getDuration()
          */
-        $obligatoryParameters = ['realm', 'affection', 'evocation', 'difficulty_limit', 'duration'];
-        foreach ($obligatoryParameters as $obligatoryParameter) {
-            $this->I_can_get_obligatory_parameter($obligatoryParameter, FormulaCode::class);
+        $mandatoryParameters = ['realm', 'affection', 'evocation', 'difficulty_limit', 'duration'];
+        foreach ($mandatoryParameters as $mandatoryParameter) {
+            $this->I_can_get_mandatory_parameter($mandatoryParameter, FormulaCode::class);
         }
     }
 
@@ -71,6 +73,23 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         ];
         foreach ($optionalParameters as $optionalParameter) {
             $this->I_can_get_optional_parameter($optionalParameter, FormulaCode::class);
+        }
+    }
+
+    /**
+     * @test
+     */
+    public function I_can_get_casting()
+    {
+        $formulasTable = new FormulasTable(Tables::getIt(), $this->modifiersTable);
+        foreach (FormulaCode::getPossibleValues() as $formulaValue) {
+            $casting = $formulasTable->getCasting(FormulaCode::getIt($formulaValue));
+            self::assertEquals(new Casting(0, Tables::getIt()->getTimeTable()), $casting);
+            self::assertSame(
+                1,
+                $casting->getTime(TimeUnitCode::ROUND)->getValue(),
+                'Expected single round as casting time for any non-modified formula'
+            );
         }
     }
 

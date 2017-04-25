@@ -25,11 +25,11 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
     /**
      * @test
      */
-    public function I_can_get_every_obligatory_parameter()
+    public function I_can_get_every_mandatory_parameter()
     {
-        $obligatoryParameters = ['realm', 'difficulty_change'];
-        foreach ($obligatoryParameters as $obligatoryParameter) {
-            $this->I_can_get_obligatory_parameter($obligatoryParameter, ModifierCode::class);
+        $mandatoryParameters = ['realm', 'difficulty_change'];
+        foreach ($mandatoryParameters as $mandatoryParameter) {
+            $this->I_can_get_mandatory_parameter($mandatoryParameter, ModifierCode::class);
         }
     }
 

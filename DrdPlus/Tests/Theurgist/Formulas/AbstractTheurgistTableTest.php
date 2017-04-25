@@ -40,18 +40,18 @@ abstract class AbstractTheurgistTableTest extends TestWithMockery
     }
 
     /**
-     * @param string $obligatoryParameter
+     * @param string $mandatoryParameter
      * @param string|AbstractTheurgistCode $codeClass
      */
-    protected function I_can_get_obligatory_parameter(string $obligatoryParameter, string $codeClass)
+    protected function I_can_get_mandatory_parameter(string $mandatoryParameter, string $codeClass)
     {
-        $getObligatoryParameter = StringTools::assembleGetterForName($obligatoryParameter);
-        $parameterClass = $this->assembleParameterClassName($obligatoryParameter);
+        $getObligatoryParameter = StringTools::assembleGetterForName($mandatoryParameter);
+        $parameterClass = $this->assembleParameterClassName($mandatoryParameter);
         $sutClass = self::getSutClass();
         $sut = new $sutClass(Tables::getIt(), $this->createModifiersTable());
         $tableArgument = $this->findOutTableArgument($parameterClass);
         foreach ($codeClass::getPossibleValues() as $modifierCode) {
-            $expectedParameterValue = $this->getValueFromTable($sut, $modifierCode, $obligatoryParameter);
+            $expectedParameterValue = $this->getValueFromTable($sut, $modifierCode, $mandatoryParameter);
             if ($tableArgument) {
                 $parameterObject = $sut->$getObligatoryParameter($codeClass::getIt($modifierCode), $tableArgument);
                 $expectedParameterObject = new $parameterClass($expectedParameterValue, $tableArgument);

@@ -16,11 +16,11 @@ class SpellTraitsTableTest extends AbstractTheurgistTableTest
     /**
      * @test
      */
-    public function I_can_get_every_obligatory_parameter()
+    public function I_can_get_every_mandatory_parameter()
     {
-        $obligatoryParameters = ['difficulty_change'];
-        foreach ($obligatoryParameters as $obligatoryParameter) {
-            $this->I_can_get_obligatory_parameter($obligatoryParameter, SpellTraitCode::class);
+        $mandatoryParameters = ['difficulty_change'];
+        foreach ($mandatoryParameters as $mandatoryParameter) {
+            $this->I_can_get_mandatory_parameter($mandatoryParameter, SpellTraitCode::class);
         }
     }
 
