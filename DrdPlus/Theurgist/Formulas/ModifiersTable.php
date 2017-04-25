@@ -26,7 +26,6 @@ use DrdPlus\Theurgist\Formulas\CastingParameters\EpicenterShift;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellSpeed;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Threshold;
-use Granam\Integer\IntegerInterface;
 use Granam\Integer\IntegerObject;
 
 class ModifiersTable extends AbstractFileTable
@@ -268,11 +267,11 @@ class ModifiersTable extends AbstractFileTable
 
     /**
      * @param array|ModifierCode[] $modifierCodes
-     * @return IntegerInterface
+     * @return DifficultyChange
      */
-    public function sumDifficultyChanges(array $modifierCodes): IntegerInterface
+    public function sumDifficultyChanges(array $modifierCodes): DifficultyChange
     {
-        return new IntegerObject(
+        return new DifficultyChange(
             array_sum(
                 array_map(function ($modifierCodesOrCode) {
                     /** @var ModifierCode $modifierCodesOrCode */

@@ -16,6 +16,7 @@ use DrdPlus\Theurgist\Codes\ProfileCode;
 use DrdPlus\Theurgist\Codes\SpellTraitCode;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Affection;
 use DrdPlus\Theurgist\Formulas\CastingParameters\CastingRounds;
+use DrdPlus\Theurgist\Formulas\CastingParameters\DifficultyChange;
 use DrdPlus\Theurgist\Formulas\CastingParameters\DifficultyLimit;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Realm;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
@@ -452,7 +453,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $modifiersTable = $this->mockery(ModifiersTable::class);
         $modifiersTable->shouldReceive('sumDifficultyChanges')
             ->with($expectedModifiers)
-            ->andReturn(new IntegerObject($difficultyChange));
+            ->andReturn(new DifficultyChange($difficultyChange));
         $modifiersTable->shouldReceive('getHighestRequiredRealm')
             ->andReturn(new Realm($highestRequiredReam));
 

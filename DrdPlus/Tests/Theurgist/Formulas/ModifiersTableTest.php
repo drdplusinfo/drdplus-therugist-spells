@@ -10,12 +10,12 @@ use DrdPlus\Theurgist\Codes\ProfileCode;
 use DrdPlus\Theurgist\Codes\SpellTraitCode;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Affection;
 use DrdPlus\Theurgist\Formulas\CastingParameters\CastingRounds;
+use DrdPlus\Theurgist\Formulas\CastingParameters\DifficultyChange;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Realm;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
 use DrdPlus\Theurgist\Formulas\FormulasTable;
 use DrdPlus\Theurgist\Formulas\ModifiersTable;
 use DrdPlus\Theurgist\Formulas\ProfilesTable;
-use Granam\Integer\IntegerInterface;
 use Granam\Integer\IntegerObject;
 
 class ModifiersTableTest extends AbstractTheurgistTableTest
@@ -504,8 +504,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
         $singleModifierSum = $modifiersTable->getDifficultyChange($singleModifier)->getValue();
         self::assertNotEquals(0, $singleModifierSum);
         $difficultyChangeSum = $modifiersTable->sumDifficultyChanges([$singleModifier]);
-        self::assertInstanceOf(IntegerInterface::class, $difficultyChangeSum);
-        self::assertSame($singleModifierSum, $difficultyChangeSum->getValue());
+        self::assertEquals(new DifficultyChange($singleModifierSum), $difficultyChangeSum);
 
         $flatArray = [
             ModifierCode::getIt(ModifierCode::STEP_TO_PAST),
@@ -529,7 +528,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
         $treeArraySum += $modifiersTable->getDifficultyChange(ModifierCode::getIt(ModifierCode::RELEASE))->getValue();
         $treeArraySum += $modifiersTable->getDifficultyChange(ModifierCode::getIt(ModifierCode::THUNDER))->getValue();
         self::assertGreaterThan($flatArraySum, $treeArraySum);
-        self::assertSame($treeArraySum, $modifiersTable->sumDifficultyChanges($treeArray)->getValue());
+        self::assertEquals(new DifficultyChange($treeArraySum), $modifiersTable->sumDifficultyChanges($treeArray));
     }
 
     /**
