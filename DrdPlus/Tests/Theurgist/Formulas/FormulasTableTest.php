@@ -6,6 +6,7 @@ use DrdPlus\Tables\Measurements\Distance\DistanceBonus;
 use DrdPlus\Tables\Measurements\Distance\DistanceTable;
 use DrdPlus\Tables\Measurements\Speed\SpeedBonus;
 use DrdPlus\Tables\Measurements\Speed\SpeedTable;
+use DrdPlus\Tables\Measurements\Time\Time;
 use DrdPlus\Tables\Tables;
 use DrdPlus\Theurgist\Codes\AffectionPeriodCode;
 use DrdPlus\Theurgist\Codes\FormCode;
@@ -14,7 +15,7 @@ use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ProfileCode;
 use DrdPlus\Theurgist\Codes\SpellTraitCode;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Affection;
-use DrdPlus\Theurgist\Formulas\CastingParameters\Casting;
+use DrdPlus\Theurgist\Formulas\CastingParameters\CastingRounds;
 use DrdPlus\Theurgist\Formulas\CastingParameters\DifficultyLimit;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Realm;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
@@ -84,10 +85,10 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $formulasTable = new FormulasTable(Tables::getIt(), $this->modifiersTable);
         foreach (FormulaCode::getPossibleValues() as $formulaValue) {
             $casting = $formulasTable->getCasting(FormulaCode::getIt($formulaValue));
-            self::assertEquals(new Casting(0, Tables::getIt()->getTimeTable()), $casting);
+            self::assertEquals(new Time(1, TimeUnitCode::ROUND, Tables::getIt()->getTimeTable()), $casting);
             self::assertSame(
                 1,
-                $casting->getTime(TimeUnitCode::ROUND)->getValue(),
+                $casting->getInUnit(TimeUnitCode::ROUND)->getValue(),
                 'Expected single round as casting time for any non-modified formula'
             );
         }
@@ -758,7 +759,6 @@ class FormulasTableTest extends AbstractTheurgistTableTest
     {
         $modifiers = ['foo', 'bar'];
         $formulasTable = new FormulasTable(Tables::getIt(), $this->createModifiersTableForPower($modifiers, 132456));
-
         $powerOfDischarge = $formulasTable->getPowerOfModified(
             FormulaCode::getIt(FormulaCode::DISCHARGE), // null
             $modifiers
@@ -972,4 +972,35 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         return $modifiersTable;
     }
 
+    /**
+     * @test
+     */
+    public function I_can_get_casting_of_modified_formula()
+    {
+        $modifiers = ['foo', 'bar'];
+        $portal = FormulaCode::getIt(FormulaCode::PORTAL);
+
+        $formulasTable = new FormulasTable(Tables::getIt(), $this->createModifiersTableForCasting($modifiers, 0));
+        $castingOfPortalWithoutChange = $formulasTable->getCastingOfModified($portal /* 0 */, $modifiers);
+        self::assertEquals($formulasTable->getCasting($portal), $castingOfPortalWithoutChange);
+
+        $formulasTable = new FormulasTable(Tables::getIt(), $this->createModifiersTableForCasting($modifiers, 18 /* rounds */));
+        $castingOfPortalWithChange = $formulasTable->getCastingOfModified($portal, $modifiers);
+        self::assertEquals(new Time(19, TimeUnitCode::ROUND, Tables::getIt()->getTimeTable()), $castingOfPortalWithChange);
+    }
+
+    /**
+     * @param array $expectedModifiers
+     * @param int $sumOfCasting
+     * @return \Mockery\MockInterface|ModifiersTable
+     */
+    private function createModifiersTableForCasting(array $expectedModifiers, int $sumOfCasting)
+    {
+        $modifiersTable = $this->mockery(ModifiersTable::class);
+        $modifiersTable->shouldReceive('sumCastingRoundsChange')
+            ->with($expectedModifiers)
+            ->andReturn(new CastingRounds($sumOfCasting, Tables::getIt()->getTimeTable()));
+
+        return $modifiersTable;
+    }
 }

@@ -10,7 +10,7 @@ use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ProfileCode;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Affection;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Attack;
-use DrdPlus\Theurgist\Formulas\CastingParameters\Casting;
+use DrdPlus\Theurgist\Formulas\CastingParameters\CastingRounds;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Conditions;
 use DrdPlus\Theurgist\Formulas\CastingParameters\DifficultyChange;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Grafts;
@@ -55,7 +55,7 @@ class ModifiersTable extends AbstractFileTable
     const REALM = 'realm';
     const AFFECTION = 'affection';
     const AFFECTION_TYPE = 'affection_type';
-    const CASTING = 'casting';
+    const CASTING_ROUNDS = 'casting_rounds';
     const DIFFICULTY_CHANGE = 'difficulty_change';
     const RADIUS = 'radius';
     const EPICENTER_SHIFT = 'epicenter_shift';
@@ -82,7 +82,7 @@ class ModifiersTable extends AbstractFileTable
         return [
             self::REALM => self::POSITIVE_INTEGER,
             self::AFFECTION => self::ARRAY,
-            self::CASTING => self::POSITIVE_INTEGER,
+            self::CASTING_ROUNDS => self::POSITIVE_INTEGER,
             self::DIFFICULTY_CHANGE => self::POSITIVE_INTEGER,
             self::RADIUS => self::ARRAY,
             self::EPICENTER_SHIFT => self::ARRAY,
@@ -232,32 +232,28 @@ class ModifiersTable extends AbstractFileTable
     }
 
     /**
-     * Gives time bonus in fact
-     *
      * @param ModifierCode $modifierCode
-     * @return Casting
+     * @return CastingRounds
      */
-    public function getCasting(ModifierCode $modifierCode): Casting
+    public function getCastingRounds(ModifierCode $modifierCode): CastingRounds
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new Casting($this->getValue($modifierCode, self::CASTING), $this->tables->getTimeTable());
+        return new CastingRounds($this->getValue($modifierCode, self::CASTING_ROUNDS));
     }
 
     /**
-     * Gives casting time bonus in fact.
-     *
      * @param array $modifierCodes
-     * @return Casting
+     * @return CastingRounds
      */
-    public function sumCastingChange(array $modifierCodes): Casting
+    public function sumCastingRoundsChange(array $modifierCodes): CastingRounds
     {
         $castingSum = 0;
         foreach ($this->toFlatArray($modifierCodes) as $modifierCode) {
-            $castingSum += $this->getCasting($modifierCode)->getValue();
+            $castingSum += $this->getCastingRounds($modifierCode)->getValue();
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new Casting($castingSum, $this->tables->getTimeTable());
+        return new CastingRounds($castingSum);
     }
 
     /**

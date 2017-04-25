@@ -1,7 +1,6 @@
 <?php
 namespace DrdPlus\Tests\Theurgist\Formulas;
 
-use DrdPlus\Tables\Measurements\Time\TimeTable;
 use DrdPlus\Tables\Tables;
 use DrdPlus\Theurgist\Codes\AffectionPeriodCode;
 use DrdPlus\Theurgist\Codes\FormCode;
@@ -10,7 +9,7 @@ use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ProfileCode;
 use DrdPlus\Theurgist\Codes\SpellTraitCode;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Affection;
-use DrdPlus\Theurgist\Formulas\CastingParameters\Casting;
+use DrdPlus\Theurgist\Formulas\CastingParameters\CastingRounds;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Realm;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
 use DrdPlus\Theurgist\Formulas\FormulasTable;
@@ -40,7 +39,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
     {
         /**
          * @see ModifiersTable::getAffection()
-         * @see ModifiersTable::getCasting()
+         * @see ModifiersTable::getCastingRounds()
          * @see ModifiersTable::getRadius()
          * @see ModifiersTable::getEpicenterShift()
          * @see ModifiersTable::getPower()
@@ -56,7 +55,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
          * @see ModifiersTable::getThreshold()
          */
         $optionalParameters = [
-            'affection', 'casting', 'radius', 'epicenter_shift', 'power', 'attack', 'grafts', 'spell_speed', 'points',
+            'affection', 'casting_rounds', 'radius', 'epicenter_shift', 'power', 'attack', 'grafts', 'spell_speed', 'points',
             'invisibility', 'quality', 'conditions', 'resistance', 'number_of_situations', 'threshold',
         ];
         foreach ($optionalParameters as $optionalParameter) {
@@ -847,14 +846,12 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
     public function I_can_get_sum_of_casting_time_change()
     {
         $modifiersTable = new ModifiersTable(Tables::getIt());
-        $timeTable = new TimeTable();
-        $timeTable->getIndexedValues(); // just to populate values for sake of comparison
 
-        self::assertEquals(new Casting(0, $timeTable), $modifiersTable->sumCastingChange([]));
+        self::assertEquals(new CastingRounds(0), $modifiersTable->sumCastingRoundsChange([]));
 
         self::assertEquals(
-            new Casting(0, $timeTable),
-            $modifiersTable->sumCastingChange(
+            new CastingRounds(0),
+            $modifiersTable->sumCastingRoundsChange(
                 [
                     ModifierCode::getIt(ModifierCode::EXPLOSION), // null
                     [
@@ -867,15 +864,15 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
         );
 
         self::assertEquals(
-            new Casting(8, $timeTable),
-            $modifiersTable->sumCastingChange(
+            new CastingRounds(4),
+            $modifiersTable->sumCastingRoundsChange(
                 [
                     [ModifierCode::getIt(ModifierCode::MOVEMENT), // null
-                        [ModifierCode::getIt(ModifierCode::GATE), // +4
+                        [ModifierCode::getIt(ModifierCode::GATE), // +2 rounds
                             [ModifierCode::getIt(ModifierCode::FILTER), // null
                                 [ModifierCode::getIt(ModifierCode::TRANSPOSITION)], // null
                                 [
-                                    ModifierCode::getIt(ModifierCode::GATE), // +4
+                                    ModifierCode::getIt(ModifierCode::GATE), // +2 rounds
                                     ModifierCode::getIt(ModifierCode::TRANSPOSITION), // null
                                 ],
                             ],

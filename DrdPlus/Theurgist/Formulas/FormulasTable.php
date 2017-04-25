@@ -1,8 +1,10 @@
 <?php
 namespace DrdPlus\Theurgist\Formulas;
 
+use DrdPlus\Codes\TimeUnitCode;
 use DrdPlus\Tables\Measurements\Distance\DistanceBonus;
 use DrdPlus\Tables\Measurements\Speed\SpeedBonus;
+use DrdPlus\Tables\Measurements\Time\Time;
 use DrdPlus\Tables\Measurements\Time\TimeBonus;
 use DrdPlus\Tables\Partials\AbstractFileTable;
 use DrdPlus\Tables\Partials\Exceptions\RequiredRowNotFound;
@@ -14,7 +16,6 @@ use DrdPlus\Theurgist\Codes\ProfileCode;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Affection;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Attack;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Brightness;
-use DrdPlus\Theurgist\Formulas\CastingParameters\Casting;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Evocation;
 use DrdPlus\Theurgist\Formulas\CastingParameters\DetailLevel;
 use DrdPlus\Theurgist\Formulas\CastingParameters\DifficultyLimit;
@@ -223,36 +224,34 @@ class FormulasTable extends AbstractFileTable
     }
 
     /**
-     * Gives time bonus in fact.
+     * Gives time in fact.
      * Currently every unmodified formula can be casted in one round.
      *
      * @param FormulaCode $formulaCode
-     * @return Casting
+     * @return Time
      */
     public function getCasting(/** @noinspection PhpUnusedParameterInspection to keep same interface with others */
-        FormulaCode $formulaCode): Casting
+        FormulaCode $formulaCode): Time
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new Casting(0 /* = 1 round */, $this->tables->getTimeTable());
+        return new Time(1, TimeUnitCode::ROUND, $this->tables->getTimeTable());
     }
 
     /**
-     * Gives time bonus in fact
+     * Gives time in fact
      *
      * @param FormulaCode $formulaCode
      * @param array|ModifierCode[] $modifierCodes
-     * @return Casting
+     * @return Time
      */
-    public function getCastingOfModified(FormulaCode $formulaCode, array $modifierCodes): Casting
+    public function getCastingOfModified(FormulaCode $formulaCode, array $modifierCodes): Time
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        $timeBonusSum = $this->tables->getBaseOfWoundsTable()->sumBonuses([
-            $this->getCasting($formulaCode),
-            $this->modifiersTable->sumCastingChange($modifierCodes),
-        ]);
+        $rounds = $this->getCasting($formulaCode)->getInUnit(TimeUnitCode::ROUND)->getValue()
+            + $this->modifiersTable->sumCastingRoundsChange($modifierCodes)->getValue();
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new Casting($timeBonusSum, $this->tables->getTimeTable());
+        return new Time($rounds, TimeUnitCode::ROUND, $this->tables->getTimeTable());
     }
 
     /**
