@@ -57,4 +57,44 @@ abstract class IntegerCastingParameterTest extends TestWithMockery
         $sutClass = self::getSutClass();
         new $sutClass(['infinite', '332211']);
     }
+
+    /**
+     * @test
+     */
+    public function I_can_get_its_clone_with_increased_value()
+    {
+        $sutClass = self::getSutClass();
+        /** @var IntegerCastingParameter $original */
+        $original = new $sutClass(['123', '456=789']);
+        $increased = $original->add(456);
+        self::assertSame($original->getValue() + 456, $increased->getValue());
+        self::assertEquals($original->getAdditionByRealms(), $increased->getAdditionByRealms());
+        self::assertNotSame($original, $increased);
+
+        $zeroed = $increased->add(-579);
+        self::assertSame(0, $zeroed->getValue());
+        self::assertNotSame($original, $zeroed);
+        self::assertNotSame($original, $increased);
+        self::assertEquals($original->getAdditionByRealms(), $zeroed->getAdditionByRealms());
+    }
+
+    /**
+     * @test
+     */
+    public function I_can_get_its_clone_with_decreased_value()
+    {
+        $sutClass = self::getSutClass();
+        /** @var IntegerCastingParameter $original */
+        $original = new $sutClass(['123', '456=789']);
+        $decreased = $original->sub(111);
+        self::assertSame($original->getValue() - 111, $decreased->getValue());
+        self::assertEquals($original->getAdditionByRealms(), $decreased->getAdditionByRealms());
+        self::assertNotSame($original, $decreased);
+
+        $restored = $decreased->sub(-111);
+        self::assertSame($original->getValue(), $restored->getValue());
+        self::assertNotSame($original, $restored);
+        self::assertNotSame($original, $decreased);
+        self::assertEquals($original->getAdditionByRealms(), $restored->getAdditionByRealms());
+    }
 }

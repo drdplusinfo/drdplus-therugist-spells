@@ -926,35 +926,24 @@ class FormulasTableTest extends AbstractTheurgistTableTest
     public function I_can_get_attack_of_modified_formula()
     {
         $modifiers = ['foo', 'bar'];
-        $formulasTable = new FormulasTable(
-            Tables::getIt(),
-            $this->createModifiersTableForAttack($modifiers, 132456)
-        );
+        $formulasTable = new FormulasTable(Tables::getIt(), $this->createModifiersTableForAttack($modifiers, 132456));
         $attackOfLock = $formulasTable->getAttackOfModified(
             FormulaCode::getIt(FormulaCode::LOCK), // no spell speed (null)
             $modifiers
         );
         self::assertNull($attackOfLock);
 
-        $formulasTable = new FormulasTable(
-            Tables::getIt(),
-            $this->createModifiersTableForAttack($modifiers, 0)
-        );
-        $attackOfDischargeWithoutChange = $formulasTable->getAttackOfModified(
-            FormulaCode::getIt(FormulaCode::DISCHARGE), // +4
-            $modifiers
-        );
-        self::assertEquals(new IntegerObject(4), $attackOfDischargeWithoutChange);
+        $dischargeCode = FormulaCode::getIt(FormulaCode::DISCHARGE);
+        $dischargeAttack = $formulasTable->getAttack($dischargeCode);
 
-        $formulasTable = new FormulasTable(
-            Tables::getIt(),
-            $this->createModifiersTableForAttack($modifiers, 789)
-        );
-        $attackOfModifiedDischarge = $formulasTable->getAttackOfModified(
-            FormulaCode::getIt(FormulaCode::DISCHARGE), // +0
-            $modifiers
-        );
-        self::assertEquals(new IntegerObject(793), $attackOfModifiedDischarge);
+        $formulasTable = new FormulasTable(Tables::getIt(), $this->createModifiersTableForAttack($modifiers, 0));
+        self::assertSame(4, $dischargeAttack->getValue());
+        $attackOfDischargeWithoutChange = $formulasTable->getAttackOfModified($dischargeCode, $modifiers);
+        self::assertEquals($dischargeAttack, $attackOfDischargeWithoutChange);
+
+        $formulasTable = new FormulasTable(Tables::getIt(), $this->createModifiersTableForAttack($modifiers, 789));
+        $attackOfModifiedDischarge = $formulasTable->getAttackOfModified($dischargeCode, $modifiers);
+        self::assertEquals($dischargeAttack->add(789), $attackOfModifiedDischarge);
     }
 
     /**

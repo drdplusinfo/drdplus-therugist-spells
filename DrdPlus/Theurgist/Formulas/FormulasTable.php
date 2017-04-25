@@ -377,7 +377,7 @@ class FormulasTable extends AbstractFileTable
     /**
      * @param FormulaCode $formulaCode
      * @param array $modifierCodes
-     * @return IntegerObject|null
+     * @return Attack|null
      */
     public function getAttackOfModified(FormulaCode $formulaCode, array $modifierCodes)
     {
@@ -387,10 +387,7 @@ class FormulasTable extends AbstractFileTable
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new IntegerObject(
-            $formulaAttack->getValue()
-            + $this->modifiersTable->sumAttackChange($modifierCodes)->getValue()
-        );
+        return $formulaAttack->add($this->modifiersTable->sumAttackChange($modifierCodes)->getValue());
     }
 
     /**

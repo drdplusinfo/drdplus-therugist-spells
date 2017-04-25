@@ -3,6 +3,7 @@ namespace DrdPlus\Theurgist\Formulas\CastingParameters;
 
 use Granam\Integer\IntegerInterface;
 use Granam\Integer\Tools\ToInteger;
+use Granam\Number\NumberInterface;
 use Granam\Tools\ValueDescriber;
 
 abstract class IntegerCastingParameter extends CastingParameter implements IntegerInterface
@@ -47,5 +48,31 @@ abstract class IntegerCastingParameter extends CastingParameter implements Integ
     public function __toString(): string
     {
         return "{$this->getValue()} ({$this->getAdditionByRealms()})";
+    }
+
+    /**
+     * @param int|float|NumberInterface $value
+     * @return IntegerCastingParameter
+     * @throws \Granam\Integer\Tools\Exceptions\Exception
+     */
+    public function add($value)
+    {
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new static(
+            [$this->getValue() + ToInteger::toInteger($value), $this->getAdditionByRealms()->getNotation()]
+        );
+    }
+
+    /**
+     * @param int|float|NumberInterface $value
+     * @return IntegerCastingParameter
+     * @throws \Granam\Integer\Tools\Exceptions\Exception
+     */
+    public function sub($value)
+    {
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new static(
+            [$this->getValue() - ToInteger::toInteger($value), $this->getAdditionByRealms()->getNotation()]
+        );
     }
 }

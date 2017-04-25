@@ -115,4 +115,12 @@ class AdditionByRealms extends StrictObject
         return "{$this->getRealmIncrement()}=>{$this->getAddition()}";
     }
 
+    /**
+     * @return string
+     */
+    public function getNotation(): string
+    {
+        return "{$this->getRealmIncrement()}={$this->getAddition()}";
+    }
+
 }
