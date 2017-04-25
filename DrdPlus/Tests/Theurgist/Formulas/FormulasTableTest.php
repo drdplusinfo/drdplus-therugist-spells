@@ -561,25 +561,15 @@ class FormulasTableTest extends AbstractTheurgistTableTest
 
     /**
      * @test
-     * @depends TODO
      * @expectedException \DrdPlus\Theurgist\Formulas\Exceptions\CanNotBuildFormulaWithRequiredModification
      * @expectedExceptionMessageRegExp ~-1~
      */
     public function I_can_not_get_minimal_required_realm_of_heavily_modified_formula_with_negative_addition()
     {
-        $formulasTable = $this->mockery(FormulasTable::class);
-        $formulasTable->shouldReceive('getDifficultyLimit')
-            ->andReturn(new DifficultyLimit([123, 456, -1 /* higher realm cause lower difficulty to be handled */]));
-        $getDataFileName = new \ReflectionMethod(FormulasTable::class, 'getDataFileName');
-        $getDataFileName->setAccessible(true);
-        $formulasTable->shouldAllowMockingProtectedMethods()
-            ->shouldReceive('getDataFileName')
-            ->andReturn($getDataFileName->invoke(new FormulasTable(Tables::getIt(), new ModifiersTable(Tables::getIt()))));
         $modifiers = ['foo'];
-        $formulasTable->shouldReceive('__get')
-            ->with('modifiersTable')
-            ->andReturn($this->createModifiersTableForDifficulty($modifiers, $difficultyChangeValue = 333, 1));
-        $formulasTable = $formulasTable->makePartial(); // call original methods
+        $formulasTable = $this->getFormulasTableForMinimalRequiredRealmTest(
+            $this->createModifiersTableForDifficulty($modifiers, 333, 1)
+        );
 
         /** @var \Mockery\MockInterface|FormulasTable $formulasTable */
         try {
@@ -588,7 +578,19 @@ class FormulasTableTest extends AbstractTheurgistTableTest
             self::fail('No exception expected so far: ' . $exception->getMessage());
         }
 
-        $formulasTable = $this->mockery(FormulasTable::class);
+        $formulasTable = $this->getFormulasTableForMinimalRequiredRealmTest(
+            $this->createModifiersTableForDifficulty($modifiers, 334 /* ++ */, 1)
+        );
+        $formulasTable->getRealmOfModified(FormulaCode::getIt(FormulaCode::FLOW_OF_TIME), $modifiers);
+    }
+
+    /**
+     * @param ModifiersTable $modifiersTable
+     * @return \Mockery\Mock|\Mockery\MockInterface|FormulasTable
+     */
+    private function getFormulasTableForMinimalRequiredRealmTest(ModifiersTable $modifiersTable)
+    {
+        $formulasTable = \Mockery::mock(FormulasTable::class, [Tables::getIt(), $modifiersTable]);
         $formulasTable->shouldReceive('getDifficultyLimit')
             ->andReturn(new DifficultyLimit([123, 456, -1 /* higher realm cause lower difficulty to be handled */]));
         $getDataFileName = new \ReflectionMethod(FormulasTable::class, 'getDataFileName');
@@ -596,14 +598,9 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $formulasTable->shouldAllowMockingProtectedMethods()
             ->shouldReceive('getDataFileName')
             ->andReturn($getDataFileName->invoke(new FormulasTable(Tables::getIt(), new ModifiersTable(Tables::getIt()))));
-        $modifiers = ['foo'];
-        $formulasTable->tables = $this->createModifiersTableForDifficulty(
-            $modifiers,
-            $difficultyChangeValue = 334, // ++
-            1
-        );
         $formulasTable = $formulasTable->makePartial(); // call original methods
-        $formulasTable->getRealmOfModified(FormulaCode::getIt(FormulaCode::FLOW_OF_TIME), $modifiers);
+
+        return $formulasTable;
     }
 
     /**
