@@ -223,7 +223,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
     private function getExpectedFormulaValues(string $modifierValue): array
     {
         $expectedFormulaValues = [];
-        $formulasTable = new FormulasTable();
+        $formulasTable = new FormulasTable($this->createTablesShell(), $this->createModifiersTableShell());
         foreach (FormulaCode::getPossibleValues() as $formulaValue) {
             $modifierCodes = $formulasTable->getModifiers(FormulaCode::getIt($formulaValue));
             foreach ($modifierCodes as $modifierCode) {
@@ -235,6 +235,26 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
         }
 
         return $expectedFormulaValues;
+    }
+
+    /**
+     * Just a placeholder - intentionally no methods are expected to be called
+     *
+     * @return \Mockery\MockInterface|Tables
+     */
+    private function createTablesShell()
+    {
+        return $this->mockery(Tables::class);
+    }
+
+    /**
+     * Just a placeholder - intentionally no methods are expected to be called
+     *
+     * @return \Mockery\MockInterface|ModifiersTable
+     */
+    private function createModifiersTableShell()
+    {
+        return $this->mockery(ModifiersTable::class);
     }
 
     /**
@@ -828,6 +848,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
     {
         $modifiersTable = new ModifiersTable(Tables::getIt());
         $timeTable = new TimeTable();
+        $timeTable->getIndexedValues(); // just to populate values for sake of comparison
 
         self::assertEquals(new Casting(0, $timeTable), $modifiersTable->sumCastingChange([]));
 

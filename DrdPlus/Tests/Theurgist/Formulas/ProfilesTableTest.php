@@ -1,10 +1,12 @@
 <?php
 namespace DrdPlus\Tests\Theurgist\Formulas;
 
+use DrdPlus\Tables\Tables;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ProfileCode;
 use DrdPlus\Theurgist\Formulas\FormulasTable;
+use DrdPlus\Theurgist\Formulas\ModifiersTable;
 use DrdPlus\Theurgist\Formulas\ProfilesTable;
 
 class ProfilesTableTest extends AbstractTheurgistTableTest
@@ -16,7 +18,7 @@ class ProfilesTableTest extends AbstractTheurgistTableTest
 
     protected function setUp()
     {
-        $this->formulasTable = new FormulasTable();
+        $this->formulasTable = new FormulasTable(Tables::getIt(), new ModifiersTable(Tables::getIt()));
     }
 
     /**

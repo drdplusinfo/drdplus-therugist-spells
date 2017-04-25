@@ -79,7 +79,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_get_forms()
     {
-        $formulasTable = new FormulasTable();
+        $formulasTable = new FormulasTable(Tables::getIt(), new ModifiersTable(Tables::getIt()));
         foreach (FormulaCode::getPossibleValues() as $formulaValue) {
             $forms = $formulasTable->getForms(FormulaCode::getIt($formulaValue));
             $formValues = [];
@@ -123,7 +123,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_get_spell_traits()
     {
-        $formulasTable = new FormulasTable();
+        $formulasTable = new FormulasTable(Tables::getIt(), new ModifiersTable(Tables::getIt()));
         foreach (FormulaCode::getPossibleValues() as $formulaValue) {
             $spellTraits = $formulasTable->getSpellTraits(FormulaCode::getIt($formulaValue));
             /** @var array|string[] $expectedTraitValues */
@@ -175,7 +175,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_get_modifiers_for_formula()
     {
-        $formulasTable = new FormulasTable();
+        $formulasTable = new FormulasTable(Tables::getIt(), new ModifiersTable(Tables::getIt()));
         foreach (FormulaCode::getPossibleValues() as $formulaValue) {
             $modifierCodes = $formulasTable->getModifiers(FormulaCode::getIt($formulaValue));
             self::assertTrue(is_array($modifierCodes));
@@ -281,7 +281,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_not_get_modifiers_to_unknown_formula()
     {
-        (new FormulasTable())->getModifiers($this->createFormulaCode('Abraka dabra'));
+        (new FormulasTable(Tables::getIt(), new ModifiersTable(Tables::getIt())))->getModifiers($this->createFormulaCode('Abraka dabra'));
     }
 
     /**
@@ -304,7 +304,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_get_profiles_for_formula()
     {
-        $formulasTable = new FormulasTable();
+        $formulasTable = new FormulasTable(Tables::getIt(), new ModifiersTable(Tables::getIt()));
         foreach (FormulaCode::getPossibleValues() as $formulaValue) {
             $profileCodes = $formulasTable->getProfiles(FormulaCode::getIt($formulaValue));
             self::assertTrue(is_array($profileCodes));
@@ -402,7 +402,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_not_get_profiles_to_unknown_formula()
     {
-        (new FormulasTable())->getProfiles($this->createFormulaCode('Charge!'));
+        (new FormulasTable(Tables::getIt(), new ModifiersTable(Tables::getIt())))->getProfiles($this->createFormulaCode('Charge!'));
     }
 
     /**
@@ -410,15 +410,11 @@ class FormulasTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_get_difficulty_of_modified_formula()
     {
-        $formulasTable = new FormulasTable();
+        $modifiers = ['foo', 'bar'];
+        $formulasTable = new FormulasTable(Tables::getIt(), $this->createModifiersTableForDifficulty($modifiers, 123, 456));
         $fire = FormulaCode::getIt(FormulaCode::FIRE);
 
-        $modifiers = ['foo', 'bar'];
-        $difficultyOfModifiedFormula = $formulasTable->getDifficultyOfModified(
-            $fire,
-            $modifiers,
-            $this->createModifiersTableForDifficulty($modifiers, 123, 456)
-        );
+        $difficultyOfModifiedFormula = $formulasTable->getDifficultyOfModified($fire, $modifiers);
         self::assertSame(
             $formulasTable->getDifficultyLimit($fire)->getMinimal() + 123,
             $difficultyOfModifiedFormula->getValue()
@@ -459,13 +455,9 @@ class FormulasTableTest extends AbstractTheurgistTableTest
 
     private function I_can_get_minimal_required_realm_of_non_modified_formula()
     {
-        $formulasTable = new FormulasTable();
+        $formulasTable = new FormulasTable(Tables::getIt(), new ModifiersTable(Tables::getIt()));
         $formulaCode = FormulaCode::getIt(FormulaCode::PORTAL);
-        $requiredRealmOfNonModified = $formulasTable->getRealmOfModified(
-            $formulaCode,
-            [],
-            new ModifiersTable(Tables::getIt())
-        );
+        $requiredRealmOfNonModified = $formulasTable->getRealmOfModified($formulaCode, []);
         self::assertEquals($formulasTable->getRealm($formulaCode), $requiredRealmOfNonModified);
     }
 
@@ -473,28 +465,27 @@ class FormulasTableTest extends AbstractTheurgistTableTest
     {
         $formulaCode = FormulaCode::getIt(FormulaCode::BARRIER);
         $modifiers = ['foo', 'bar', 'baz'];
-        $formulasTable = new FormulasTable();
-        $requiredRealmOfSlightlyModifiedFormula = $formulasTable->getRealmOfModified(
-            $formulaCode,
-            $modifiers,
+        $formulasTable = new FormulasTable(
+            Tables::getIt(),
             $this->createModifiersTableForDifficulty(
                 $modifiers,
                 $difficultyChangeValue = 6 /* 14 + 6 = 20, still can be handled by formula minimal realm */,
                 1 // highest required realm by modifiers
             )
         );
+        $requiredRealmOfSlightlyModifiedFormula = $formulasTable->getRealmOfModified($formulaCode, $modifiers);
         self::assertInstanceOf(Realm::class, $requiredRealmOfSlightlyModifiedFormula);
         self::assertSame($formulasTable->getRealm($formulaCode)->getValue(), $requiredRealmOfSlightlyModifiedFormula->getValue());
 
-        $requiredRealmOnHighModifiersRequirement = $formulasTable->getRealmOfModified(
-            $formulaCode,
-            $modifiers,
+        $formulasTable = new FormulasTable(
+            Tables::getIt(),
             $this->createModifiersTableForDifficulty(
                 $modifiers,
                 $difficultyChangeValue = 6 /* 14 + 6 = 20, still can be handled by formula minimal realm */,
                 123 // highest required realm by modifiers
             )
         );
+        $requiredRealmOnHighModifiersRequirement = $formulasTable->getRealmOfModified($formulaCode, $modifiers);
         self::assertInstanceOf(Realm::class, $requiredRealmOnHighModifiersRequirement);
         self::assertSame(123, $requiredRealmOnHighModifiersRequirement->getValue());
     }
@@ -503,16 +494,15 @@ class FormulasTableTest extends AbstractTheurgistTableTest
     {
         $formulaCode = FormulaCode::getIt(FormulaCode::ILLUSION);
         $modifiers = ['foo', 'bar', 'baz'];
-        $formulasTable = new FormulasTable();
-        $requiredRealmOfModerateModifiedFormula = $formulasTable->getRealmOfModified(
-            $formulaCode,
-            $modifiers,
+        $formulasTable = new FormulasTable(
+            Tables::getIt(),
             $this->createModifiersTableForDifficulty(
                 $modifiers,
                 $difficultyChangeValue = 9 /* 2 + 9 = 11, can not be handled by formula minimal realm */,
                 1
             )
         );
+        $requiredRealmOfModerateModifiedFormula = $formulasTable->getRealmOfModified($formulaCode, $modifiers);
         self::assertInstanceOf(Realm::class, $requiredRealmOfModerateModifiedFormula);
         self::assertGreaterThan(
             $formulasTable->getRealm($formulaCode)->getValue(),
@@ -525,15 +515,15 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $realmsIncrement = (int)ceil($unhandledDifficulty / $handledDifficultyPerRealm);
         self::assertSame($basicFormulaRealmValue + $realmsIncrement, $requiredRealmOfModerateModifiedFormula->getValue());
 
-        $requiredRealmOfHighModifiersRequirement = $formulasTable->getRealmOfModified(
-            $formulaCode,
-            $modifiers,
+        $formulasTable = new FormulasTable(
+            Tables::getIt(),
             $this->createModifiersTableForDifficulty(
                 $modifiers,
                 $difficultyChangeValue = 9 /* 2 + 9 = 11, can not be handled by formula minimal realm */,
                 456
             )
         );
+        $requiredRealmOfHighModifiersRequirement = $formulasTable->getRealmOfModified($formulaCode, $modifiers);
         self::assertSame(456, $requiredRealmOfHighModifiersRequirement->getValue());
     }
 
@@ -541,12 +531,11 @@ class FormulasTableTest extends AbstractTheurgistTableTest
     {
         $formulaCode = FormulaCode::getIt(FormulaCode::DISCHARGE);
         $modifiers = ['foo', 'BAR'];
-        $formulasTable = new FormulasTable();
-        $requiredRealmOfHeavilyModifiedFormula = $formulasTable->getRealmOfModified(
-            $formulaCode,
-            $modifiers,
+        $formulasTable = new FormulasTable(
+            Tables::getIt(),
             $this->createModifiersTableForDifficulty($modifiers, $difficultyChangeValue = 159, 1)
         );
+        $requiredRealmOfHeavilyModifiedFormula = $formulasTable->getRealmOfModified($formulaCode, $modifiers);
         self::assertInstanceOf(Realm::class, $requiredRealmOfHeavilyModifiedFormula);
         self::assertGreaterThan(
             $formulasTable->getRealm($formulaCode)->getValue(),
@@ -561,16 +550,18 @@ class FormulasTableTest extends AbstractTheurgistTableTest
             $basicFormulaRealmValue + $realmsIncrement,
             $requiredRealmOfHeavilyModifiedFormula->getValue()
         );
-        $requiredRealmOfHighModifiersRequirement = $formulasTable->getRealmOfModified(
-            $formulaCode,
-            $modifiers,
+
+        $formulasTable = new FormulasTable(
+            Tables::getIt(),
             $this->createModifiersTableForDifficulty($modifiers, $difficultyChangeValue = 159, $requiredRealmOfHeavilyModifiedFormula->getValue() + 1)
         );
+        $requiredRealmOfHighModifiersRequirement = $formulasTable->getRealmOfModified($formulaCode, $modifiers);
         self::assertSame($requiredRealmOfHeavilyModifiedFormula->getValue() + 1, $requiredRealmOfHighModifiersRequirement->getValue());
     }
 
     /**
      * @test
+     * @depends TODO
      * @expectedException \DrdPlus\Theurgist\Formulas\Exceptions\CanNotBuildFormulaWithRequiredModification
      * @expectedExceptionMessageRegExp ~-1~
      */
@@ -583,26 +574,36 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $getDataFileName->setAccessible(true);
         $formulasTable->shouldAllowMockingProtectedMethods()
             ->shouldReceive('getDataFileName')
-            ->andReturn($getDataFileName->invoke(new FormulasTable()));
+            ->andReturn($getDataFileName->invoke(new FormulasTable(Tables::getIt(), new ModifiersTable(Tables::getIt()))));
+        $modifiers = ['foo'];
+        $formulasTable->shouldReceive('__get')
+            ->with('modifiersTable')
+            ->andReturn($this->createModifiersTableForDifficulty($modifiers, $difficultyChangeValue = 333, 1));
         $formulasTable = $formulasTable->makePartial(); // call original methods
 
-        $modifiers = ['foo'];
-        /** @var FormulasTable $formulasTable */
+        /** @var \Mockery\MockInterface|FormulasTable $formulasTable */
         try {
-            $formulasTable->getRealmOfModified(
-                FormulaCode::getIt(FormulaCode::FLOW_OF_TIME),
-                $modifiers,
-                $this->createModifiersTableForDifficulty($modifiers, $difficultyChangeValue = 333, 1)
-            );
+            $formulasTable->getRealmOfModified(FormulaCode::getIt(FormulaCode::FLOW_OF_TIME), $modifiers);
         } catch (\Exception $exception) {
             self::fail('No exception expected so far: ' . $exception->getMessage());
         }
 
-        $formulasTable->getRealmOfModified(
-            FormulaCode::getIt(FormulaCode::FLOW_OF_TIME),
+        $formulasTable = $this->mockery(FormulasTable::class);
+        $formulasTable->shouldReceive('getDifficultyLimit')
+            ->andReturn(new DifficultyLimit([123, 456, -1 /* higher realm cause lower difficulty to be handled */]));
+        $getDataFileName = new \ReflectionMethod(FormulasTable::class, 'getDataFileName');
+        $getDataFileName->setAccessible(true);
+        $formulasTable->shouldAllowMockingProtectedMethods()
+            ->shouldReceive('getDataFileName')
+            ->andReturn($getDataFileName->invoke(new FormulasTable(Tables::getIt(), new ModifiersTable(Tables::getIt()))));
+        $modifiers = ['foo'];
+        $formulasTable->tables = $this->createModifiersTableForDifficulty(
             $modifiers,
-            $this->createModifiersTableForDifficulty($modifiers, $difficultyChangeValue = 334, 1)
+            $difficultyChangeValue = 334, // ++
+            1
         );
+        $formulasTable = $formulasTable->makePartial(); // call original methods
+        $formulasTable->getRealmOfModified(FormulaCode::getIt(FormulaCode::FLOW_OF_TIME), $modifiers);
     }
 
     /**
@@ -610,48 +611,54 @@ class FormulasTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_get_affections_of_modified_formula()
     {
-        $formulasTable = new FormulasTable();
-
+        $formulasTable = new FormulasTable(
+            Tables::getIt(),
+            $this->createModifiersTableForAffections([], [[0, AffectionPeriodCode::DAILY]])
+        );
         self::assertEquals(
             [AffectionPeriodCode::DAILY => new Affection([-1, AffectionPeriodCode::DAILY])],
-            $formulasTable->getAffectionsOfModified(
-                FormulaCode::getIt(FormulaCode::DISCHARGE) /* -1 */,
-                [],
-                $this->modifiersTable
-            )
+            $formulasTable->getAffectionsOfModified(FormulaCode::getIt(FormulaCode::DISCHARGE) /* -1 */, [])
         );
 
         $expectedModifiers = ['foo', 'bar'];
+        $formulasTable = new FormulasTable(
+            Tables::getIt(),
+            $this->createModifiersTableForAffections($expectedModifiers, [[0, AffectionPeriodCode::DAILY]])
+        );
         self::assertEquals(
             [AffectionPeriodCode::DAILY => new Affection([-1, AffectionPeriodCode::DAILY])],
-            $formulasTable->getAffectionsOfModified(
-                FormulaCode::getIt(FormulaCode::FLOW_OF_TIME),
-                $expectedModifiers,
-                $this->createModifiersTableForAffections(
-                    $expectedModifiers,
-                    [
-                        [0, AffectionPeriodCode::DAILY],
-                    ]
-                )
-            )
+            $formulasTable->getAffectionsOfModified(FormulaCode::getIt(FormulaCode::FLOW_OF_TIME), $expectedModifiers)
         );
 
+        $formulasTable = new FormulasTable(
+            Tables::getIt(),
+            $this->createModifiersTableForAffections(
+                $expectedModifiers,
+                [
+                    [-1, AffectionPeriodCode::DAILY],
+                    [-4, AffectionPeriodCode::DAILY],
+                    [-78, AffectionPeriodCode::DAILY],
+                ]
+            )
+        );
         self::assertEquals(
             [AffectionPeriodCode::DAILY => new Affection([-84, AffectionPeriodCode::DAILY])],
-            $formulasTable->getAffectionsOfModified(
-                FormulaCode::getIt(FormulaCode::FLOW_OF_TIME),
-                $expectedModifiers,
-                $this->createModifiersTableForAffections(
-                    $expectedModifiers,
-                    [
-                        [-1, AffectionPeriodCode::DAILY],
-                        [-4, AffectionPeriodCode::DAILY],
-                        [-78, AffectionPeriodCode::DAILY],
-                    ]
-                )
-            )
+            $formulasTable->getAffectionsOfModified(FormulaCode::getIt(FormulaCode::FLOW_OF_TIME), $expectedModifiers)
         );
 
+        $formulasTable = new FormulasTable(
+            Tables::getIt(),
+            $this->createModifiersTableForAffections(
+                $expectedModifiers,
+                [
+                    [-1, AffectionPeriodCode::DAILY],
+                    [-4, AffectionPeriodCode::DAILY],
+                    [-78, AffectionPeriodCode::DAILY],
+                    [-159, AffectionPeriodCode::LIFE],
+                    [-357, AffectionPeriodCode::LIFE],
+                ]
+            )
+        );
         self::assertEquals(
             [
                 AffectionPeriodCode::DAILY => new Affection([-85, AffectionPeriodCode::DAILY]),
@@ -659,17 +666,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
             ],
             $formulasTable->getAffectionsOfModified(
                 FormulaCode::getIt(FormulaCode::TSUNAMI_FROM_CLAY_AND_STONES), // -2
-                $expectedModifiers,
-                $this->createModifiersTableForAffections(
-                    $expectedModifiers,
-                    [
-                        [-1, AffectionPeriodCode::DAILY],
-                        [-4, AffectionPeriodCode::DAILY],
-                        [-78, AffectionPeriodCode::DAILY],
-                        [-159, AffectionPeriodCode::LIFE],
-                        [-357, AffectionPeriodCode::LIFE],
-                    ]
-                )
+                $expectedModifiers
             )
         );
     }
@@ -698,31 +695,27 @@ class FormulasTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_get_radius_of_modified_formula()
     {
-        $formulasTable = new FormulasTable();
-        $distanceTable = new DistanceTable();
         $modifiers = ['foo', 'bar'];
-
+        $formulasTable = new FormulasTable(Tables::getIt(), $this->createModifiersTableForRadius($modifiers, 132456));
         $radiusOfLock = $formulasTable->getRadiusOfModified(
             FormulaCode::getIt(FormulaCode::LOCK), // no radius (null)
-            $modifiers,
-            $this->createModifiersTableForRadius($modifiers, 132456),
-            $distanceTable
+            $modifiers
         );
         self::assertNull($radiusOfLock);
 
+        $formulasTable = new FormulasTable(Tables::getIt(), $this->createModifiersTableForRadius($modifiers, 0));
         $radiusOfDischargeWithoutChange = $formulasTable->getRadiusOfModified(
             FormulaCode::getIt(FormulaCode::DISCHARGE), // +10
-            $modifiers,
-            $this->createModifiersTableForRadius($modifiers, 0),
-            $distanceTable
+            $modifiers
         );
+        $distanceTable = new DistanceTable();
+        $distanceTable->getIndexedValues(); // just to populate them for sake of comparison
         self::assertEquals(new DistanceBonus(10, $distanceTable), $radiusOfDischargeWithoutChange);
 
+        $formulasTable = new FormulasTable(Tables::getIt(), $this->createModifiersTableForRadius($modifiers, 789));
         $radiusOfModifiedDischarge = $formulasTable->getRadiusOfModified(
             FormulaCode::getIt(FormulaCode::DISCHARGE), // +10
-            $modifiers,
-            $this->createModifiersTableForRadius($modifiers, 789),
-            $distanceTable
+            $modifiers
         );
         self::assertEquals(new DistanceBonus(799, $distanceTable), $radiusOfModifiedDischarge);
     }
@@ -747,27 +740,26 @@ class FormulasTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_get_power_of_modified_formula()
     {
-        $formulasTable = new FormulasTable();
         $modifiers = ['foo', 'bar'];
+        $formulasTable = new FormulasTable(Tables::getIt(), $this->createModifiersTableForPower($modifiers, 132456));
 
         $powerOfDischarge = $formulasTable->getPowerOfModified(
             FormulaCode::getIt(FormulaCode::DISCHARGE), // null
-            $modifiers,
-            $this->createModifiersTableForPower($modifiers, 132456)
+            $modifiers
         );
         self::assertNull($powerOfDischarge);
 
+        $formulasTable = new FormulasTable(Tables::getIt(), $this->createModifiersTableForPower($modifiers, 0));
         $powerOfLockWithoutChange = $formulasTable->getPowerOfModified(
             FormulaCode::getIt(FormulaCode::LOCK), // 0
-            $modifiers,
-            $this->createModifiersTableForPower($modifiers, 0)
+            $modifiers
         );
         self::assertEquals(new IntegerObject(0), $powerOfLockWithoutChange);
 
+        $formulasTable = new FormulasTable(Tables::getIt(), $this->createModifiersTableForPower($modifiers, 789));
         $powerOfGreatMassacreWithChange = $formulasTable->getPowerOfModified(
             FormulaCode::getIt(FormulaCode::GREAT_MASSACRE), // 6
-            $modifiers,
-            $this->createModifiersTableForPower($modifiers, 789)
+            $modifiers
         );
         self::assertEquals(new IntegerObject(795), $powerOfGreatMassacreWithChange);
     }
@@ -792,39 +784,46 @@ class FormulasTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_get_epicenter_shift_of_modified_formula()
     {
-        $formulasTable = new FormulasTable();
-        $distanceTable = new DistanceTable();
         $modifiers = ['foo', 'bar'];
-
+        $formulasTable = new FormulasTable(
+            Tables::getIt(),
+            $this->createModifiersTableForEpicenterShift($modifiers, false /* not shifted */, 123456)
+        );
         $epicenterShiftOfNotShiftedLock = $formulasTable->getEpicenterShiftOfModified(
             FormulaCode::getIt(FormulaCode::LOCK), // no epicenter shift (null)
-            $modifiers,
-            $this->createModifiersTableForEpicenterShift($modifiers, false /* not shifted */, 123456),
-            $distanceTable
+            $modifiers
         );
         self::assertNull($epicenterShiftOfNotShiftedLock);
 
+        $formulasTable = new FormulasTable(
+            Tables::getIt(),
+            $this->createModifiersTableForEpicenterShift($modifiers, true /* shifted */, 123456)
+        );
         $epicenterShiftOfShiftedLock = $formulasTable->getEpicenterShiftOfModified(
             FormulaCode::getIt(FormulaCode::LOCK), // no epicenter shift (null)
-            $modifiers,
-            $this->createModifiersTableForEpicenterShift($modifiers, true /* shifted */, 123456),
-            $distanceTable
+            $modifiers
         );
+        $distanceTable = new DistanceTable();
+        $distanceTable->getIndexedValues(); // just to populate them for sake of comparison
         self::assertEquals(new DistanceBonus(123456, $distanceTable), $epicenterShiftOfShiftedLock);
 
+        $formulasTable = new FormulasTable(
+            Tables::getIt(),
+            $this->createModifiersTableForEpicenterShift($modifiers, true /* shifted */, 0)
+        );
         $epicenterShiftOfGreatMassacreWithoutChange = $formulasTable->getEpicenterShiftOfModified(
             FormulaCode::getIt(FormulaCode::GREAT_MASSACRE), // +20
-            $modifiers,
-            $this->createModifiersTableForEpicenterShift($modifiers, true /* shifted */, 0),
-            $distanceTable
+            $modifiers
         );
         self::assertEquals(new DistanceBonus(20, $distanceTable), $epicenterShiftOfGreatMassacreWithoutChange);
 
+        $formulasTable = new FormulasTable(
+            Tables::getIt(),
+            $this->createModifiersTableForEpicenterShift($modifiers, true /* shifted */, 789)
+        );
         $epicenterShiftOfModifiedGreatMassacre = $formulasTable->getEpicenterShiftOfModified(
             FormulaCode::getIt(FormulaCode::GREAT_MASSACRE), // +20
-            $modifiers,
-            $this->createModifiersTableForEpicenterShift($modifiers, true /* shifted */, 789),
-            $distanceTable
+            $modifiers
         );
         self::assertEquals(new DistanceBonus(809, $distanceTable), $epicenterShiftOfModifiedGreatMassacre);
     }
@@ -856,31 +855,36 @@ class FormulasTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_get_spell_speed_of_modified_formula()
     {
-        $formulasTable = new FormulasTable();
-        $speedTable = new SpeedTable();
         $modifiers = ['foo', 'bar'];
-
+        $formulasTable = new FormulasTable(
+            Tables::getIt(),
+            $this->createModifiersTableForSpellSpeed($modifiers, 132456)
+        );
         $spellSpeedOfLock = $formulasTable->getSpellSpeedOfModified(
             FormulaCode::getIt(FormulaCode::LOCK), // no spell speed (null)
-            $modifiers,
-            $this->createModifiersTableForSpellSpeed($modifiers, 132456),
-            $speedTable
+            $modifiers
         );
         self::assertNull($spellSpeedOfLock);
 
+        $formulasTable = new FormulasTable(
+            Tables::getIt(),
+            $this->createModifiersTableForSpellSpeed($modifiers, 0)
+        );
+        $speedTable = new SpeedTable();
+        $speedTable->getIndexedValues(); // just to populate them for sake of comparison
         $spellSpeedOfTsunamiWithoutChange = $formulasTable->getSpellSpeedOfModified(
             FormulaCode::getIt(FormulaCode::TSUNAMI_FROM_CLAY_AND_STONES), // +0
-            $modifiers,
-            $this->createModifiersTableForSpellSpeed($modifiers, 0),
-            $speedTable
+            $modifiers
         );
         self::assertEquals(new SpeedBonus(0, $speedTable), $spellSpeedOfTsunamiWithoutChange);
 
+        $formulasTable = new FormulasTable(
+            Tables::getIt(),
+            $this->createModifiersTableForSpellSpeed($modifiers, 789)
+        );
         $spellSpeedOfModifiedTsunami = $formulasTable->getSpellSpeedOfModified(
             FormulaCode::getIt(FormulaCode::TSUNAMI_FROM_CLAY_AND_STONES), // +0
-            $modifiers,
-            $this->createModifiersTableForSpellSpeed($modifiers, 789),
-            $speedTable
+            $modifiers
         );
         self::assertEquals(new SpeedBonus(789, $speedTable), $spellSpeedOfModifiedTsunami);
     }
@@ -905,27 +909,34 @@ class FormulasTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_get_attack_of_modified_formula()
     {
-        $formulasTable = new FormulasTable();
         $modifiers = ['foo', 'bar'];
-
+        $formulasTable = new FormulasTable(
+            Tables::getIt(),
+            $this->createModifiersTableForAttack($modifiers, 132456)
+        );
         $attackOfLock = $formulasTable->getAttackOfModified(
             FormulaCode::getIt(FormulaCode::LOCK), // no spell speed (null)
-            $modifiers,
-            $this->createModifiersTableForAttack($modifiers, 132456)
+            $modifiers
         );
         self::assertNull($attackOfLock);
 
+        $formulasTable = new FormulasTable(
+            Tables::getIt(),
+            $this->createModifiersTableForAttack($modifiers, 0)
+        );
         $attackOfDischargeWithoutChange = $formulasTable->getAttackOfModified(
             FormulaCode::getIt(FormulaCode::DISCHARGE), // +4
-            $modifiers,
-            $this->createModifiersTableForAttack($modifiers, 0)
+            $modifiers
         );
         self::assertEquals(new IntegerObject(4), $attackOfDischargeWithoutChange);
 
+        $formulasTable = new FormulasTable(
+            Tables::getIt(),
+            $this->createModifiersTableForAttack($modifiers, 789)
+        );
         $attackOfModifiedDischarge = $formulasTable->getAttackOfModified(
             FormulaCode::getIt(FormulaCode::DISCHARGE), // +0
-            $modifiers,
-            $this->createModifiersTableForAttack($modifiers, 789)
+            $modifiers
         );
         self::assertEquals(new IntegerObject(793), $attackOfModifiedDischarge);
     }

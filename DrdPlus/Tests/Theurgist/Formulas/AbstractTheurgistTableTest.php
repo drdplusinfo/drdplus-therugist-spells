@@ -6,6 +6,7 @@ use DrdPlus\Tables\Table;
 use DrdPlus\Tables\Tables;
 use DrdPlus\Theurgist\Codes\AbstractTheurgistCode;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Attack;
+use DrdPlus\Theurgist\Formulas\ModifiersTable;
 use Granam\String\StringTools;
 use Granam\Tests\Tools\TestWithMockery;
 
@@ -47,7 +48,7 @@ abstract class AbstractTheurgistTableTest extends TestWithMockery
         $getObligatoryParameter = StringTools::assembleGetterForName($obligatoryParameter);
         $parameterClass = $this->assembleParameterClassName($obligatoryParameter);
         $sutClass = self::getSutClass();
-        $sut = new $sutClass(Tables::getIt());
+        $sut = new $sutClass(Tables::getIt(), $this->createModifiersTable());
         $tableArgument = $this->findOutTableArgument($parameterClass);
         foreach ($codeClass::getPossibleValues() as $modifierCode) {
             $expectedParameterValue = $this->getValueFromTable($sut, $modifierCode, $obligatoryParameter);
@@ -62,7 +63,19 @@ abstract class AbstractTheurgistTableTest extends TestWithMockery
         }
     }
 
-    private function assembleParameterClassName(string $parameter)
+    /**
+     * @return \Mockery\MockInterface|ModifiersTable
+     */
+    private function createModifiersTable()
+    {
+        return $this->mockery(ModifiersTable::class);
+    }
+
+    /**
+     * @param string $parameter
+     * @return string
+     */
+    private function assembleParameterClassName(string $parameter): string
     {
         $basename = implode(array_map(
             function (string $parameterPart) {
@@ -85,7 +98,7 @@ abstract class AbstractTheurgistTableTest extends TestWithMockery
         $getOptionalParameter = StringTools::assembleGetterForName($optionalParameter);
         $parameterClass = $this->assembleParameterClassName($optionalParameter);
         $sutClass = self::getSutClass();
-        $sut = new $sutClass(Tables::getIt());
+        $sut = new $sutClass(Tables::getIt(), $this->createModifiersTable());
         $tableArgument = $this->findOutTableArgument($parameterClass);
         foreach ($codeClass::getPossibleValues() as $modifierCode) {
             $expectedParameterValue = $this->getValueFromTable($sut, $modifierCode, $optionalParameter);
@@ -127,6 +140,10 @@ abstract class AbstractTheurgistTableTest extends TestWithMockery
         $tableClass = $tableParameter->getClass()->getName();
         self::assertTrue(is_a($tableClass, Table::class, true));
 
-        return new $tableClass;
+        /** @var Table $table */
+        $table = new $tableClass;
+        $table->getIndexedValues(); // to load them to provide save result on comparisons of used and unused table
+
+        return $table;
     }
 }

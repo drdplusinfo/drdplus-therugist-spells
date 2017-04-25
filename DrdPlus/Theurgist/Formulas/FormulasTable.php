@@ -1,15 +1,12 @@
 <?php
 namespace DrdPlus\Theurgist\Formulas;
 
-use DrdPlus\Tables\Measurements\BaseOfWounds\BaseOfWoundsTable;
 use DrdPlus\Tables\Measurements\Distance\DistanceBonus;
-use DrdPlus\Tables\Measurements\Distance\DistanceTable;
 use DrdPlus\Tables\Measurements\Speed\SpeedBonus;
-use DrdPlus\Tables\Measurements\Speed\SpeedTable;
 use DrdPlus\Tables\Measurements\Time\TimeBonus;
-use DrdPlus\Tables\Measurements\Time\TimeTable;
 use DrdPlus\Tables\Partials\AbstractFileTable;
 use DrdPlus\Tables\Partials\Exceptions\RequiredRowNotFound;
+use DrdPlus\Tables\Tables;
 use DrdPlus\Theurgist\Codes\FormCode;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
@@ -32,6 +29,21 @@ use Granam\Integer\IntegerObject;
 
 class FormulasTable extends AbstractFileTable
 {
+    /**
+     * @var Tables
+     */
+    private $tables;
+    /**
+     * @var ModifiersTable
+     */
+    private $modifiersTable;
+
+    public function __construct(Tables $tables, ModifiersTable $modifiersTable)
+    {
+        $this->tables = $tables;
+        $this->modifiersTable = $modifiersTable;
+    }
+
     protected function getDataFileName(): string
     {
         return __DIR__ . '/data/formulas.csv';
@@ -100,25 +112,19 @@ class FormulasTable extends AbstractFileTable
     /**
      * @param FormulaCode $formulaCode
      * @param array|ModifierCode[] $modifierCodes
-     * @param ModifiersTable $modifiersTable
      * @return Realm
      * @throws \DrdPlus\Theurgist\Formulas\Exceptions\CanNotBuildFormulaWithRequiredModification
      */
-    public function getRealmOfModified(
-        FormulaCode $formulaCode,
-        array $modifierCodes,
-        ModifiersTable $modifiersTable
-    ): Realm
+    public function getRealmOfModified(FormulaCode $formulaCode, array $modifierCodes): Realm
     {
         $basicFormulaDifficultyLimit = $this->getDifficultyLimit($formulaCode);
         $maximalDifficultyHandledByFormula = $basicFormulaDifficultyLimit->getMaximal();
         $minimalPossibleRealm = $this->getRealm($formulaCode);
         $difficultyOfModifiedWithoutRealmChange = $this->getDifficultyOfModified(
             $formulaCode,
-            $modifierCodes,
-            $modifiersTable
+            $modifierCodes
         )->getValue();
-        $highestRequiredRealmByModifiers = $modifiersTable->getHighestRequiredRealm($modifierCodes);
+        $highestRequiredRealmByModifiers = $this->modifiersTable->getHighestRequiredRealm($modifierCodes);
         if ($maximalDifficultyHandledByFormula >= $difficultyOfModifiedWithoutRealmChange
             && $minimalPossibleRealm->getValue() >= $highestRequiredRealmByModifiers->getValue()
         ) {
@@ -163,20 +169,15 @@ class FormulasTable extends AbstractFileTable
     /**
      * @param FormulaCode $formulaCode
      * @param array|ModifierCode[] $modifierCodes
-     * @param ModifiersTable $modifiersTable
      * @return array|Affection[]
      * @throws \DrdPlus\Theurgist\Formulas\Exceptions\CanNotBuildFormulaWithRequiredModification
      */
-    public function getAffectionsOfModified(
-        FormulaCode $formulaCode,
-        array $modifierCodes,
-        ModifiersTable $modifiersTable
-    ): array
+    public function getAffectionsOfModified(FormulaCode $formulaCode, array $modifierCodes): array
     {
         $formulaAffection = $this->getAffection($formulaCode);
         $summedAffections = [$formulaAffection->getAffectionPeriod()->getValue() => $formulaAffection];
         /** @var Affection $modifiersAffection */
-        foreach ($modifiersTable->getAffectionsOfModifiers($modifierCodes) as $modifiersAffection) {
+        foreach ($this->modifiersTable->getAffectionsOfModifiers($modifierCodes) as $modifiersAffection) {
             $affectionPeriodValue = $modifiersAffection->getAffectionPeriod()->getValue();
             if (!array_key_exists($affectionPeriodValue, $summedAffections)) {
                 $summedAffections[$affectionPeriodValue] = $modifiersAffection;
@@ -198,60 +199,51 @@ class FormulasTable extends AbstractFileTable
      * Time needed to invoke (assemble) a spell. Gives time bonus value in fact.
      *
      * @param FormulaCode $formulaCode
-     * @param TimeTable $timeTable
      * @return Evocation
      */
-    public function getEvocation(FormulaCode $formulaCode, TimeTable $timeTable): Evocation
+    public function getEvocation(FormulaCode $formulaCode): Evocation
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new Evocation($this->getValue($formulaCode, self::EVOCATION), $timeTable);
+        return new Evocation($this->getValue($formulaCode, self::EVOCATION), $this->tables->getTimeTable());
     }
 
     /**
      * @param FormulaCode $formulaCode
-     * @param TimeTable $timeTable
      * @return TimeBonus
      */
-    public function getEvocationOfModified(FormulaCode $formulaCode, TimeTable $timeTable): TimeBonus
+    public function getEvocationOfModified(FormulaCode $formulaCode): TimeBonus
     {
         // no modifier affects evocation time
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new TimeBonus(
-            $this->getEvocation($formulaCode, $timeTable)->getValue(),
-            $timeTable
+            $this->getEvocation($formulaCode)->getValue(),
+            $this->tables->getTimeTable()
         );
     }
 
     /**
      * @param FormulaCode $formulaCode
-     * @param TimeTable $timeTable
      * @return TimeBonus
      */
-    public function getCastingTime(FormulaCode $formulaCode, TimeTable $timeTable): TimeBonus
+    public function getCastingTime(FormulaCode $formulaCode): TimeBonus
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new TimeBonus(0 /* = 1 round */, $timeTable);
+        return new TimeBonus(0 /* = 1 round */, $this->tables->getTimeTable());
     }
 
     /**
      * @param FormulaCode $formulaCode
-     * @param TimeTable $timeTable
+     * @param array|ModifierCode[] $modifierCodes
      * @return TimeBonus
      */
-    public function getCastingTimeOfModified(
-        FormulaCode $formulaCode,
-        array $modifierCodes,
-        ModifiersTable $modifiersTable,
-        TimeTable $timeTable,
-        BaseOfWoundsTable $baseOfWoundsTable
-    ): TimeBonus
+    public function getCastingTimeOfModified(FormulaCode $formulaCode, array $modifierCodes): TimeBonus
     {
-        $timeBonusSum = $baseOfWoundsTable->sumBonuses([
-            $this->getCastingTime($formulaCode, $timeTable),
-            $modifiersTable->sumCastingChange($modifierCodes),
+        $timeBonusSum = $this->tables->getBaseOfWoundsTable()->sumBonuses([
+            $this->getCastingTime($formulaCode),
+            $this->modifiersTable->sumCastingChange($modifierCodes),
         ]);
 
-        return new TimeBonus($timeBonusSum, $timeTable);
+        return new TimeBonus($timeBonusSum, $this->tables->getTimeTable());
     }
 
     /**
@@ -267,28 +259,22 @@ class FormulasTable extends AbstractFileTable
     /**
      * @param FormulaCode $formulaCode
      * @param array|ModifierCode[] $modifierCodes
-     * @param ModifiersTable $modifiersTable
      * @return IntegerObject
      * @throws \DrdPlus\Theurgist\Formulas\Exceptions\CanNotBuildFormulaWithRequiredModification
      */
-    public function getDifficultyOfModified(
-        FormulaCode $formulaCode,
-        array $modifierCodes,
-        ModifiersTable $modifiersTable
-    ): IntegerObject
+    public function getDifficultyOfModified(FormulaCode $formulaCode, array $modifierCodes): IntegerObject
     {
         return new IntegerObject(
             $this->getDifficultyLimit($formulaCode)->getMinimal()
-            + $modifiersTable->sumDifficultyChanges($modifierCodes)->getValue()
+            + $this->modifiersTable->sumDifficultyChanges($modifierCodes)->getValue()
         );
     }
 
     /**
      * @param FormulaCode $formulaCode
-     * @param DistanceTable $distanceTable
      * @return Radius|null
      */
-    public function getRadius(FormulaCode $formulaCode, DistanceTable $distanceTable)
+    public function getRadius(FormulaCode $formulaCode)
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         $radiusValues = $this->getValue($formulaCode, self::RADIUS);
@@ -297,45 +283,37 @@ class FormulasTable extends AbstractFileTable
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new Radius($radiusValues, $distanceTable);
+        return new Radius($radiusValues, $this->tables->getDistanceTable());
     }
 
     /**
      * @param FormulaCode $formulaCode
      * @param array|ModifierCode[] $modifierCodes
-     * @param ModifiersTable $modifiersTable
-     * @param DistanceTable $distanceTable
      * @return DistanceBonus|null
      * @throws \DrdPlus\Theurgist\Formulas\Exceptions\CanNotBuildFormulaWithRequiredModification
      */
-    public function getRadiusOfModified(
-        FormulaCode $formulaCode,
-        array $modifierCodes,
-        ModifiersTable $modifiersTable,
-        DistanceTable $distanceTable
-    )
+    public function getRadiusOfModified(FormulaCode $formulaCode, array $modifierCodes)
     {
-        $formulaRadius = $this->getRadius($formulaCode, $distanceTable);
+        $formulaRadius = $this->getRadius($formulaCode);
         if (!$formulaRadius) {
             return null;
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new DistanceBonus(
-            $formulaRadius->getValue() + $modifiersTable->sumRadiusChange($modifierCodes)->getValue(),
-            $distanceTable
+            $formulaRadius->getValue() + $this->modifiersTable->sumRadiusChange($modifierCodes)->getValue(),
+            $this->tables->getDistanceTable()
         );
     }
 
     /**
      * @param FormulaCode $formulaCode
-     * @param TimeTable $timeTable
      * @return Duration
      */
-    public function getDuration(FormulaCode $formulaCode, TimeTable $timeTable): Duration
+    public function getDuration(FormulaCode $formulaCode): Duration
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new Duration($this->getValue($formulaCode, self::DURATION), $timeTable);
+        return new Duration($this->getValue($formulaCode, self::DURATION), $this->tables->getTimeTable());
     }
 
     /**
@@ -357,17 +335,19 @@ class FormulasTable extends AbstractFileTable
     /**
      * @param FormulaCode $formulaCode
      * @param array|ModifierCode[] $modifierCodes
-     * @param ModifiersTable $modifiersTable
      * @return IntegerObject|null
      */
-    public function getPowerOfModified(FormulaCode $formulaCode, array $modifierCodes, ModifiersTable $modifiersTable)
+    public function getPowerOfModified(FormulaCode $formulaCode, array $modifierCodes)
     {
         $formulaPower = $this->getPower($formulaCode);
         if (!$formulaPower) {
             return null;
         }
 
-        return new IntegerObject($formulaPower->getValue() + $modifiersTable->sumPowerChange($modifierCodes)->getValue());
+        return new IntegerObject(
+            $formulaPower->getValue()
+            + $this->modifiersTable->sumPowerChange($modifierCodes)->getValue()
+        );
     }
 
     /**
@@ -389,14 +369,9 @@ class FormulasTable extends AbstractFileTable
     /**
      * @param FormulaCode $formulaCode
      * @param array $modifierCodes
-     * @param ModifiersTable $modifiersTable
      * @return IntegerObject|null
      */
-    public function getAttackOfModified(
-        FormulaCode $formulaCode,
-        array $modifierCodes,
-        ModifiersTable $modifiersTable
-    )
+    public function getAttackOfModified(FormulaCode $formulaCode, array $modifierCodes)
     {
         $formulaAttack = $this->getAttack($formulaCode);
         if (!$formulaAttack) {
@@ -406,7 +381,7 @@ class FormulasTable extends AbstractFileTable
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new IntegerObject(
             $formulaAttack->getValue()
-            + $modifiersTable->sumAttackChange($modifierCodes)->getValue()
+            + $this->modifiersTable->sumAttackChange($modifierCodes)->getValue()
         );
     }
 
@@ -470,10 +445,9 @@ class FormulasTable extends AbstractFileTable
 
     /**
      * @param FormulaCode $formulaCode
-     * @param SpeedTable $speedTable
      * @return SpellSpeed|null
      */
-    public function getSpellSpeed(FormulaCode $formulaCode, SpeedTable $speedTable)
+    public function getSpellSpeed(FormulaCode $formulaCode)
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         $speedValues = $this->getValue($formulaCode, self::SPELL_SPEED);
@@ -482,24 +456,17 @@ class FormulasTable extends AbstractFileTable
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new SpellSpeed($speedValues, $speedTable);
+        return new SpellSpeed($speedValues, $this->tables->getSpeedTable());
     }
 
     /**
      * @param FormulaCode $formulaCode
      * @param array $modifierCodes
-     * @param ModifiersTable $modifiersTable
-     * @param SpeedTable $speedTable
      * @return SpeedBonus|null
      */
-    public function getSpellSpeedOfModified(
-        FormulaCode $formulaCode,
-        array $modifierCodes,
-        ModifiersTable $modifiersTable,
-        SpeedTable $speedTable
-    )
+    public function getSpellSpeedOfModified(FormulaCode $formulaCode, array $modifierCodes)
     {
-        $formulaSpeed = $this->getSpellSpeed($formulaCode, $speedTable);
+        $formulaSpeed = $this->getSpellSpeed($formulaCode);
         if (!$formulaSpeed) {
             return null;
         }
@@ -507,17 +474,16 @@ class FormulasTable extends AbstractFileTable
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new SpeedBonus(
             $formulaSpeed->getValue()
-            + $modifiersTable->sumSpellSpeedChange($modifierCodes)->getValue(),
-            $speedTable
+            + $this->modifiersTable->sumSpellSpeedChange($modifierCodes)->getValue(),
+            $this->tables->getSpeedTable()
         );
     }
 
     /**
      * @param FormulaCode $formulaCode
-     * @param DistanceTable $distanceTable
      * @return EpicenterShift|null
      */
-    public function getEpicenterShift(FormulaCode $formulaCode, DistanceTable $distanceTable)
+    public function getEpicenterShift(FormulaCode $formulaCode)
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         $epicenterShift = $this->getValue($formulaCode, self::EPICENTER_SHIFT);
@@ -526,7 +492,7 @@ class FormulasTable extends AbstractFileTable
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new EpicenterShift($epicenterShift, $distanceTable);
+        return new EpicenterShift($epicenterShift, $this->tables->getDistanceTable());
     }
 
     /**
@@ -605,21 +571,14 @@ class FormulasTable extends AbstractFileTable
      *
      * @param FormulaCode $formulaCode
      * @param array $modifierCodes
-     * @param ModifiersTable $modifiersTable
-     * @param DistanceTable $distanceTable
      * @return DistanceBonus|null
      */
-    public function getEpicenterShiftOfModified(
-        FormulaCode $formulaCode,
-        array $modifierCodes,
-        ModifiersTable $modifiersTable,
-        DistanceTable $distanceTable
-    )
+    public function getEpicenterShiftOfModified(FormulaCode $formulaCode, array $modifierCodes)
     {
-        $formulaEpicenterShift = $this->getEpicenterShift($formulaCode, $distanceTable);
+        $formulaEpicenterShift = $this->getEpicenterShift($formulaCode);
         if (!$formulaEpicenterShift) {
             $formulaEpicenterShiftValue = 0;
-            if (!$modifiersTable->isEpicenterShifted($modifierCodes)) {
+            if (!$this->modifiersTable->isEpicenterShifted($modifierCodes)) {
                 return null; // no shift at all
             }
         } else {
@@ -629,8 +588,8 @@ class FormulasTable extends AbstractFileTable
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new DistanceBonus(
             $formulaEpicenterShiftValue
-            + $modifiersTable->sumEpicenterShiftChange($modifierCodes)->getValue(),
-            $distanceTable
+            + $this->modifiersTable->sumEpicenterShiftChange($modifierCodes)->getValue(),
+            $this->tables->getDistanceTable()
         );
     }
 
