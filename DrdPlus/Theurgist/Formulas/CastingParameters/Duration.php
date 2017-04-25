@@ -1,37 +1,25 @@
 <?php
 namespace DrdPlus\Theurgist\Formulas\CastingParameters;
 
+use DrdPlus\Tables\Measurements\Time\Time;
 use DrdPlus\Tables\Measurements\Time\TimeBonus;
 use DrdPlus\Tables\Measurements\Time\TimeTable;
 
+/**
+ * @method Duration add($value)
+ * @method Duration sub($value)
+ */
 class Duration extends PositiveCastingParameter
 {
     /**
-     * @var TimeBonus
-     */
-    private $durationTimeBonus;
-
-    /**
-     * @param array $values
      * @param TimeTable $timeTable
-     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidValueForPositiveCastingParameter
-     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\MissingValueForAdditionByRealm
-     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfRealmIncrement
-     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAdditionByRealmValue
-     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\UnexpectedFormatOfAdditionByRealm
+     * @return Time
+     * @throws \DrdPlus\Tables\Measurements\Time\Exceptions\CanNotConvertThatBonusToTime
      */
-    public function __construct(array $values, TimeTable $timeTable)
+    public function getDurationTime(TimeTable $timeTable): Time
     {
-        parent::__construct($values);
-        $this->durationTimeBonus = new TimeBonus($this->getValue(), $timeTable);
-    }
-
-    /**
-     * @return TimeBonus
-     */
-    public function getDurationTimeBonus(): TimeBonus
-    {
-        return $this->durationTimeBonus;
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return (new TimeBonus($this->getValue(), $timeTable))->getTime();
     }
 
 }

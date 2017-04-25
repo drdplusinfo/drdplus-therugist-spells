@@ -343,7 +343,7 @@ class FormulasTable extends AbstractFileTable
     /**
      * @param FormulaCode $formulaCode
      * @param array|ModifierCode[] $modifierCodes
-     * @return IntegerObject|null
+     * @return Power|null
      */
     public function getPowerOfModified(FormulaCode $formulaCode, array $modifierCodes)
     {
@@ -352,10 +352,7 @@ class FormulasTable extends AbstractFileTable
             return null;
         }
 
-        return new IntegerObject(
-            $formulaPower->getValue()
-            + $this->modifiersTable->sumPowerChange($modifierCodes)->getValue()
-        );
+        return $formulaPower->add($this->modifiersTable->sumPowerChange($modifierCodes)->getValue());
     }
 
     /**

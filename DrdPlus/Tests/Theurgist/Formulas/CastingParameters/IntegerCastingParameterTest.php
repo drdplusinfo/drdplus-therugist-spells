@@ -97,4 +97,22 @@ abstract class IntegerCastingParameterTest extends TestWithMockery
         self::assertNotSame($original, $decreased);
         self::assertEquals($original->getAdditionByRealms(), $restored->getAdditionByRealms());
     }
+
+    /**
+     * @test
+     */
+    public function I_get_whispered_current_class_as_return_value_of_add_and_sub()
+    {
+        $reflectionClass = new \ReflectionClass(self::getSutClass());
+        $classBaseName = preg_replace('~^.*[\\\](\w+)$~', '$1', self::getSutClass());
+        self::assertSame($phpDoc = <<<PHPDOC
+/**
+ * @method {$classBaseName} add(\$value)
+ * @method {$classBaseName} sub(\$value)
+ */
+PHPDOC
+            , $reflectionClass->getDocComment(),
+            "Expected:\n$phpDoc"
+        );
+    }
 }

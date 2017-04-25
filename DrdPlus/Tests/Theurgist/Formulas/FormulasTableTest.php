@@ -765,19 +765,15 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         );
         self::assertNull($powerOfDischarge);
 
+        $lock = FormulaCode::getIt(FormulaCode::LOCK);
         $formulasTable = new FormulasTable(Tables::getIt(), $this->createModifiersTableForPower($modifiers, 0));
-        $powerOfLockWithoutChange = $formulasTable->getPowerOfModified(
-            FormulaCode::getIt(FormulaCode::LOCK), // 0
-            $modifiers
-        );
-        self::assertEquals(new IntegerObject(0), $powerOfLockWithoutChange);
+        $powerOfLockWithoutChange = $formulasTable->getPowerOfModified($lock, $modifiers);
+        self::assertEquals($formulasTable->getPower($lock), $powerOfLockWithoutChange);
 
         $formulasTable = new FormulasTable(Tables::getIt(), $this->createModifiersTableForPower($modifiers, 789));
-        $powerOfGreatMassacreWithChange = $formulasTable->getPowerOfModified(
-            FormulaCode::getIt(FormulaCode::GREAT_MASSACRE), // 6
-            $modifiers
-        );
-        self::assertEquals(new IntegerObject(795), $powerOfGreatMassacreWithChange);
+        $greatMassacre = FormulaCode::getIt(FormulaCode::GREAT_MASSACRE);
+        $powerOfGreatMassacreWithChange = $formulasTable->getPowerOfModified($greatMassacre, $modifiers);
+        self::assertEquals($formulasTable->getPower($greatMassacre)->add(789), $powerOfGreatMassacreWithChange);
     }
 
     /**

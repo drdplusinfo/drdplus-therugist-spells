@@ -9,17 +9,11 @@ use Granam\Integer\PositiveIntegerObject;
 class Evocation extends PositiveIntegerObject
 {
     /**
-     * @var Time
-     */
-    private $castingTime;
-
-    /**
      * @param $value
-     * @param TimeTable $timeTable
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidValueForPositiveCastingParameter
      * @throws \DrdPlus\Tables\Measurements\Time\Exceptions\CanNotConvertThatBonusToTime
      */
-    public function __construct($value, TimeTable $timeTable)
+    public function __construct($value)
     {
         try {
             parent::__construct($value);
@@ -28,16 +22,17 @@ class Evocation extends PositiveIntegerObject
                 'Expected positive integer: ' . $exception->getMessage()
             );
         }
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        $this->castingTime = (new TimeBonus($this->getValue(), $timeTable))->getTime();
     }
 
     /**
+     * @param TimeTable $timeTable
      * @return Time
+     * @throws \DrdPlus\Tables\Measurements\Time\Exceptions\CanNotConvertThatBonusToTime
      */
-    public function getCastingTime(): Time
+    public function getCastingTime(TimeTable $timeTable): Time
     {
-        return $this->castingTime;
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return (new TimeBonus($this->getValue(), $timeTable))->getTime();
     }
 
 }
