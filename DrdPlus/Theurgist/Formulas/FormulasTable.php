@@ -117,7 +117,10 @@ class FormulasTable extends AbstractFileTable
      * @return Realm
      * @throws \DrdPlus\Theurgist\Formulas\Exceptions\CanNotBuildFormulaWithRequiredModification
      */
-    public function getRealmOfModified(FormulaCode $formulaCode, array $modifierCodes): Realm
+    public function getRealmOfModified(/** @noinspection PhpUnusedParameterInspection to keep same interface with others */
+        FormulaCode $formulaCode,
+        array $modifierCodes
+    ): Realm
     {
         $basicFormulaDifficultyLimit = $this->getDifficultyLimit($formulaCode);
         $maximalDifficultyHandledByFormula = $basicFormulaDifficultyLimit->getMaximal();
@@ -211,9 +214,13 @@ class FormulasTable extends AbstractFileTable
 
     /**
      * @param FormulaCode $formulaCode
+     * @param array|ModifierCode[] $modifierCodes
      * @return TimeBonus
      */
-    public function getEvocationOfModified(FormulaCode $formulaCode): TimeBonus
+    public function getEvocationOfModified(/** @noinspection PhpUnusedParameterInspection to keep same interface with others */
+        FormulaCode $formulaCode,
+        array $modifierCodes
+    ): TimeBonus
     {
         // no modifier affects evocation time
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
@@ -373,7 +380,7 @@ class FormulasTable extends AbstractFileTable
 
     /**
      * @param FormulaCode $formulaCode
-     * @param array $modifierCodes
+     * @param array|ModifierCode[] $modifierCodes
      * @return Attack|null
      */
     public function getAttackOfModified(FormulaCode $formulaCode, array $modifierCodes)
@@ -437,9 +444,13 @@ class FormulasTable extends AbstractFileTable
 
     /**
      * @param FormulaCode $formulaCode
+     * @param array|ModifierCode[] $modifierCodes
      * @return Brightness|null
      */
-    public function getBrightnessOfModified(FormulaCode $formulaCode)
+    public function getBrightnessOfModified(/** @noinspection PhpUnusedParameterInspection to keep same interface with others */
+        FormulaCode $formulaCode,
+        array $modifierCodes
+    )
     {
         // no modifier affects brightness
         return $this->getBrightness($formulaCode);
@@ -463,7 +474,7 @@ class FormulasTable extends AbstractFileTable
 
     /**
      * @param FormulaCode $formulaCode
-     * @param array $modifierCodes
+     * @param array|ModifierCode[] $modifierCodes
      * @return SpeedBonus|null
      */
     public function getSpellSpeedOfModified(FormulaCode $formulaCode, array $modifierCodes)
@@ -572,7 +583,7 @@ class FormulasTable extends AbstractFileTable
      * Transposition can shift epicenter.
      *
      * @param FormulaCode $formulaCode
-     * @param array $modifierCodes
+     * @param array|ModifierCode[] $modifierCodes
      * @return DistanceBonus|null
      */
     public function getEpicenterShiftOfModified(FormulaCode $formulaCode, array $modifierCodes)

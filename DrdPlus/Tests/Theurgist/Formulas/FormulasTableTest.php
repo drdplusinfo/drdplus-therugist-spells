@@ -81,6 +81,43 @@ class FormulasTableTest extends AbstractTheurgistTableTest
     /**
      * @test
      */
+    public function Every_getter_of_modified_formula_parameter_has_same_interface()
+    {
+        foreach (get_class_methods(FormulasTable::class) as $methodName) {
+            if (strpos($methodName, 'Modified') === false) {
+                continue;
+            }
+            $methodReflection = new \ReflectionMethod(FormulasTable::class, $methodName);
+            $parameters = $methodReflection->getParameters();
+            self::assertCount(
+                2,
+                $parameters,
+                "Expected exactly two parameters for '{$methodName}', formula code and array of modifier codes"
+            );
+            self::assertNotNull(
+                $parameters[0]->getClass(),
+                "First parameter of '{$methodName}' should be of type formula code class"
+            );
+            self::assertSame(FormulaCode::class, $parameters[0]->getClass()->getName());
+            self::assertSame('formulaCode', $parameters[0]->getName());
+            self::assertTrue(
+                $parameters[1]->isArray(),
+                "Expected array of modifier codes as second parameter of '{$methodName}', got " . $parameters[1]->getType()
+            );
+            self::assertSame('modifierCodes', $parameters[1]->getName());
+            self::assertContains(<<<PHPDOC
+* @param FormulaCode \$formulaCode
+* @param array|ModifierCode[] \$modifierCodes
+PHPDOC
+                , preg_replace('~ {2,}~', '', $methodReflection->getDocComment()),
+                "Expected different PHPDoc for '{$methodName}'"
+            );
+        }
+    }
+
+    /**
+     * @test
+     */
     public function I_can_get_casting()
     {
         $formulasTable = new FormulasTable(Tables::getIt(), $this->modifiersTable);
