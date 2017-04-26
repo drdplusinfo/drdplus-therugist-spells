@@ -9,6 +9,17 @@ abstract class IntegerCastingParameterTest extends TestWithMockery
 {
     /**
      * @test
+     * @expectedException \DrdPlus\Theurgist\Formulas\CastingParameters\Partials\Exceptions\MissingValueForAdditionByRealm
+     * @expectedExceptionMessageRegExp ~123~
+     */
+    public function I_can_not_create_it_with_invalid_points_to_annotation()
+    {
+        $reflectionMethod = new \ReflectionMethod(IntegerCastingParameter::class, '__construct');
+        $reflectionMethod->invoke($this->mockery(IntegerCastingParameter::class), [123]);
+    }
+
+    /**
+     * @test
      */
     public function I_can_create_it()
     {

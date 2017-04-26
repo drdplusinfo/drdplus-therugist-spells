@@ -1,17 +1,25 @@
 <?php
 namespace DrdPlus\Theurgist\Formulas\CastingParameters\Partials;
 
+use DrdPlus\Theurgist\Formulas\CastingParameters\AdditionByRealms;
 use Granam\Integer\IntegerInterface;
 use Granam\Integer\Tools\ToInteger;
 use Granam\Number\NumberInterface;
+use Granam\Strict\Object\StrictObject;
 use Granam\Tools\ValueDescriber;
 
-abstract class IntegerCastingParameter extends CastingParameter implements IntegerInterface
+abstract class IntegerCastingParameter extends StrictObject implements IntegerInterface
 {
+    use GetParameterNameTrait;
+
     /**
      * @var int
      */
     private $value;
+    /**
+     * @var AdditionByRealms
+     */
+    private $additionByRealms;
 
     /**
      * @param array $values
@@ -31,7 +39,13 @@ abstract class IntegerCastingParameter extends CastingParameter implements Integ
                 . (array_key_exists(0, $values) ? ValueDescriber::describe($values[0], true) : 'nothing')
             );
         }
-        parent::__construct($values, 1);
+        if (!array_key_exists(1, $values)) {
+            throw new Exceptions\MissingValueForAdditionByRealm(
+                'Missing index 1 for addition by realm in given values ' . var_export($values, true)
+                . ' for ' . $this->getParameterName()
+            );
+        }
+        $this->additionByRealms = new AdditionByRealms($values[1]);
     }
 
     /**
@@ -40,6 +54,14 @@ abstract class IntegerCastingParameter extends CastingParameter implements Integ
     public function getValue(): int
     {
         return $this->value;
+    }
+
+    /**
+     * @return AdditionByRealms
+     */
+    public function getAdditionByRealms(): AdditionByRealms
+    {
+        return $this->additionByRealms;
     }
 
     /**
