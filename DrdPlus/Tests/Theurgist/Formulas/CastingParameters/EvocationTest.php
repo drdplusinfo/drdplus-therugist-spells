@@ -1,6 +1,8 @@
 <?php
 namespace DrdPlus\Tests\Theurgist\Formulas\CastingParameters;
 
+use DrdPlus\Codes\TimeUnitCode;
+use DrdPlus\Tables\Measurements\Time\Time;
 use DrdPlus\Tables\Measurements\Time\TimeBonus;
 use DrdPlus\Tables\Measurements\Time\TimeTable;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Evocation;
@@ -14,18 +16,18 @@ class EvocationTest extends TestCase
      */
     public function I_can_use_it()
     {
-        $zeroCasting = new Evocation(0);
-        self::assertInstanceOf(PositiveInteger::class, $zeroCasting);
-        self::assertSame(0, $zeroCasting->getValue());
-        self::assertSame('0', (string)$zeroCasting);
+        $zeroEvocation = new Evocation(0);
+        self::assertInstanceOf(PositiveInteger::class, $zeroEvocation);
+        self::assertSame(0, $zeroEvocation->getValue());
+        self::assertSame('0', (string)$zeroEvocation);
         $timeTable = new TimeTable();
-        $zeroCastingTime = $zeroCasting->getCastingTime($timeTable);
-        self::assertEquals((new TimeBonus(0, $timeTable))->getTime(), $zeroCastingTime);
+        $zeroEvocationTime = $zeroEvocation->getEvocationTime($timeTable);
+        self::assertEquals(new Time(1, TimeUnitCode::ROUND, $timeTable), $zeroEvocationTime);
 
-        $positiveCasting = new Evocation(123, $timeTable);
-        self::assertSame(123, $positiveCasting->getValue());
-        self::assertSame('123', (string)$positiveCasting);
-        $positiveCastingTimeBonus = $positiveCasting->getCastingTime($timeTable);
-        self::assertEquals((new TimeBonus(123, $timeTable))->getTime(), $positiveCastingTimeBonus);
+        $positiveEvocation = new Evocation(123, $timeTable);
+        self::assertSame(123, $positiveEvocation->getValue());
+        self::assertSame('123', (string)$positiveEvocation);
+        $positiveEvocationTime = $positiveEvocation->getEvocationTime($timeTable);
+        self::assertEquals((new TimeBonus(123, $timeTable))->getTime(), $positiveEvocationTime);
     }
 }

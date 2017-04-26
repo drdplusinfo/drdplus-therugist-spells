@@ -29,7 +29,7 @@ class Evocation extends PositiveIntegerObject
      * @return Time
      * @throws \DrdPlus\Tables\Measurements\Time\Exceptions\CanNotConvertThatBonusToTime
      */
-    public function getCastingTime(TimeTable $timeTable): Time
+    public function getEvocationTime(TimeTable $timeTable): Time
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return (new TimeBonus($this->getValue(), $timeTable))->getTime();
