@@ -2,6 +2,7 @@
 namespace DrdPlus\Theurgist\Formulas\CastingParameters;
 
 use DrdPlus\Codes\Properties\PropertyCode;
+use DrdPlus\Theurgist\Formulas\CastingParameters\Partials\IntegerCastingParameter;
 use Granam\Tools\ValueDescriber;
 
 class Trap extends IntegerCastingParameter
@@ -13,8 +14,8 @@ class Trap extends IntegerCastingParameter
 
     /**
      * @param array $values with 'trap value', 'trap change by realms' and 'used property'
-     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidValueForIntegerCastingParameter
-     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\MissingValueForAdditionByRealm
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Partials\Exceptions\InvalidValueForIntegerCastingParameter
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Partials\Exceptions\MissingValueForAdditionByRealm
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfRealmIncrement
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAdditionByRealmValue
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\UnexpectedFormatOfAdditionByRealm

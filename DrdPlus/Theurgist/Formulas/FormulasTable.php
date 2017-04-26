@@ -25,7 +25,6 @@ use DrdPlus\Theurgist\Formulas\CastingParameters\Realm;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SizeChange;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellSpeed;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
-use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTraitsTable;
 
 class FormulasTable extends AbstractFileTable
 {

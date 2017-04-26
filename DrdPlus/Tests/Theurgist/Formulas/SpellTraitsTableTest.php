@@ -1,14 +1,13 @@
 <?php
-namespace DrdPlus\Tests\Theurgist\Formulas\CastingParameters;
+namespace DrdPlus\Tests\Theurgist\Formulas;
 
 use DrdPlus\Tables\Tables;
-use DrdPlus\Tests\Theurgist\Formulas\AbstractTheurgistTableTest;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\SpellTraitCode;
-use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTraitsTable;
 use DrdPlus\Theurgist\Formulas\FormulasTable;
 use DrdPlus\Theurgist\Formulas\ModifiersTable;
+use DrdPlus\Theurgist\Formulas\SpellTraitsTable;
 
 class SpellTraitsTableTest extends AbstractTheurgistTableTest
 {

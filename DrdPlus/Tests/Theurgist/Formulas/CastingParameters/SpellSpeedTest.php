@@ -3,6 +3,7 @@ namespace DrdPlus\Tests\Theurgist\Formulas\CastingParameters;
 
 use DrdPlus\Tables\Measurements\Speed\SpeedBonus;
 use DrdPlus\Tables\Measurements\Speed\SpeedTable;
+use DrdPlus\Tests\Theurgist\Formulas\CastingParameters\Partials\IntegerCastingParameterTest;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellSpeed;
 
 class SpellSpeedTest extends IntegerCastingParameterTest

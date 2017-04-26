@@ -4,6 +4,7 @@ namespace DrdPlus\Theurgist\Formulas\CastingParameters;
 use DrdPlus\Tables\Measurements\Speed\Speed;
 use DrdPlus\Tables\Measurements\Speed\SpeedBonus;
 use DrdPlus\Tables\Measurements\Speed\SpeedTable;
+use DrdPlus\Theurgist\Formulas\CastingParameters\Partials\IntegerCastingParameter;
 
 /**
  * @method SpellSpeed add($value)

@@ -840,10 +840,10 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
     {
         $modifiersTable = new ModifiersTable(Tables::getIt());
 
-        self::assertEquals(new CastingRounds(0), $modifiersTable->sumCastingRoundsChange([]));
+        self::assertEquals(new CastingRounds([0]), $modifiersTable->sumCastingRoundsChange([]));
 
         self::assertEquals(
-            new CastingRounds(0),
+            new CastingRounds([0]),
             $modifiersTable->sumCastingRoundsChange(
                 [
                     ModifierCode::getIt(ModifierCode::EXPLOSION), // null
@@ -857,7 +857,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
         );
 
         self::assertEquals(
-            new CastingRounds(4),
+            new CastingRounds([4]),
             $modifiersTable->sumCastingRoundsChange(
                 [
                     [ModifierCode::getIt(ModifierCode::MOVEMENT), // null

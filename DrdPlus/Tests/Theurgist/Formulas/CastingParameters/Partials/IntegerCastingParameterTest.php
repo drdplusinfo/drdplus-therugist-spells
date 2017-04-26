@@ -1,8 +1,8 @@
 <?php
-namespace DrdPlus\Tests\Theurgist\Formulas\CastingParameters;
+namespace DrdPlus\Tests\Theurgist\Formulas\CastingParameters\Partials;
 
 use DrdPlus\Theurgist\Formulas\CastingParameters\AdditionByRealms;
-use DrdPlus\Theurgist\Formulas\CastingParameters\IntegerCastingParameter;
+use DrdPlus\Theurgist\Formulas\CastingParameters\Partials\IntegerCastingParameter;
 use Granam\Tests\Tools\TestWithMockery;
 
 abstract class IntegerCastingParameterTest extends TestWithMockery
@@ -49,7 +49,7 @@ abstract class IntegerCastingParameterTest extends TestWithMockery
 
     /**
      * @test
-     * @expectedException \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidValueForIntegerCastingParameter
+     * @expectedException \DrdPlus\Theurgist\Formulas\CastingParameters\Partials\Exceptions\InvalidValueForIntegerCastingParameter
      * @expectedExceptionMessageRegExp ~infinite~
      */
     public function I_can_not_create_it_non_numeric()

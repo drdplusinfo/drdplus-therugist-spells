@@ -81,7 +81,7 @@ class ModifiersTable extends AbstractFileTable
         return [
             self::REALM => self::POSITIVE_INTEGER,
             self::AFFECTION => self::ARRAY,
-            self::CASTING_ROUNDS => self::POSITIVE_INTEGER,
+            self::CASTING_ROUNDS => self::ARRAY,
             self::DIFFICULTY_CHANGE => self::POSITIVE_INTEGER,
             self::RADIUS => self::ARRAY,
             self::EPICENTER_SHIFT => self::ARRAY,
@@ -252,7 +252,7 @@ class ModifiersTable extends AbstractFileTable
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new CastingRounds($castingSum);
+        return new CastingRounds([$castingSum, 0 /* no additions by realm */]);
     }
 
     /**

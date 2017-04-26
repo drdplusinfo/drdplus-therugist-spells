@@ -3,6 +3,7 @@ namespace DrdPlus\Tests\Theurgist\Formulas\CastingParameters;
 
 use DrdPlus\Tables\Measurements\Time\TimeBonus;
 use DrdPlus\Tables\Measurements\Time\TimeTable;
+use DrdPlus\Tests\Theurgist\Formulas\CastingParameters\Partials\PositiveCastingParameterTest;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Evocation;
 
 class EvocationTest extends PositiveCastingParameterTest

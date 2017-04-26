@@ -6,7 +6,7 @@ use DrdPlus\Tables\Table;
 use DrdPlus\Tables\Tables;
 use DrdPlus\Theurgist\Codes\AbstractTheurgistCode;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Attack;
-use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTraitsTable;
+use DrdPlus\Theurgist\Formulas\SpellTraitsTable;
 use DrdPlus\Theurgist\Formulas\ModifiersTable;
 use Granam\String\StringTools;
 use Granam\Tests\Tools\TestWithMockery;

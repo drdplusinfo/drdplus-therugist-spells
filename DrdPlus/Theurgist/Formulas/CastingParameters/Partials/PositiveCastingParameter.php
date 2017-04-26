@@ -1,5 +1,5 @@
 <?php
-namespace DrdPlus\Theurgist\Formulas\CastingParameters;
+namespace DrdPlus\Theurgist\Formulas\CastingParameters\Partials;
 
 use Granam\Integer\PositiveInteger;
 use Granam\Integer\Tools\ToInteger;
@@ -9,8 +9,8 @@ abstract class PositiveCastingParameter extends IntegerCastingParameter implemen
 {
     /**
      * @param array $values
-     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidValueForPositiveCastingParameter
-     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\MissingValueForAdditionByRealm
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Partials\Exceptions\InvalidValueForPositiveCastingParameter
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Partials\Exceptions\MissingValueForAdditionByRealm
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfRealmIncrement
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAdditionByRealmValue
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\UnexpectedFormatOfAdditionByRealm

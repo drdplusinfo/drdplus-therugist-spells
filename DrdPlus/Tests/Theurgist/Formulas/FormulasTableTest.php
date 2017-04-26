@@ -17,7 +17,7 @@ use DrdPlus\Theurgist\Formulas\CastingParameters\Difficulty;
 use DrdPlus\Theurgist\Formulas\CastingParameters\EpicenterShift;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Realm;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
-use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTraitsTable;
+use DrdPlus\Theurgist\Formulas\SpellTraitsTable;
 use DrdPlus\Theurgist\Formulas\FormulasTable;
 use DrdPlus\Theurgist\Formulas\ModifiersTable;
 use DrdPlus\Theurgist\Formulas\ProfilesTable;
@@ -1201,7 +1201,7 @@ PHPDOC
         $modifiersTable = $this->mockery(ModifiersTable::class);
         $modifiersTable->shouldReceive('sumCastingRoundsChange')
             ->with($expectedModifiers)
-            ->andReturn(new CastingRounds($sumOfCasting, Tables::getIt()->getTimeTable()));
+            ->andReturn(new CastingRounds([$sumOfCasting], Tables::getIt()->getTimeTable()));
 
         return $modifiersTable;
     }

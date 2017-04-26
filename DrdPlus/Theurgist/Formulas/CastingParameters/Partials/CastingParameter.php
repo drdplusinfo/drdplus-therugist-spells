@@ -1,7 +1,7 @@
 <?php
-namespace DrdPlus\Theurgist\Formulas\CastingParameters;
+namespace DrdPlus\Theurgist\Formulas\CastingParameters\Partials;
 
-use DrdPlus\Theurgist\Formulas\CastingParameters\Partials\GetParameterNameTrait;
+use DrdPlus\Theurgist\Formulas\CastingParameters\AdditionByRealms;
 use Granam\Strict\Object\StrictObject;
 
 /** @noinspection SingletonFactoryPatternViolationInspection */
@@ -17,7 +17,7 @@ abstract class CastingParameter extends StrictObject
     /**
      * @param array $values
      * @param int $additionByRealmIndex
-     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\MissingValueForAdditionByRealm
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Partials\Exceptions\MissingValueForAdditionByRealm
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfRealmIncrement
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAdditionByRealmValue
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\UnexpectedFormatOfAdditionByRealm

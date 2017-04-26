@@ -4,6 +4,7 @@ namespace DrdPlus\Tests\Theurgist\Formulas\CastingParameters;
 use DrdPlus\Codes\TimeUnitCode;
 use DrdPlus\Tables\Measurements\Time\Time;
 use DrdPlus\Tables\Measurements\Time\TimeTable;
+use DrdPlus\Tests\Theurgist\Formulas\CastingParameters\Partials\PositiveCastingParameterTest;
 use DrdPlus\Theurgist\Formulas\CastingParameters\AdditionByRealms;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Duration;
 
@@ -27,7 +28,7 @@ class DurationTest extends PositiveCastingParameterTest
 
     /**
      * @test
-     * @expectedException \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidValueForPositiveCastingParameter
+     * @expectedException \DrdPlus\Theurgist\Formulas\CastingParameters\Partials\Exceptions\InvalidValueForPositiveCastingParameter
      * @expectedExceptionMessageRegExp ~-5~
      */
     public function I_can_not_create_it_negative()

@@ -1,10 +1,12 @@
 <?php
-namespace DrdPlus\Theurgist\Formulas\CastingParameters;
+namespace DrdPlus\Theurgist\Formulas;
 
 use DrdPlus\Tables\Partials\AbstractFileTable;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\SpellTraitCode;
+use DrdPlus\Theurgist\Formulas\CastingParameters\DifficultyChange;
+use DrdPlus\Theurgist\Formulas\CastingParameters\Trap;
 
 class SpellTraitsTable extends AbstractFileTable
 {

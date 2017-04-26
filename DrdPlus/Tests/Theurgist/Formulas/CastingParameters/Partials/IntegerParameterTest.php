@@ -1,5 +1,5 @@
 <?php
-namespace DrdPlus\Tests\Theurgist\Formulas\CastingParameters;
+namespace DrdPlus\Tests\Theurgist\Formulas\CastingParameters\Partials;
 
 use Granam\Integer\IntegerInterface;
 use Granam\Tests\Tools\TestWithMockery;

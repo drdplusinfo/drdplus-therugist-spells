@@ -1,6 +1,7 @@
 <?php
 namespace DrdPlus\Tests\Theurgist\Formulas\CastingParameters;
 
+use DrdPlus\Tests\Theurgist\Formulas\CastingParameters\Partials\PositiveCastingParameterTest;
 use DrdPlus\Theurgist\Formulas\CastingParameters\AdditionByRealms;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Difficulty;
 

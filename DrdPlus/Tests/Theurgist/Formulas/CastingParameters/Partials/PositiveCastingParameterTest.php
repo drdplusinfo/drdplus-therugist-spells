@@ -1,5 +1,5 @@
 <?php
-namespace DrdPlus\Tests\Theurgist\Formulas\CastingParameters;
+namespace DrdPlus\Tests\Theurgist\Formulas\CastingParameters\Partials;
 
 abstract class PositiveCastingParameterTest extends IntegerCastingParameterTest
 {
@@ -10,7 +10,7 @@ abstract class PositiveCastingParameterTest extends IntegerCastingParameterTest
 
     /**
      * @test
-     * @expectedException \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidValueForPositiveCastingParameter
+     * @expectedException \DrdPlus\Theurgist\Formulas\CastingParameters\Partials\Exceptions\InvalidValueForPositiveCastingParameter
      * @expectedExceptionMessageRegExp ~infinite~
      */
     public function I_can_not_create_it_non_numeric()
@@ -21,7 +21,7 @@ abstract class PositiveCastingParameterTest extends IntegerCastingParameterTest
 
     /**
      * @test
-     * @expectedException \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidValueForPositiveCastingParameter
+     * @expectedException \DrdPlus\Theurgist\Formulas\CastingParameters\Partials\Exceptions\InvalidValueForPositiveCastingParameter
      * @expectedExceptionMessageRegExp ~-5~
      */
     public function I_can_not_create_it_negative()
