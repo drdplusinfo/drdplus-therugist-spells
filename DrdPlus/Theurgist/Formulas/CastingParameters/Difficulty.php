@@ -58,7 +58,8 @@ class Difficulty extends PositiveCastingParameter
     }
 
     /**
-     * Works as difficulty (some kind of "price") for basic formula.
+     * Works as difficulty (some kind of "price") for basic, not changed formula.
+     * Can differs from 'value', @see getValue, which is current difficulty of even modified formula.
      *
      * @return int
      */
@@ -69,7 +70,8 @@ class Difficulty extends PositiveCastingParameter
 
     /**
      * Maximal difficulty a formula from lowest possible realm can handle.
-     *
+     * Can be even LESS than 'value', @see getValue, which is current difficulty of even heavily modified formula.
+
      * @return int
      */
     public function getMaximal(): int
