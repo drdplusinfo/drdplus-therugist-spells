@@ -222,7 +222,11 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
     private function getExpectedFormulaValues(string $modifierValue): array
     {
         $expectedFormulaValues = [];
-        $formulasTable = new FormulasTable($this->createTablesShell(), $this->createModifiersTableShell());
+        $formulasTable = new FormulasTable(
+            $this->createTablesShell(),
+            $this->createModifiersTableShell(),
+            $this->createSpellTraitsTableShell()
+        );
         foreach (FormulaCode::getPossibleValues() as $formulaValue) {
             $modifierCodes = $formulasTable->getModifiers(FormulaCode::getIt($formulaValue));
             foreach ($modifierCodes as $modifierCode) {
@@ -244,16 +248,6 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
     private function createTablesShell()
     {
         return $this->mockery(Tables::class);
-    }
-
-    /**
-     * Just a placeholder - intentionally no methods are expected to be called
-     *
-     * @return \Mockery\MockInterface|ModifiersTable
-     */
-    private function createModifiersTableShell()
-    {
-        return $this->mockery(ModifiersTable::class);
     }
 
     /**
@@ -651,11 +645,11 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
     {
         $modifiersTable = new ModifiersTable(Tables::getIt());
 
-        self::assertEquals(new IntegerObject(0), $modifiersTable->sumPowerChange([]));
+        self::assertEquals(new IntegerObject(0), $modifiersTable->sumPowerChanges([]));
 
         self::assertEquals(
             new IntegerObject(13),
-            $modifiersTable->sumPowerChange(
+            $modifiersTable->sumPowerChanges(
                 [
                     ModifierCode::getIt(ModifierCode::GATE), // null
                     ModifierCode::getIt(ModifierCode::EXPLOSION), // +6

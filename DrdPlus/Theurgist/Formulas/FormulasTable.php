@@ -13,6 +13,7 @@ use DrdPlus\Theurgist\Codes\FormCode;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ProfileCode;
+use DrdPlus\Theurgist\Codes\SpellTraitCode;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Affection;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Attack;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Brightness;
@@ -27,6 +28,7 @@ use DrdPlus\Theurgist\Formulas\CastingParameters\Realm;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SizeChange;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellSpeed;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
+use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTraitsTable;
 use Granam\Integer\IntegerObject;
 
 class FormulasTable extends AbstractFileTable
@@ -39,11 +41,21 @@ class FormulasTable extends AbstractFileTable
      * @var ModifiersTable
      */
     private $modifiersTable;
+    /**
+     * @var SpellTraitsTable
+     */
+    private $spellTraitsTable;
 
-    public function __construct(Tables $tables, ModifiersTable $modifiersTable)
+    /**
+     * @param Tables $tables
+     * @param ModifiersTable $modifiersTable
+     * @param SpellTraitsTable $spellTraitsTable
+     */
+    public function __construct(Tables $tables, ModifiersTable $modifiersTable, SpellTraitsTable $spellTraitsTable)
     {
         $this->tables = $tables;
         $this->modifiersTable = $modifiersTable;
+        $this->spellTraitsTable = $spellTraitsTable;
     }
 
     protected function getDataFileName(): string
@@ -114,12 +126,14 @@ class FormulasTable extends AbstractFileTable
     /**
      * @param FormulaCode $formulaCode
      * @param array|ModifierCode[] $modifierCodes
+     * @param array|SpellTraitCode[] $spellTraitCodes
      * @return Realm
      * @throws \DrdPlus\Theurgist\Formulas\Exceptions\CanNotBuildFormulaWithRequiredModification
      */
     public function getRealmOfModified(/** @noinspection PhpUnusedParameterInspection to keep same interface with others */
         FormulaCode $formulaCode,
-        array $modifierCodes
+        array $modifierCodes,
+        array $spellTraitCodes
     ): Realm
     {
         $basicFormulaDifficultyLimit = $this->getDifficultyLimit($formulaCode);
@@ -127,7 +141,8 @@ class FormulasTable extends AbstractFileTable
         $minimalPossibleRealm = $this->getRealm($formulaCode);
         $difficultyOfModifiedWithoutRealmChange = $this->getDifficultyOfModified(
             $formulaCode,
-            $modifierCodes
+            $modifierCodes,
+            $spellTraitCodes
         )->getValue();
         $highestRequiredRealmByModifiers = $this->modifiersTable->getHighestRequiredRealm($modifierCodes);
         if ($maximalDifficultyHandledByFormula >= $difficultyOfModifiedWithoutRealmChange
@@ -174,10 +189,15 @@ class FormulasTable extends AbstractFileTable
     /**
      * @param FormulaCode $formulaCode
      * @param array|ModifierCode[] $modifierCodes
+     * @param array|SpellTraitCode[] $spellTraitCodes
      * @return array|Affection[]
      * @throws \DrdPlus\Theurgist\Formulas\Exceptions\CanNotBuildFormulaWithRequiredModification
      */
-    public function getAffectionsOfModified(FormulaCode $formulaCode, array $modifierCodes): array
+    public function getAffectionsOfModified(/** @noinspection PhpUnusedParameterInspection */
+        FormulaCode $formulaCode,
+        array $modifierCodes,
+        array $spellTraitCodes
+    ): array
     {
         $formulaAffection = $this->getAffection($formulaCode);
         $summedAffections = [$formulaAffection->getAffectionPeriod()->getValue() => $formulaAffection];
@@ -215,11 +235,13 @@ class FormulasTable extends AbstractFileTable
     /**
      * @param FormulaCode $formulaCode
      * @param array|ModifierCode[] $modifierCodes
+     * @param array|SpellTraitCode[] $spellTraitCodes
      * @return TimeBonus
      */
     public function getEvocationOfModified(/** @noinspection PhpUnusedParameterInspection to keep same interface with others */
         FormulaCode $formulaCode,
-        array $modifierCodes
+        array $modifierCodes,
+        array $spellTraitCodes
     ): TimeBonus
     {
         // no modifier affects evocation time
@@ -249,9 +271,14 @@ class FormulasTable extends AbstractFileTable
      *
      * @param FormulaCode $formulaCode
      * @param array|ModifierCode[] $modifierCodes
+     * @param array|SpellTraitCode[] $spellTraitCodes
      * @return Time
      */
-    public function getCastingOfModified(FormulaCode $formulaCode, array $modifierCodes): Time
+    public function getCastingOfModified(/** @noinspection PhpUnusedParameterInspection to keep same interface with others */
+        FormulaCode $formulaCode,
+        array $modifierCodes,
+        array $spellTraitCodes
+    ): Time
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         $rounds = $this->getCasting($formulaCode)->getInUnit(TimeUnitCode::ROUND)->getValue()
@@ -274,14 +301,20 @@ class FormulasTable extends AbstractFileTable
     /**
      * @param FormulaCode $formulaCode
      * @param array|ModifierCode[] $modifierCodes
+     * @param array|SpellTraitCode[] $spellTraitCodes
      * @return IntegerObject
      * @throws \DrdPlus\Theurgist\Formulas\Exceptions\CanNotBuildFormulaWithRequiredModification
      */
-    public function getDifficultyOfModified(FormulaCode $formulaCode, array $modifierCodes): IntegerObject
+    public function getDifficultyOfModified(
+        FormulaCode $formulaCode,
+        array $modifierCodes,
+        array $spellTraitCodes
+    ): IntegerObject
     {
         return new IntegerObject(
             $this->getDifficultyLimit($formulaCode)->getMinimal()
             + $this->modifiersTable->sumDifficultyChanges($modifierCodes)->getValue()
+            + $this->spellTraitsTable->sumDifficultyChanges($spellTraitCodes)->getValue()
         );
     }
 
@@ -304,10 +337,15 @@ class FormulasTable extends AbstractFileTable
     /**
      * @param FormulaCode $formulaCode
      * @param array|ModifierCode[] $modifierCodes
+     * @param array|SpellTraitCode[] $spellTraitCodes
      * @return DistanceBonus|null
      * @throws \DrdPlus\Theurgist\Formulas\Exceptions\CanNotBuildFormulaWithRequiredModification
      */
-    public function getRadiusOfModified(FormulaCode $formulaCode, array $modifierCodes)
+    public function getRadiusOfModified(/** @noinspection PhpUnusedParameterInspection */
+        FormulaCode $formulaCode,
+        array $modifierCodes,
+        array $spellTraitCodes
+    )
     {
         $formulaRadius = $this->getRadius($formulaCode);
         if (!$formulaRadius) {
@@ -350,16 +388,21 @@ class FormulasTable extends AbstractFileTable
     /**
      * @param FormulaCode $formulaCode
      * @param array|ModifierCode[] $modifierCodes
+     * @param array|SpellTraitCode[] $spellTraitCodes
      * @return Power|null
      */
-    public function getPowerOfModified(FormulaCode $formulaCode, array $modifierCodes)
+    public function getPowerOfModified(/** @noinspection PhpUnusedParameterInspection to keep same interface with others */
+        FormulaCode $formulaCode,
+        array $modifierCodes,
+        array $spellTraitCodes
+    )
     {
         $formulaPower = $this->getPower($formulaCode);
         if (!$formulaPower) {
             return null;
         }
 
-        return $formulaPower->add($this->modifiersTable->sumPowerChange($modifierCodes)->getValue());
+        return $formulaPower->add($this->modifiersTable->sumPowerChanges($modifierCodes)->getValue());
     }
 
     /**
@@ -381,9 +424,14 @@ class FormulasTable extends AbstractFileTable
     /**
      * @param FormulaCode $formulaCode
      * @param array|ModifierCode[] $modifierCodes
+     * @param array|SpellTraitCode[] $spellTraitCodes
      * @return Attack|null
      */
-    public function getAttackOfModified(FormulaCode $formulaCode, array $modifierCodes)
+    public function getAttackOfModified(/** @noinspection PhpUnusedParameterInspection to keep same interface with others */
+        FormulaCode $formulaCode,
+        array $modifierCodes,
+        array $spellTraitCodes
+    )
     {
         $formulaAttack = $this->getAttack($formulaCode);
         if (!$formulaAttack) {
@@ -428,6 +476,28 @@ class FormulasTable extends AbstractFileTable
 
     /**
      * @param FormulaCode $formulaCode
+     * @param array|ModifierCode[] $modifierCodes
+     * @param array|SpellTraitCode[] $spellTraitCodes
+     * @return DetailLevel|null
+     */
+    public function getDetailLevelOfModified(/** @noinspection PhpUnusedParameterInspection to keep same interface with others */
+        FormulaCode $formulaCode,
+        array $modifierCodes,
+        array $spellTraitCodes
+    )
+    {
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        $detailLevelValues = $this->getValue($formulaCode, self::DETAIL_LEVEL);
+        if (!$detailLevelValues) {
+            return null;
+        }
+
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new DetailLevel($detailLevelValues);
+    }
+
+    /**
+     * @param FormulaCode $formulaCode
      * @return Brightness|null
      */
     public function getBrightness(FormulaCode $formulaCode)
@@ -445,11 +515,13 @@ class FormulasTable extends AbstractFileTable
     /**
      * @param FormulaCode $formulaCode
      * @param array|ModifierCode[] $modifierCodes
+     * @param array|SpellTraitCode[] $spellTraitCodes
      * @return Brightness|null
      */
     public function getBrightnessOfModified(/** @noinspection PhpUnusedParameterInspection to keep same interface with others */
         FormulaCode $formulaCode,
-        array $modifierCodes
+        array $modifierCodes,
+        array $spellTraitCodes
     )
     {
         // no modifier affects brightness
@@ -475,9 +547,14 @@ class FormulasTable extends AbstractFileTable
     /**
      * @param FormulaCode $formulaCode
      * @param array|ModifierCode[] $modifierCodes
+     * @param array|SpellTraitCode[] $spellTraitCodes
      * @return SpeedBonus|null
      */
-    public function getSpellSpeedOfModified(FormulaCode $formulaCode, array $modifierCodes)
+    public function getSpellSpeedOfModified(/** @noinspection PhpUnusedParameterInspection to keep same interface with others */
+        FormulaCode $formulaCode,
+        array $modifierCodes,
+        array $spellTraitCodes
+    )
     {
         $formulaSpeed = $this->getSpellSpeed($formulaCode);
         if (!$formulaSpeed) {
@@ -584,9 +661,14 @@ class FormulasTable extends AbstractFileTable
      *
      * @param FormulaCode $formulaCode
      * @param array|ModifierCode[] $modifierCodes
+     * @param array|SpellTraitCode[] $spellTraitCodes
      * @return DistanceBonus|null
      */
-    public function getEpicenterShiftOfModified(FormulaCode $formulaCode, array $modifierCodes)
+    public function getEpicenterShiftOfModified(/** @noinspection PhpUnusedParameterInspection to keep same interface with others */
+        FormulaCode $formulaCode,
+        array $modifierCodes,
+        array $spellTraitCodes
+    )
     {
         $formulaEpicenterShift = $this->getEpicenterShift($formulaCode);
         if (!$formulaEpicenterShift) {

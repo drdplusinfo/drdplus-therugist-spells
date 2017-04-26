@@ -66,13 +66,48 @@ class SpellTraitsTable extends AbstractFileTable
     }
 
     /**
-     * @param SpellTraitCode $traitCode
+     * @param SpellTraitCode $spellTraitCode
      * @return DifficultyChange
      */
-    public function getDifficultyChange(SpellTraitCode $traitCode): DifficultyChange
+    public function getDifficultyChange(SpellTraitCode $spellTraitCode): DifficultyChange
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new DifficultyChange($this->getValue($traitCode, self::DIFFICULTY_CHANGE));
+        return new DifficultyChange($this->getValue($spellTraitCode, self::DIFFICULTY_CHANGE));
+    }
+
+    /**
+     * @param array|SpellTraitCode[] $spellTraitCodes
+     * @return DifficultyChange
+     */
+    public function sumDifficultyChanges(array $spellTraitCodes): DifficultyChange
+    {
+        $sumOfDifficultyChange = 0;
+        foreach ($this->toFlatArray($spellTraitCodes) as $spellTraitCode) {
+            $sumOfDifficultyChange += $this->getDifficultyChange($spellTraitCode);
+        }
+
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new DifficultyChange($sumOfDifficultyChange);
+    }
+
+    /**
+     * @param array $items
+     * @return array
+     */
+    private function toFlatArray(array $items): array
+    {
+        $flat = [];
+        foreach ($items as $item) {
+            if (is_array($item)) {
+                foreach ($this->toFlatArray($item) as $subItem) {
+                    $flat[] = $subItem;
+                }
+            } else {
+                $flat[] = $item;
+            }
+        }
+
+        return $flat;
     }
 
     /**

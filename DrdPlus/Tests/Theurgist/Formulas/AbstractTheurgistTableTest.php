@@ -6,6 +6,7 @@ use DrdPlus\Tables\Table;
 use DrdPlus\Tables\Tables;
 use DrdPlus\Theurgist\Codes\AbstractTheurgistCode;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Attack;
+use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTraitsTable;
 use DrdPlus\Theurgist\Formulas\ModifiersTable;
 use Granam\String\StringTools;
 use Granam\Tests\Tools\TestWithMockery;
@@ -48,7 +49,7 @@ abstract class AbstractTheurgistTableTest extends TestWithMockery
         $getObligatoryParameter = StringTools::assembleGetterForName($mandatoryParameter);
         $parameterClass = $this->assembleParameterClassName($mandatoryParameter);
         $sutClass = self::getSutClass();
-        $sut = new $sutClass(Tables::getIt(), $this->createModifiersTable());
+        $sut = new $sutClass(Tables::getIt(), $this->createModifiersTableShell(), $this->createSpellTraitsTableShell());
         $tableArgument = $this->findOutTableArgument($parameterClass);
         foreach ($codeClass::getPossibleValues() as $modifierCode) {
             $expectedParameterValue = $this->getValueFromTable($sut, $modifierCode, $mandatoryParameter);
@@ -64,11 +65,23 @@ abstract class AbstractTheurgistTableTest extends TestWithMockery
     }
 
     /**
+     * Just a placeholder - intentionally no methods are expected to be called
+     *
      * @return \Mockery\MockInterface|ModifiersTable
      */
-    private function createModifiersTable()
+    protected function createModifiersTableShell()
     {
         return $this->mockery(ModifiersTable::class);
+    }
+
+    /**
+     * Just a placeholder - intentionally no methods are expected to be called
+     *
+     * @return \Mockery\MockInterface|SpellTraitsTable
+     */
+    protected function createSpellTraitsTableShell()
+    {
+        return $this->mockery(SpellTraitsTable::class);
     }
 
     /**
@@ -98,7 +111,7 @@ abstract class AbstractTheurgistTableTest extends TestWithMockery
         $getOptionalParameter = StringTools::assembleGetterForName($optionalParameter);
         $parameterClass = $this->assembleParameterClassName($optionalParameter);
         $sutClass = self::getSutClass();
-        $sut = new $sutClass(Tables::getIt(), $this->createModifiersTable());
+        $sut = new $sutClass(Tables::getIt(), $this->createModifiersTableShell(), $this->createSpellTraitsTableShell());
         $tableArgument = $this->findOutTableArgument($parameterClass);
         foreach ($codeClass::getPossibleValues() as $modifierCode) {
             $expectedParameterValue = $this->getValueFromTable($sut, $modifierCode, $optionalParameter);

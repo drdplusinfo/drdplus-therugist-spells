@@ -391,7 +391,7 @@ class ModifiersTable extends AbstractFileTable
      * @param array|ModifierCode[] $modifierCodes
      * @return IntegerObject
      */
-    public function sumPowerChange(array $modifierCodes): IntegerObject
+    public function sumPowerChanges(array $modifierCodes): IntegerObject
     {
         $powerValue = 0;
         foreach ($modifierCodes as $modifierCode) {
