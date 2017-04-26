@@ -57,9 +57,14 @@ abstract class IntegerCastingParameter extends CastingParameter implements Integ
      */
     public function add($value)
     {
+        $value = ToInteger::toInteger($value);
+        if ($value === 0) {
+            return $this;
+        }
+
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new static(
-            [$this->getValue() + ToInteger::toInteger($value), $this->getAdditionByRealms()->getNotation()]
+            [$this->getValue() + $value, $this->getAdditionByRealms()->getNotation()]
         );
     }
 
@@ -70,9 +75,14 @@ abstract class IntegerCastingParameter extends CastingParameter implements Integ
      */
     public function sub($value)
     {
+        $value = ToInteger::toInteger($value);
+        if ($value === 0) {
+            return $this;
+        }
+
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new static(
-            [$this->getValue() - ToInteger::toInteger($value), $this->getAdditionByRealms()->getNotation()]
+            [$this->getValue() - $value, $this->getAdditionByRealms()->getNotation()]
         );
     }
 }

@@ -2,10 +2,6 @@
 namespace DrdPlus\Tests\Theurgist\Formulas;
 
 use DrdPlus\Codes\TimeUnitCode;
-use DrdPlus\Tables\Measurements\Distance\DistanceBonus;
-use DrdPlus\Tables\Measurements\Distance\DistanceTable;
-use DrdPlus\Tables\Measurements\Speed\SpeedBonus;
-use DrdPlus\Tables\Measurements\Speed\SpeedTable;
 use DrdPlus\Tables\Measurements\Time\Time;
 use DrdPlus\Tables\Tables;
 use DrdPlus\Theurgist\Codes\AffectionPeriodCode;
@@ -18,6 +14,7 @@ use DrdPlus\Theurgist\Formulas\CastingParameters\Affection;
 use DrdPlus\Theurgist\Formulas\CastingParameters\CastingRounds;
 use DrdPlus\Theurgist\Formulas\CastingParameters\DifficultyChange;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Difficulty;
+use DrdPlus\Theurgist\Formulas\CastingParameters\EpicenterShift;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Realm;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTraitsTable;
@@ -109,6 +106,28 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         ];
         foreach ($optionalParameters as $optionalParameter) {
             $this->I_can_get_optional_parameter($optionalParameter, FormulaCode::class);
+            $this->I_can_get_modified_optional_parameter($optionalParameter);
+        }
+    }
+
+    /**
+     * @param string $optionalParameterName
+     */
+    private function I_can_get_modified_optional_parameter(string $optionalParameterName)
+    {
+        $getOptionalModifiedParameter = StringTools::assembleGetterForName($optionalParameterName . '_of_modified');
+        $getOptionalParameter = StringTools::assembleGetterForName($optionalParameterName);
+        $parameterClass = $this->assembleParameterClassName($optionalParameterName);
+        $formulasTable = new FormulasTable(Tables::getIt(), $this->modifiersTable, $this->spellTraitsTable);
+        foreach (FormulaCode::getPossibleValues() as $formulaName) {
+            $basic = $formulasTable->$getOptionalParameter(FormulaCode::getIt($formulaName));
+            $modified = $formulasTable->$getOptionalModifiedParameter(FormulaCode::getIt($formulaName), [], []);
+            if ($basic === null) {
+                self::assertNull($modified);
+            } else {
+                self::assertInstanceOf($parameterClass, $basic);
+                self::assertInstanceOf($parameterClass, $modified);
+            }
         }
     }
 
@@ -862,14 +881,16 @@ PHPDOC
             $this->createModifiersTableForRadius($modifiers, 0),
             $this->createSpellTraitsTableShell()
         );
+        $discharge = FormulaCode::getIt(FormulaCode::DISCHARGE);
         $radiusOfDischargeWithoutChange = $formulasTable->getRadiusOfModified(
-            FormulaCode::getIt(FormulaCode::DISCHARGE), // +10
+            $discharge,
             $modifiers,
             ['foo bar', 'bar BAZ']
         );
-        $distanceTable = new DistanceTable();
-        $distanceTable->getIndexedValues(); // just to populate them for sake of comparison
-        self::assertEquals(new DistanceBonus(10, $distanceTable), $radiusOfDischargeWithoutChange);
+        self::assertEquals(
+            $formulasTable->getRadius($discharge),
+            $radiusOfDischargeWithoutChange
+        );
 
         $formulasTable = new FormulasTable(
             Tables::getIt(),
@@ -877,11 +898,11 @@ PHPDOC
             $this->createSpellTraitsTableShell()
         );
         $radiusOfModifiedDischarge = $formulasTable->getRadiusOfModified(
-            FormulaCode::getIt(FormulaCode::DISCHARGE), // +10
+            $discharge,
             $modifiers,
             ['foo bar', 'bar BAZ']
         );
-        self::assertEquals(new DistanceBonus(799, $distanceTable), $radiusOfModifiedDischarge);
+        self::assertEquals($formulasTable->getRadius($discharge)->add(789), $radiusOfModifiedDischarge);
     }
 
     /**
@@ -979,21 +1000,20 @@ PHPDOC
             $modifiers,
             ['foo bar', 'bar BAZ']
         );
-        $distanceTable = new DistanceTable();
-        $distanceTable->getIndexedValues(); // just to populate them for sake of comparison
-        self::assertEquals(new DistanceBonus(123456, $distanceTable), $epicenterShiftOfShiftedLock);
+        self::assertEquals(new EpicenterShift([123456, 0]), $epicenterShiftOfShiftedLock);
 
         $formulasTable = new FormulasTable(
             Tables::getIt(),
             $this->createModifiersTableForEpicenterShift($modifiers, true /* shifted */, 0),
             $this->createSpellTraitsTableShell()
         );
+        $greatMassacre = FormulaCode::getIt(FormulaCode::GREAT_MASSACRE);
         $epicenterShiftOfGreatMassacreWithoutChange = $formulasTable->getEpicenterShiftOfModified(
-            FormulaCode::getIt(FormulaCode::GREAT_MASSACRE), // +20
+            $greatMassacre, // +20
             $modifiers,
             ['foo bar', 'bar BAZ']
         );
-        self::assertEquals(new DistanceBonus(20, $distanceTable), $epicenterShiftOfGreatMassacreWithoutChange);
+        self::assertEquals($formulasTable->getEpicenterShift($greatMassacre) /* + 0 */, $epicenterShiftOfGreatMassacreWithoutChange);
 
         $formulasTable = new FormulasTable(
             Tables::getIt(),
@@ -1005,7 +1025,10 @@ PHPDOC
             $modifiers,
             ['foo bar', 'bar BAZ']
         );
-        self::assertEquals(new DistanceBonus(809, $distanceTable), $epicenterShiftOfModifiedGreatMassacre);
+        self::assertEquals(
+            $formulasTable->getEpicenterShift($greatMassacre)->add(789),
+            $epicenterShiftOfModifiedGreatMassacre
+        );
     }
 
     /**
@@ -1053,14 +1076,13 @@ PHPDOC
             $this->createModifiersTableForSpellSpeed($modifiers, 0),
             $this->createSpellTraitsTableShell()
         );
-        $speedTable = new SpeedTable();
-        $speedTable->getIndexedValues(); // just to populate them for sake of comparison
+        $tsunami = FormulaCode::getIt(FormulaCode::TSUNAMI_FROM_CLAY_AND_STONES);
         $spellSpeedOfTsunamiWithoutChange = $formulasTable->getSpellSpeedOfModified(
-            FormulaCode::getIt(FormulaCode::TSUNAMI_FROM_CLAY_AND_STONES), // +0
+            $tsunami, // +0
             $modifiers,
             ['foo bar', 'bar BAZ']
         );
-        self::assertEquals(new SpeedBonus(0, $speedTable), $spellSpeedOfTsunamiWithoutChange);
+        self::assertEquals($formulasTable->getSpellSpeed($tsunami) /* + 0 */, $spellSpeedOfTsunamiWithoutChange);
 
         $formulasTable = new FormulasTable(
             Tables::getIt(),
@@ -1068,11 +1090,11 @@ PHPDOC
             $this->createSpellTraitsTableShell()
         );
         $spellSpeedOfModifiedTsunami = $formulasTable->getSpellSpeedOfModified(
-            FormulaCode::getIt(FormulaCode::TSUNAMI_FROM_CLAY_AND_STONES), // +0
+            $tsunami, // +0
             $modifiers,
             ['foo bar', 'bar BAZ']
         );
-        self::assertEquals(new SpeedBonus(789, $speedTable), $spellSpeedOfModifiedTsunami);
+        self::assertEquals($formulasTable->getSpellSpeed($tsunami)->add(789), $spellSpeedOfModifiedTsunami);
     }
 
     /**

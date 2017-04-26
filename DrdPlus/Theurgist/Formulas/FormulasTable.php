@@ -2,8 +2,6 @@
 namespace DrdPlus\Theurgist\Formulas;
 
 use DrdPlus\Codes\TimeUnitCode;
-use DrdPlus\Tables\Measurements\Distance\DistanceBonus;
-use DrdPlus\Tables\Measurements\Speed\SpeedBonus;
 use DrdPlus\Tables\Measurements\Time\Time;
 use DrdPlus\Tables\Partials\AbstractFileTable;
 use DrdPlus\Tables\Partials\Exceptions\RequiredRowNotFound;
@@ -84,7 +82,7 @@ class FormulasTable extends AbstractFileTable
         return [
             self::REALM => self::POSITIVE_INTEGER,
             self::AFFECTION => self::ARRAY,
-            self::EVOCATION => self::POSITIVE_INTEGER,
+            self::EVOCATION => self::ARRAY,
             self::DIFFICULTY => self::ARRAY,
             self::RADIUS => self::ARRAY,
             self::DURATION => self::ARRAY,
@@ -330,7 +328,7 @@ class FormulasTable extends AbstractFileTable
      * @param FormulaCode $formulaCode
      * @param array|ModifierCode[] $modifierCodes
      * @param array|SpellTraitCode[] $spellTraitCodes
-     * @return DistanceBonus|null
+     * @return Radius|null
      */
     public function getRadiusOfModified(/** @noinspection PhpUnusedParameterInspection */
         FormulaCode $formulaCode,
@@ -344,9 +342,8 @@ class FormulasTable extends AbstractFileTable
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new DistanceBonus(
-            $formulaRadius->getValue() + $this->modifiersTable->sumRadiusChange($modifierCodes)->getValue(),
-            $this->tables->getDistanceTable()
+        return $formulaRadius->add(
+            $this->modifiersTable->sumRadiusChange($modifierCodes)->getValue()
         );
     }
 
@@ -467,6 +464,21 @@ class FormulasTable extends AbstractFileTable
 
     /**
      * @param FormulaCode $formulaCode
+     * @param array|ModifierCode[] $modifierCodes
+     * @param array|SpellTraitCode[] $spellTraitCodes
+     * @return SizeChange|null
+     */
+    public function getSizeChangeOfModified(/** @noinspection PhpUnusedParameterInspection to keep same interface with others */
+        FormulaCode $formulaCode,
+        array $modifierCodes,
+        array $spellTraitCodes
+    )
+    {
+        return $this->getSizeChange($formulaCode);
+    }
+
+    /**
+     * @param FormulaCode $formulaCode
      * @return DetailLevel|null
      */
     public function getDetailLevel(FormulaCode $formulaCode)
@@ -555,7 +567,7 @@ class FormulasTable extends AbstractFileTable
      * @param FormulaCode $formulaCode
      * @param array|ModifierCode[] $modifierCodes
      * @param array|SpellTraitCode[] $spellTraitCodes
-     * @return SpeedBonus|null
+     * @return SpellSpeed|null
      */
     public function getSpellSpeedOfModified(/** @noinspection PhpUnusedParameterInspection to keep same interface with others */
         FormulaCode $formulaCode,
@@ -569,11 +581,7 @@ class FormulasTable extends AbstractFileTable
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new SpeedBonus(
-            $formulaSpeed->getValue()
-            + $this->modifiersTable->sumSpellSpeedChange($modifierCodes)->getValue(),
-            $this->tables->getSpeedTable()
-        );
+        return $formulaSpeed->add($this->modifiersTable->sumSpellSpeedChange($modifierCodes)->getValue());
     }
 
     /**
@@ -590,6 +598,44 @@ class FormulasTable extends AbstractFileTable
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new EpicenterShift($epicenterShift, $this->tables->getDistanceTable());
+    }
+
+    /**
+     * Transposition can shift epicenter.
+     *
+     * @param FormulaCode $formulaCode
+     * @param array|ModifierCode[] $modifierCodes
+     * @param array|SpellTraitCode[] $spellTraitCodes
+     * @return EpicenterShift|null
+     */
+    public function getEpicenterShiftOfModified(/** @noinspection PhpUnusedParameterInspection to keep same interface with others */
+        FormulaCode $formulaCode,
+        array $modifierCodes,
+        array $spellTraitCodes
+    )
+    {
+        $formulaEpicenterShift = $this->getEpicenterShift($formulaCode);
+        if (!$formulaEpicenterShift) {
+            $formulaEpicenterShiftValue = 0;
+            if (!$this->modifiersTable->isEpicenterShifted($modifierCodes)) {
+                return null; // no shift at all
+            }
+        } else {
+            $formulaEpicenterShiftValue = $formulaEpicenterShift->getValue();
+        }
+
+        if ($formulaEpicenterShift) {
+            return $formulaEpicenterShift->add($this->modifiersTable->sumEpicenterShiftChange($modifierCodes)->getValue());
+        }
+
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new EpicenterShift(
+            [
+                $formulaEpicenterShiftValue + $this->modifiersTable->sumEpicenterShiftChange($modifierCodes)->getValue(),
+                0 // no addition by realm possible for this formula
+            ],
+            $this->tables->getDistanceTable()
+        );
     }
 
     /**
@@ -662,37 +708,4 @@ class FormulasTable extends AbstractFileTable
             throw new Exceptions\UnknownFormulaToGetModifiersFor("Given formula code '{$formulaCode}' is unknown");
         }
     }
-
-    /**
-     * Transposition can shift epicenter.
-     *
-     * @param FormulaCode $formulaCode
-     * @param array|ModifierCode[] $modifierCodes
-     * @param array|SpellTraitCode[] $spellTraitCodes
-     * @return DistanceBonus|null
-     */
-    public function getEpicenterShiftOfModified(/** @noinspection PhpUnusedParameterInspection to keep same interface with others */
-        FormulaCode $formulaCode,
-        array $modifierCodes,
-        array $spellTraitCodes
-    )
-    {
-        $formulaEpicenterShift = $this->getEpicenterShift($formulaCode);
-        if (!$formulaEpicenterShift) {
-            $formulaEpicenterShiftValue = 0;
-            if (!$this->modifiersTable->isEpicenterShifted($modifierCodes)) {
-                return null; // no shift at all
-            }
-        } else {
-            $formulaEpicenterShiftValue = $formulaEpicenterShift->getValue();
-        }
-
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new DistanceBonus(
-            $formulaEpicenterShiftValue
-            + $this->modifiersTable->sumEpicenterShiftChange($modifierCodes)->getValue(),
-            $this->tables->getDistanceTable()
-        );
-    }
-
 }

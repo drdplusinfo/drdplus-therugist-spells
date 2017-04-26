@@ -4,24 +4,27 @@ namespace DrdPlus\Theurgist\Formulas\CastingParameters;
 use DrdPlus\Tables\Measurements\Time\Time;
 use DrdPlus\Tables\Measurements\Time\TimeBonus;
 use DrdPlus\Tables\Measurements\Time\TimeTable;
-use Granam\Integer\PositiveIntegerObject;
 
-class Evocation extends PositiveIntegerObject
+/**
+ * @method Evocation add($value)
+ * @method Evocation sub($value)
+ */
+class Evocation extends PositiveCastingParameter
 {
     /**
-     * @param $value
+     * @param array $values
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidValueForPositiveCastingParameter
-     * @throws \DrdPlus\Tables\Measurements\Time\Exceptions\CanNotConvertThatBonusToTime
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\MissingValueForAdditionByRealm
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfRealmIncrement
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAdditionByRealmValue
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\UnexpectedFormatOfAdditionByRealm
      */
-    public function __construct($value)
+    public function __construct(array $values)
     {
-        try {
-            parent::__construct($value);
-        } catch (\Granam\Integer\Tools\Exceptions\Exception $exception) {
-            throw new Exceptions\InvalidValueForPositiveCastingParameter(
-                'Expected positive integer: ' . $exception->getMessage()
-            );
+        if (!array_key_exists(1, $values)) {
+            $values[1] = 0; // no addition by realms
         }
+        parent::__construct($values);
     }
 
     /**
