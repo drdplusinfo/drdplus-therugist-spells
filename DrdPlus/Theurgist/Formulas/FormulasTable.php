@@ -5,7 +5,6 @@ use DrdPlus\Codes\TimeUnitCode;
 use DrdPlus\Tables\Measurements\Distance\DistanceBonus;
 use DrdPlus\Tables\Measurements\Speed\SpeedBonus;
 use DrdPlus\Tables\Measurements\Time\Time;
-use DrdPlus\Tables\Measurements\Time\TimeBonus;
 use DrdPlus\Tables\Partials\AbstractFileTable;
 use DrdPlus\Tables\Partials\Exceptions\RequiredRowNotFound;
 use DrdPlus\Tables\Tables;
@@ -19,7 +18,7 @@ use DrdPlus\Theurgist\Formulas\CastingParameters\Attack;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Brightness;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Evocation;
 use DrdPlus\Theurgist\Formulas\CastingParameters\DetailLevel;
-use DrdPlus\Theurgist\Formulas\CastingParameters\DifficultyLimit;
+use DrdPlus\Theurgist\Formulas\CastingParameters\Difficulty;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Duration;
 use DrdPlus\Theurgist\Formulas\CastingParameters\EpicenterShift;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Power;
@@ -29,7 +28,6 @@ use DrdPlus\Theurgist\Formulas\CastingParameters\SizeChange;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellSpeed;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTraitsTable;
-use Granam\Integer\IntegerObject;
 
 class FormulasTable extends AbstractFileTable
 {
@@ -66,7 +64,7 @@ class FormulasTable extends AbstractFileTable
     const REALM = 'realm';
     const AFFECTION = 'affection';
     const EVOCATION = 'evocation';
-    const DIFFICULTY_LIMIT = 'difficulty_limit';
+    const DIFFICULTY = 'difficulty';
     const RADIUS = 'radius';
     const DURATION = 'duration';
     const POWER = 'power';
@@ -87,7 +85,7 @@ class FormulasTable extends AbstractFileTable
             self::REALM => self::POSITIVE_INTEGER,
             self::AFFECTION => self::ARRAY,
             self::EVOCATION => self::POSITIVE_INTEGER,
-            self::DIFFICULTY_LIMIT => self::ARRAY,
+            self::DIFFICULTY => self::ARRAY,
             self::RADIUS => self::ARRAY,
             self::DURATION => self::ARRAY,
             self::POWER => self::ARRAY,
@@ -136,32 +134,32 @@ class FormulasTable extends AbstractFileTable
         array $spellTraitCodes
     ): Realm
     {
-        $basicFormulaDifficultyLimit = $this->getDifficultyLimit($formulaCode);
-        $maximalDifficultyHandledByFormula = $basicFormulaDifficultyLimit->getMaximal();
+        $basicFormulaDifficulty = $this->getDifficulty($formulaCode);
+        $maximalDifficultyHandledByFormula = $basicFormulaDifficulty->getMaximal();
         $minimalPossibleRealm = $this->getRealm($formulaCode);
-        $difficultyOfModifiedWithoutRealmChange = $this->getDifficultyOfModified(
+        $difficultyOfModifiedYetWithoutRealmChange = $this->getDifficultyOfModified(
             $formulaCode,
             $modifierCodes,
             $spellTraitCodes
         )->getValue();
         $highestRequiredRealmByModifiers = $this->modifiersTable->getHighestRequiredRealm($modifierCodes);
-        if ($maximalDifficultyHandledByFormula >= $difficultyOfModifiedWithoutRealmChange
+        if ($maximalDifficultyHandledByFormula >= $difficultyOfModifiedYetWithoutRealmChange
             && $minimalPossibleRealm->getValue() >= $highestRequiredRealmByModifiers->getValue()
         ) {
             return $minimalPossibleRealm;
         }
-        $formulaAdditionByRealms = $basicFormulaDifficultyLimit->getAdditionByRealms();
+        $formulaAdditionByRealms = $basicFormulaDifficulty->getAdditionByRealms();
         $difficultyHandledByAdditionalRealm = $formulaAdditionByRealms->getAddition();
         if ($difficultyHandledByAdditionalRealm <= 0) {
             // this should never happen, because every formula addition is currently greater than zero
             throw new Exceptions\CanNotBuildFormulaWithRequiredModification(
-                "Formula {$formulaCode} with basic difficulty {$basicFormulaDifficultyLimit}"
-                . " can not be build with difficulty {$difficultyOfModifiedWithoutRealmChange}"
+                "Formula {$formulaCode} with basic difficulty {$basicFormulaDifficulty}"
+                . " can not be build with difficulty {$difficultyOfModifiedYetWithoutRealmChange}"
                 . " because of its addition by realms {$formulaAdditionByRealms}"
             );
         }
         $realmIncrementToHandleAdditionalDifficulty = $formulaAdditionByRealms->getRealmIncrement();
-        while ($maximalDifficultyHandledByFormula < $difficultyOfModifiedWithoutRealmChange) {
+        while ($maximalDifficultyHandledByFormula < $difficultyOfModifiedYetWithoutRealmChange) {
             $maximalDifficultyHandledByFormula += $difficultyHandledByAdditionalRealm;
             /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
             $minimalPossibleRealm = $minimalPossibleRealm->add($realmIncrementToHandleAdditionalDifficulty);
@@ -236,20 +234,15 @@ class FormulasTable extends AbstractFileTable
      * @param FormulaCode $formulaCode
      * @param array|ModifierCode[] $modifierCodes
      * @param array|SpellTraitCode[] $spellTraitCodes
-     * @return TimeBonus
+     * @return Evocation
      */
     public function getEvocationOfModified(/** @noinspection PhpUnusedParameterInspection to keep same interface with others */
         FormulaCode $formulaCode,
         array $modifierCodes,
         array $spellTraitCodes
-    ): TimeBonus
+    ): Evocation
     {
-        // no modifier affects evocation time
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new TimeBonus(
-            $this->getEvocation($formulaCode)->getValue(),
-            $this->tables->getTimeTable()
-        );
+        return $this->getEvocation($formulaCode);
     }
 
     /**
@@ -290,30 +283,29 @@ class FormulasTable extends AbstractFileTable
 
     /**
      * @param FormulaCode $formulaCode
-     * @return DifficultyLimit
+     * @return Difficulty
      */
-    public function getDifficultyLimit(FormulaCode $formulaCode): DifficultyLimit
+    public function getDifficulty(FormulaCode $formulaCode): Difficulty
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new DifficultyLimit($this->getValue($formulaCode, self::DIFFICULTY_LIMIT));
+        return new Difficulty($this->getValue($formulaCode, self::DIFFICULTY));
     }
 
     /**
      * @param FormulaCode $formulaCode
      * @param array|ModifierCode[] $modifierCodes
      * @param array|SpellTraitCode[] $spellTraitCodes
-     * @return IntegerObject
-     * @throws \DrdPlus\Theurgist\Formulas\Exceptions\CanNotBuildFormulaWithRequiredModification
+     * @return Difficulty
      */
     public function getDifficultyOfModified(
         FormulaCode $formulaCode,
         array $modifierCodes,
         array $spellTraitCodes
-    ): IntegerObject
+    ): Difficulty
     {
-        return new IntegerObject(
-            $this->getDifficultyLimit($formulaCode)->getMinimal()
-            + $this->modifiersTable->sumDifficultyChanges($modifierCodes)->getValue()
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return $this->getDifficulty($formulaCode)->add(
+            +$this->modifiersTable->sumDifficultyChanges($modifierCodes)->getValue()
             + $this->spellTraitsTable->sumDifficultyChanges($spellTraitCodes)->getValue()
         );
     }
@@ -339,7 +331,6 @@ class FormulasTable extends AbstractFileTable
      * @param array|ModifierCode[] $modifierCodes
      * @param array|SpellTraitCode[] $spellTraitCodes
      * @return DistanceBonus|null
-     * @throws \DrdPlus\Theurgist\Formulas\Exceptions\CanNotBuildFormulaWithRequiredModification
      */
     public function getRadiusOfModified(/** @noinspection PhpUnusedParameterInspection */
         FormulaCode $formulaCode,
@@ -364,6 +355,22 @@ class FormulasTable extends AbstractFileTable
      * @return Duration
      */
     public function getDuration(FormulaCode $formulaCode): Duration
+    {
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new Duration($this->getValue($formulaCode, self::DURATION), $this->tables->getTimeTable());
+    }
+
+    /**
+     * @param FormulaCode $formulaCode
+     * @param array|ModifierCode[] $modifierCodes
+     * @param array|SpellTraitCode[] $spellTraitCodes
+     * @return Duration
+     */
+    public function getDurationOfModified(/** @noinspection PhpUnusedParameterInspection */
+        FormulaCode $formulaCode,
+        array $modifierCodes,
+        array $spellTraitCodes
+    ): Duration
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new Duration($this->getValue($formulaCode, self::DURATION), $this->tables->getTimeTable());

@@ -17,7 +17,7 @@ use DrdPlus\Theurgist\Codes\SpellTraitCode;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Affection;
 use DrdPlus\Theurgist\Formulas\CastingParameters\CastingRounds;
 use DrdPlus\Theurgist\Formulas\CastingParameters\DifficultyChange;
-use DrdPlus\Theurgist\Formulas\CastingParameters\DifficultyLimit;
+use DrdPlus\Theurgist\Formulas\CastingParameters\Difficulty;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Realm;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTraitsTable;
@@ -25,6 +25,7 @@ use DrdPlus\Theurgist\Formulas\FormulasTable;
 use DrdPlus\Theurgist\Formulas\ModifiersTable;
 use DrdPlus\Theurgist\Formulas\ProfilesTable;
 use Granam\Integer\IntegerObject;
+use Granam\String\StringTools;
 
 class FormulasTableTest extends AbstractTheurgistTableTest
 {
@@ -52,12 +53,39 @@ class FormulasTableTest extends AbstractTheurgistTableTest
          * @see FormulasTable::getRealm()
          * @see FormulasTable::getAffection()
          * @see FormulasTable::getEvocation()
-         * @see FormulasTable::getDifficultyLimit()
+         * @see FormulasTable::getDifficulty()
          * @see FormulasTable::getDuration()
          */
-        $mandatoryParameters = ['realm', 'affection', 'evocation', 'difficulty_limit', 'duration'];
+        $mandatoryParameters = ['realm', 'affection', 'evocation', 'difficulty', 'duration'];
         foreach ($mandatoryParameters as $mandatoryParameter) {
             $this->I_can_get_mandatory_parameter($mandatoryParameter, FormulaCode::class);
+            $this->I_can_get_modified_mandatory_parameter($mandatoryParameter);
+        }
+    }
+
+    /**
+     * @param string $mandatoryParameterName
+     */
+    private function I_can_get_modified_mandatory_parameter(string $mandatoryParameterName)
+    {
+        if ($mandatoryParameterName === 'affection') {
+            $getMandatoryModifiedParameter = StringTools::assembleGetterForName($mandatoryParameterName . 's_of_modified');
+        } else {
+            $getMandatoryModifiedParameter = StringTools::assembleGetterForName($mandatoryParameterName . '_of_modified');
+        }
+        $parameterClass = $this->assembleParameterClassName($mandatoryParameterName);
+        $formulasTable = new FormulasTable(Tables::getIt(), $this->modifiersTable, $this->spellTraitsTable);
+        foreach (FormulaCode::getPossibleValues() as $formulaName) {
+            $modified = $formulasTable->$getMandatoryModifiedParameter(FormulaCode::getIt($formulaName), [], []);
+            if ($mandatoryParameterName === 'affection') {
+                self::assertInternalType('array', $modified);
+                /** @var array $modified */
+                foreach ($modified as $affection) {
+                    self::assertInstanceOf($parameterClass, $affection);
+                }
+            } else {
+                self::assertInstanceOf($parameterClass, $modified);
+            }
         }
     }
 
@@ -493,7 +521,7 @@ PHPDOC
 
         $difficultyOfModifiedFormula = $formulasTable->getDifficultyOfModified($fire, $modifiers, $spellTraits);
         self::assertSame(
-            $formulasTable->getDifficultyLimit($fire)->getMinimal() + 123 + 789,
+            $formulasTable->getDifficulty($fire)->getMinimal() + 123 + 789,
             $difficultyOfModifiedFormula->getValue()
         );
     }
@@ -608,10 +636,10 @@ PHPDOC
             $requiredRealmOfModerateModifiedFormula->getValue()
         );
         $basicFormulaRealmValue = $formulasTable->getRealm($formulaCode)->getValue();
-        $portalDifficultyLimit = $formulasTable->getDifficultyLimit($formulaCode);
-        $unhandledDifficulty = ($modifiersDifficultyChangeValue + $spellTraitsDifficultyChangeValue + $portalDifficultyLimit->getMinimal())
-            - $portalDifficultyLimit->getMaximal();
-        $handledDifficultyPerRealm = $portalDifficultyLimit->getAdditionByRealms()->getAddition();
+        $portalDifficulty = $formulasTable->getDifficulty($formulaCode);
+        $unhandledDifficulty = ($modifiersDifficultyChangeValue + $spellTraitsDifficultyChangeValue + $portalDifficulty->getMinimal())
+            - $portalDifficulty->getMaximal();
+        $handledDifficultyPerRealm = $portalDifficulty->getAdditionByRealms()->getAddition();
         $realmsIncrement = (int)ceil($unhandledDifficulty / $handledDifficultyPerRealm);
         self::assertSame($basicFormulaRealmValue + $realmsIncrement, $requiredRealmOfModerateModifiedFormula->getValue());
 
@@ -648,10 +676,10 @@ PHPDOC
             $requiredRealmOfHeavilyModifiedFormula->getValue()
         );
         $basicFormulaRealmValue = $formulasTable->getRealm($formulaCode)->getValue();
-        $portalDifficultyLimit = $formulasTable->getDifficultyLimit($formulaCode);
-        $unhandledDifficulty = ($modifiersDifficultyChangeValue + $spellTraitsDifficultyChangeValue + $portalDifficultyLimit->getMinimal())
-            - $portalDifficultyLimit->getMaximal();
-        $handledDifficultyPerRealm = $portalDifficultyLimit->getAdditionByRealms()->getAddition();
+        $portalDifficulty = $formulasTable->getDifficulty($formulaCode);
+        $unhandledDifficulty = ($modifiersDifficultyChangeValue + $spellTraitsDifficultyChangeValue + $portalDifficulty->getMinimal())
+            - $portalDifficulty->getMaximal();
+        $handledDifficultyPerRealm = $portalDifficulty->getAdditionByRealms()->getAddition();
         $realmsIncrement = (int)ceil($unhandledDifficulty / $handledDifficultyPerRealm);
         self::assertSame(
             $basicFormulaRealmValue + $realmsIncrement,
@@ -677,8 +705,9 @@ PHPDOC
         $modifiers = ['foo'];
         $spellTraits = ['bar'];
         $formulasTable = $this->getFormulasTableForMinimalRequiredRealmTest(
-            $this->createModifiersTableForDifficulty($modifiers, 333, 1),
-            $this->createSpellTraitsTableForDifficulty($spellTraits, 0)
+            $this->createModifiersTableForDifficulty($modifiers, 123, 1),
+            $this->createSpellTraitsTableForDifficulty($spellTraits, 456),
+            579
         );
 
         /** @var \Mockery\MockInterface|FormulasTable $formulasTable */
@@ -689,8 +718,9 @@ PHPDOC
         }
 
         $formulasTable = $this->getFormulasTableForMinimalRequiredRealmTest(
-            $this->createModifiersTableForDifficulty($modifiers, 333, 1),
-            $this->createSpellTraitsTableForDifficulty($spellTraits, 1 /* ++ */)
+            $this->createModifiersTableForDifficulty($modifiers, 123, 1),
+            $this->createSpellTraitsTableForDifficulty($spellTraits, 456),
+            578
         );
         $formulasTable->getRealmOfModified(FormulaCode::getIt(FormulaCode::FLOW_OF_TIME), $modifiers, $spellTraits);
     }
@@ -698,13 +728,18 @@ PHPDOC
     /**
      * @param ModifiersTable $modifiersTable
      * @param SpellTraitsTable $spellTraitsTable
+     * @param int $maximalDifficulty
      * @return \Mockery\Mock|\Mockery\MockInterface|FormulasTable
      */
-    private function getFormulasTableForMinimalRequiredRealmTest(ModifiersTable $modifiersTable, SpellTraitsTable $spellTraitsTable)
+    private function getFormulasTableForMinimalRequiredRealmTest(
+        ModifiersTable $modifiersTable,
+        SpellTraitsTable $spellTraitsTable,
+        int $maximalDifficulty
+    )
     {
         $formulasTable = \Mockery::mock(FormulasTable::class, [Tables::getIt(), $modifiersTable, $spellTraitsTable]);
-        $formulasTable->shouldReceive('getDifficultyLimit')
-            ->andReturn(new DifficultyLimit([123, 456, -1 /* higher realm cause lower difficulty to be handled */]));
+        $formulasTable->shouldReceive('getDifficulty')
+            ->andReturn(new Difficulty([0, $maximalDifficulty, -1 /* => higher realm cause lower difficulty to be handled */]));
         $getDataFileName = new \ReflectionMethod(FormulasTable::class, 'getDataFileName');
         $getDataFileName->setAccessible(true);
         $formulasTable->shouldAllowMockingProtectedMethods()

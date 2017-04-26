@@ -46,18 +46,18 @@ abstract class AbstractTheurgistTableTest extends TestWithMockery
      */
     protected function I_can_get_mandatory_parameter(string $mandatoryParameter, string $codeClass)
     {
-        $getObligatoryParameter = StringTools::assembleGetterForName($mandatoryParameter);
+        $getMandatoryParameter = StringTools::assembleGetterForName($mandatoryParameter);
         $parameterClass = $this->assembleParameterClassName($mandatoryParameter);
         $sutClass = self::getSutClass();
         $sut = new $sutClass(Tables::getIt(), $this->createModifiersTableShell(), $this->createSpellTraitsTableShell());
         $tableArgument = $this->findOutTableArgument($parameterClass);
-        foreach ($codeClass::getPossibleValues() as $modifierCode) {
-            $expectedParameterValue = $this->getValueFromTable($sut, $modifierCode, $mandatoryParameter);
+        foreach ($codeClass::getPossibleValues() as $codeValue) {
+            $expectedParameterValue = $this->getValueFromTable($sut, $codeValue, $mandatoryParameter);
             if ($tableArgument) {
-                $parameterObject = $sut->$getObligatoryParameter($codeClass::getIt($modifierCode), $tableArgument);
+                $parameterObject = $sut->$getMandatoryParameter($codeClass::getIt($codeValue), $tableArgument);
                 $expectedParameterObject = new $parameterClass($expectedParameterValue, $tableArgument);
             } else {
-                $parameterObject = $sut->$getObligatoryParameter($codeClass::getIt($modifierCode));
+                $parameterObject = $sut->$getMandatoryParameter($codeClass::getIt($codeValue));
                 $expectedParameterObject = new $parameterClass($expectedParameterValue);
             }
             self::assertEquals($expectedParameterObject, $parameterObject);
@@ -88,7 +88,7 @@ abstract class AbstractTheurgistTableTest extends TestWithMockery
      * @param string $parameter
      * @return string
      */
-    private function assembleParameterClassName(string $parameter): string
+    protected function assembleParameterClassName(string $parameter): string
     {
         $basename = implode(array_map(
             function (string $parameterPart) {
@@ -113,18 +113,18 @@ abstract class AbstractTheurgistTableTest extends TestWithMockery
         $sutClass = self::getSutClass();
         $sut = new $sutClass(Tables::getIt(), $this->createModifiersTableShell(), $this->createSpellTraitsTableShell());
         $tableArgument = $this->findOutTableArgument($parameterClass);
-        foreach ($codeClass::getPossibleValues() as $modifierCode) {
-            $expectedParameterValue = $this->getValueFromTable($sut, $modifierCode, $optionalParameter);
+        foreach ($codeClass::getPossibleValues() as $codeValue) {
+            $expectedParameterValue = $this->getValueFromTable($sut, $codeValue, $optionalParameter);
             if ($tableArgument) {
                 $parameterObject = $sut->$getOptionalParameter(
-                    $codeClass::getIt($modifierCode),
+                    $codeClass::getIt($codeValue),
                     $tableArgument
                 );
                 $expectedParameterObject = count($expectedParameterValue) !== 0
                     ? new $parameterClass($expectedParameterValue, $tableArgument)
                     : null;
             } else {
-                $parameterObject = $sut->$getOptionalParameter($codeClass::getIt($modifierCode));
+                $parameterObject = $sut->$getOptionalParameter($codeClass::getIt($codeValue));
                 $expectedParameterObject = count($expectedParameterValue) !== 0
                     ? new $parameterClass($expectedParameterValue)
                     : null;

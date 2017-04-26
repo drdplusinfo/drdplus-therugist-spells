@@ -2,11 +2,18 @@
 namespace DrdPlus\Theurgist\Formulas\CastingParameters;
 
 use Granam\Integer\Tools\ToInteger;
+use Granam\Number\NumberInterface;
 use Granam\Tools\ValueDescriber;
 
-class DifficultyLimit extends CastingParameter
+class Difficulty extends PositiveCastingParameter
 {
+    /**
+     * @var int
+     */
     private $minimal;
+    /**
+     * @var int
+     */
     private $maximal;
 
     /**
@@ -43,7 +50,11 @@ class DifficultyLimit extends CastingParameter
                 . " Got minimum {$this->minimal} and maximum {$this->maximal}"
             );
         }
-        parent::__construct($values, 2);
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        parent::__construct([
+            $values[3] ?? $this->minimal /* minimum is used as default difficulty */,
+            $values[2] ?? null,
+        ]);
     }
 
     /**
@@ -67,17 +78,50 @@ class DifficultyLimit extends CastingParameter
     }
 
     /**
+     * @param int|float|NumberInterface $value
+     * @return Difficulty
+     * @throws \Granam\Integer\Tools\Exceptions\Exception
+     */
+    public function add($value): Difficulty
+    {
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new static(
+            [
+                $this->getMinimal(),
+                $this->getMaximal(),
+                $this->getAdditionByRealms()->getNotation(),
+                $this->getValue() + ToInteger::toInteger($value) // current difficulty is injected via fourth index
+            ]
+        );
+    }
+
+    /**
+     * @param int|float|NumberInterface $value
+     * @return Difficulty
+     * @throws \Granam\Integer\Tools\Exceptions\Exception
+     */
+    public function sub($value): Difficulty
+    {
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new static(
+            [
+                $this->getMinimal(),
+                $this->getMaximal(),
+                $this->getAdditionByRealms()->getNotation(),
+                $this->getValue() - ToInteger::toInteger($value) // current difficulty is injected via fourth index
+            ]
+        );
+    }
+
+    /**
      * @return string
      */
     public function __toString(): string
     {
-        $asString = (string)$this->getMinimal();
-        if ($this->getMaximal() !== $this->getMinimal()) {
-            $asString .= ' — ' . $this->getMaximal();
-        }
-        if ($this->getAdditionByRealms()->getAddition() > 0) {
-            $asString .= ' (' . $this->getAdditionByRealms() . ')';
-        }
+        $asString = (string)$this->getValue();
+        $asString .= ' (' . $this->getMinimal() . '...' . $this->getMaximal();
+        $asString .= ' [' . $this->getAdditionByRealms() . ']';
+        $asString .= ')';
 
         return $asString;
     }

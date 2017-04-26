@@ -2,36 +2,104 @@
 namespace DrdPlus\Tests\Theurgist\Formulas\CastingParameters;
 
 use DrdPlus\Theurgist\Formulas\CastingParameters\AdditionByRealms;
-use DrdPlus\Theurgist\Formulas\CastingParameters\DifficultyLimit;
-use Granam\Tests\Tools\TestWithMockery;
+use DrdPlus\Theurgist\Formulas\CastingParameters\Difficulty;
 
-class DifficultyTest extends TestWithMockery
+class DifficultyTest extends PositiveCastingParameterTest
 {
+
+    protected function I_can_create_it_with_zero()
+    {
+        $difficulty = new Difficulty(['0', '1', '78=321']);
+        self::assertSame(0, $difficulty->getValue());
+        self::assertEquals(new AdditionByRealms('78=321'), $difficulty->getAdditionByRealms());
+        self::assertSame('0 (0...1 [' . $difficulty->getAdditionByRealms() . '])', (string)$difficulty);
+    }
+
+    protected function I_can_create_it_positive()
+    {
+        $difficulty = new Difficulty(['35689', '356891', '332211']);
+        self::assertSame(35689, $difficulty->getValue());
+        self::assertEquals(new AdditionByRealms('332211'), $difficulty->getAdditionByRealms());
+        self::assertSame('35689 (35689...356891 [' . $difficulty->getAdditionByRealms() . '])', (string)$difficulty);
+    }
+
+    /**
+     * @test
+     */
+    public function I_can_not_create_it_non_numeric()
+    {
+        self::assertTrue(true); // this is solved by Difficulty itself as 'minimal' and 'maximal' values check
+    }
+
+    /**
+     * @test
+     */
+    public function I_can_not_create_it_negative()
+    {
+        self::assertTrue(true); // this is solved by Difficulty itself as 'minimal' and 'maximal' values check
+    }
+
+    /**
+     * @test
+     */
+    public function I_can_get_its_clone_with_increased_value()
+    {
+        $original = new Difficulty(['123', '456', '456=789']);
+        $increased = $original->add(456);
+        self::assertSame($original->getValue() + 456, $increased->getValue());
+        self::assertEquals($original->getAdditionByRealms(), $increased->getAdditionByRealms());
+        self::assertNotSame($original, $increased);
+
+        $zeroed = $increased->add(-579);
+        self::assertSame(0, $zeroed->getValue());
+        self::assertNotSame($original, $zeroed);
+        self::assertNotSame($original, $increased);
+        self::assertEquals($original->getAdditionByRealms(), $zeroed->getAdditionByRealms());
+    }
+
+    /**
+     * @test
+     */
+    public function I_can_get_its_clone_with_decreased_value()
+    {
+        $original = new Difficulty(['123', '234', '456=789']);
+        $decreased = $original->sub(111);
+        self::assertSame($original->getValue() - 111, $decreased->getValue());
+        self::assertEquals($original->getAdditionByRealms(), $decreased->getAdditionByRealms());
+        self::assertNotSame($original, $decreased);
+
+        $restored = $decreased->sub(-111);
+        self::assertSame($original->getValue(), $restored->getValue());
+        self::assertNotSame($original, $restored);
+        self::assertNotSame($original, $decreased);
+        self::assertEquals($original->getAdditionByRealms(), $restored->getAdditionByRealms());
+    }
+
     /**
      * @test
      */
     public function I_can_use_it()
     {
-        $zeroMinimalDifficulty = new DifficultyLimit(['0', '65', '12=13']);
+        $zeroMinimalDifficulty = new Difficulty(['0', '65', '12=13']);
         self::assertSame(0, $zeroMinimalDifficulty->getMinimal());
         self::assertSame(65, $zeroMinimalDifficulty->getMaximal());
         self::assertEquals(new AdditionByRealms('12=13'), $zeroMinimalDifficulty->getAdditionByRealms());
-        self::assertSame('0 — 65 (12=>13)', (string)$zeroMinimalDifficulty);
+        self::assertSame('0 (0...65 [12=>13])', (string)$zeroMinimalDifficulty);
 
-        $sameMinimalAsMaximal = new DifficultyLimit(['89', '89', '1=2']);
+        $sameMinimalAsMaximal = new Difficulty(['89', '89', '1=2']);
         self::assertSame(89, $sameMinimalAsMaximal->getMinimal());
         self::assertSame(89, $sameMinimalAsMaximal->getMaximal());
-        self::assertSame('89 (1=>2)', (string)$sameMinimalAsMaximal);
+        self::assertSame('89 (89...89 [1=>2])', (string)$sameMinimalAsMaximal);
 
-        $withoutAdditionByRealms = new DifficultyLimit(['123', '456', '0']);
+        $withoutAdditionByRealms = new Difficulty(['123', '456', '0']);
         self::assertSame(123, $withoutAdditionByRealms->getMinimal());
         self::assertSame(456, $withoutAdditionByRealms->getMaximal());
-        self::assertSame('123 — 456', (string)$withoutAdditionByRealms);
+        self::assertSame('123 (123...456 [1=>0])', (string)$withoutAdditionByRealms);
 
-        $simplyZero = new DifficultyLimit(['0', '0', '0']);
+        $simplyZero = new Difficulty(['0', '0', '0']);
         self::assertSame(0, $simplyZero->getMinimal());
         self::assertSame(0, $simplyZero->getMaximal());
-        self::assertSame('0', (string)$simplyZero);
+        self::assertSame('0 (0...0 [1=>0])', (string)$simplyZero);
     }
 
     /**
@@ -41,7 +109,7 @@ class DifficultyTest extends TestWithMockery
      */
     public function I_can_not_create_it_with_negative_minimum()
     {
-        new DifficultyLimit(['-1', '65', '12=13']);
+        new Difficulty(['-1', '65', '12=13']);
     }
 
     /**
@@ -51,7 +119,7 @@ class DifficultyTest extends TestWithMockery
      */
     public function I_can_not_create_it_with_negative_maximum()
     {
-        new DifficultyLimit(['6', '-15', '12=13']);
+        new Difficulty(['6', '-15', '12=13']);
     }
 
     /**
@@ -61,6 +129,6 @@ class DifficultyTest extends TestWithMockery
      */
     public function I_can_not_create_it_with_lesser_maximum_than_minimum()
     {
-        new DifficultyLimit(['12', '11', '12=13']);
+        new Difficulty(['12', '11', '12=13']);
     }
 }
