@@ -2,21 +2,12 @@
 namespace DrdPlus\Tests\Theurgist\Formulas\CastingParameters;
 
 use DrdPlus\Codes\Properties\PropertyCode;
+use DrdPlus\Tests\Theurgist\Formulas\CastingParameters\Partials\IntegerCastingParameterTest;
 use DrdPlus\Theurgist\Formulas\CastingParameters\AdditionByRealms;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Trap;
-use Granam\Tests\Tools\TestWithMockery;
 
-class TrapTest extends TestWithMockery
+class TrapTest extends IntegerCastingParameterTest
 {
-    /**
-     * @test
-     */
-    public function I_can_create_it()
-    {
-        $this->I_can_create_it_negative();
-        $this->I_can_create_it_with_zero();
-        $this->I_can_create_it_positive();
-    }
 
     protected function I_can_create_it_negative()
     {
@@ -63,5 +54,51 @@ class TrapTest extends TestWithMockery
     public function I_can_not_create_it_without_property()
     {
         new Trap(['35689', '332211']);
+    }
+
+    /**
+     * @test
+     */
+    public function I_can_get_its_clone_with_increased_value()
+    {
+        $sutClass = self::getSutClass();
+        /** @var Trap $original */
+        $original = new $sutClass(['123', '456=789', PropertyCode::ENDURANCE]);
+        self::assertSame($original, $original->add(0));
+        $increased = $original->add(456);
+        self::assertSame($original->getValue() + 456, $increased->getValue());
+        self::assertEquals($original->getAdditionByRealms(), $increased->getAdditionByRealms());
+        self::assertSame($original->getPropertyCode(), $increased->getPropertyCode());
+        self::assertNotSame($original, $increased);
+
+        $zeroed = $increased->add(-579);
+        self::assertSame(0, $zeroed->getValue());
+        self::assertNotSame($original, $zeroed);
+        self::assertNotSame($original, $increased);
+        self::assertSame($original->getPropertyCode(), $zeroed->getPropertyCode());
+        self::assertEquals($original->getAdditionByRealms(), $zeroed->getAdditionByRealms());
+    }
+
+    /**
+     * @test
+     */
+    public function I_can_get_its_clone_with_decreased_value()
+    {
+        $sutClass = self::getSutClass();
+        /** @var Trap $original */
+        $original = new $sutClass(['123', '456=789', PropertyCode::INTELLIGENCE]);
+        self::assertSame($original, $original->sub(0));
+        $decreased = $original->sub(111);
+        self::assertSame($original->getValue() - 111, $decreased->getValue());
+        self::assertEquals($original->getAdditionByRealms(), $decreased->getAdditionByRealms());
+        self::assertSame($original->getPropertyCode(), $decreased->getPropertyCode());
+        self::assertNotSame($original, $decreased);
+
+        $restored = $decreased->sub(-111);
+        self::assertSame($original->getValue(), $restored->getValue());
+        self::assertNotSame($original, $restored);
+        self::assertNotSame($original, $decreased);
+        self::assertSame($original->getPropertyCode(), $restored->getPropertyCode());
+        self::assertEquals($original->getAdditionByRealms(), $restored->getAdditionByRealms());
     }
 }

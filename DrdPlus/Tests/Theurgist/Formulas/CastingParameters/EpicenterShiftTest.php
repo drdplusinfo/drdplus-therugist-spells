@@ -11,7 +11,7 @@ class EpicenterShiftTest extends IntegerCastingParameterTest
     /**
      * @test
      */
-    public function I_can_create_it_positive()
+    public function I_can_get_its_distance()
     {
         $shift = new EpicenterShift(['35', '332211']);
         self::assertSame(35, $shift->getValue());

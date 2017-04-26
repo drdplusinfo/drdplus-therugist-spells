@@ -3,6 +3,8 @@ namespace DrdPlus\Theurgist\Formulas\CastingParameters;
 
 use DrdPlus\Codes\Properties\PropertyCode;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Partials\IntegerCastingParameter;
+use Granam\Integer\Tools\ToInteger;
+use Granam\Number\NumberInterface;
 use Granam\Tools\ValueDescriber;
 
 class Trap extends IntegerCastingParameter
@@ -40,6 +42,42 @@ class Trap extends IntegerCastingParameter
     public function getPropertyCode(): PropertyCode
     {
         return $this->propertyCode;
+    }
+
+    /**
+     * @param int|float|NumberInterface $value
+     * @return Trap
+     * @throws \Granam\Integer\Tools\Exceptions\Exception
+     */
+    public function add($value): Trap
+    {
+        $value = ToInteger::toInteger($value);
+        if ($value === 0) {
+            return $this;
+        }
+
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new static(
+            [$this->getValue() + $value, $this->getAdditionByRealms()->getNotation(), $this->getPropertyCode()]
+        );
+    }
+
+    /**
+     * @param int|float|NumberInterface $value
+     * @return Trap
+     * @throws \Granam\Integer\Tools\Exceptions\Exception
+     */
+    public function sub($value): Trap
+    {
+        $value = ToInteger::toInteger($value);
+        if ($value === 0) {
+            return $this;
+        }
+
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new static(
+            [$this->getValue() - $value, $this->getAdditionByRealms()->getNotation(), $this->getPropertyCode()]
+        );
     }
 
     /**

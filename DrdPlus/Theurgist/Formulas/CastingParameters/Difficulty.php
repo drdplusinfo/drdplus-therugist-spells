@@ -72,7 +72,7 @@ class Difficulty extends PositiveCastingParameter
     /**
      * Maximal difficulty a formula from lowest possible realm can handle.
      * Can be even LESS than 'value', @see getValue, which is current difficulty of even heavily modified formula.
-
+     *
      * @return int
      */
     public function getMaximal(): int
@@ -87,6 +87,11 @@ class Difficulty extends PositiveCastingParameter
      */
     public function add($value): Difficulty
     {
+        $value = ToInteger::toInteger($value);
+        if ($value === 0) {
+            return $this;
+        }
+
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new static(
             [
@@ -105,6 +110,11 @@ class Difficulty extends PositiveCastingParameter
      */
     public function sub($value): Difficulty
     {
+        $value = ToInteger::toInteger($value);
+        if ($value === 0) {
+            return $this;
+        }
+
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new static(
             [

@@ -3,6 +3,10 @@ namespace DrdPlus\Theurgist\Formulas\CastingParameters;
 
 use DrdPlus\Theurgist\Formulas\CastingParameters\Partials\PositiveCastingParameter;
 
+/**
+ * @method CastingRounds add($value)
+ * @method CastingRounds sub($value)
+ */
 class CastingRounds extends PositiveCastingParameter
 {
     /**
