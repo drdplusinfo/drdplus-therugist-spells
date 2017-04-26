@@ -66,6 +66,7 @@ abstract class IntegerCastingParameterTest extends TestWithMockery
         $sutClass = self::getSutClass();
         /** @var IntegerCastingParameter $original */
         $original = new $sutClass(['123', '456=789']);
+        self::assertSame($original, $original->add(0));
         $increased = $original->add(456);
         self::assertSame($original->getValue() + 456, $increased->getValue());
         self::assertEquals($original->getAdditionByRealms(), $increased->getAdditionByRealms());
@@ -86,6 +87,7 @@ abstract class IntegerCastingParameterTest extends TestWithMockery
         $sutClass = self::getSutClass();
         /** @var IntegerCastingParameter $original */
         $original = new $sutClass(['123', '456=789']);
+        self::assertSame($original, $original->sub(0));
         $decreased = $original->sub(111);
         self::assertSame($original->getValue() - 111, $decreased->getValue());
         self::assertEquals($original->getAdditionByRealms(), $decreased->getAdditionByRealms());
