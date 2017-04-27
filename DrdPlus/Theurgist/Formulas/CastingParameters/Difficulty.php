@@ -52,10 +52,7 @@ class Difficulty extends PositiveCastingParameter
             );
         }
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        parent::__construct([
-            $values[3] ?? $this->minimal /* minimum is used as default difficulty */,
-            $values[2] ?? null,
-        ]);
+        parent::__construct([$values[3] ?? $this->minimal /* minimum as default difficulty */, $values[2] ?? null]);
     }
 
     /**
