@@ -5,6 +5,7 @@ use DrdPlus\Tables\Tables;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\SpellTraitCode;
+use DrdPlus\Theurgist\Formulas\CastingParameters\DifficultyChange;
 use DrdPlus\Theurgist\Formulas\FormulasTable;
 use DrdPlus\Theurgist\Formulas\ModifiersTable;
 use DrdPlus\Theurgist\Formulas\SpellTraitsTable;
@@ -212,5 +213,25 @@ class SpellTraitsTableTest extends AbstractTheurgistTableTest
         }
 
         return $matchingFormulaValues;
+    }
+
+    /**
+     * @test
+     */
+    public function I_can_get_sum_of_difficulty_changes()
+    {
+        self::assertEquals(
+            new DifficultyChange(18),
+            (new SpellTraitsTable())->sumDifficultyChanges(
+                [
+                    SpellTraitCode::getIt(SpellTraitCode::DEFORMATION), // +3
+                    SpellTraitCode::getIt(SpellTraitCode::ODORLESS), // +3
+                    [
+                        SpellTraitCode::getIt(SpellTraitCode::AFFECTING), // +6
+                        [SpellTraitCode::getIt(SpellTraitCode::CYCLIC)], // +6
+                    ],
+                ]
+            )
+        );
     }
 }

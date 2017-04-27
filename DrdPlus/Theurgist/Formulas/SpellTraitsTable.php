@@ -85,7 +85,7 @@ class SpellTraitsTable extends AbstractFileTable
     {
         $sumOfDifficultyChange = 0;
         foreach ($this->toFlatArray($spellTraitCodes) as $spellTraitCode) {
-            $sumOfDifficultyChange += $this->getDifficultyChange($spellTraitCode);
+            $sumOfDifficultyChange += $this->getDifficultyChange($spellTraitCode)->getValue();
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
