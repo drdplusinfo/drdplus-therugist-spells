@@ -55,9 +55,11 @@ class SpellTraitTest extends TestWithMockery
      */
     public function I_can_get_trap()
     {
-        $everySense = SpellTraitCode::getIt(SpellTraitCode::EVERY_SENSE);
-        $spellTraitsTable = $this->createSpellTraitsTable($everySense, $trap = $this->createTrap());
-        self::assertSame($trap, (new SpellTrait($everySense . '=123'))->getTrap($spellTraitsTable));
+        foreach (SpellTraitCode::getPossibleValues() as $spellTraitValue) {
+            $spellTraitCode = SpellTraitCode::getIt($spellTraitValue);
+            $spellTraitsTable = $this->createSpellTraitsTable($spellTraitCode, $trap = $this->createTrap());
+            self::assertSame($trap, (new SpellTrait($spellTraitCode . '=123'))->getTrap($spellTraitsTable));
+        }
     }
 
     /**

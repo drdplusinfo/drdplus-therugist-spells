@@ -93,9 +93,9 @@ class SpellTrait extends StrictObject
 
     /**
      * @param SpellTraitsTable $spellTraitsTable
-     * @return Trap
+     * @return Trap|null
      */
-    public function getTrap(SpellTraitsTable $spellTraitsTable): Trap
+    public function getTrap(SpellTraitsTable $spellTraitsTable)
     {
         return $spellTraitsTable->getTrap($this->getSpellTraitCode());
     }
