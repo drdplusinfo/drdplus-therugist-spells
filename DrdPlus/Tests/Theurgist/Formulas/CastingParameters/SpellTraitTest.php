@@ -3,6 +3,8 @@ namespace DrdPlus\Tests\Theurgist\Formulas\CastingParameters;
 
 use DrdPlus\Theurgist\Codes\SpellTraitCode;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
+use DrdPlus\Theurgist\Formulas\CastingParameters\Trap;
+use DrdPlus\Theurgist\Formulas\SpellTraitsTable;
 use Granam\Tests\Tools\TestWithMockery;
 
 class SpellTraitTest extends TestWithMockery
@@ -46,5 +48,38 @@ class SpellTraitTest extends TestWithMockery
     public function I_can_not_crete_it_from_string_with_too_many_parts()
     {
         new SpellTrait(SpellTraitCode::DEFORMATION . '=14=-78');
+    }
+
+    /**
+     * @test
+     */
+    public function I_can_get_trap()
+    {
+        $everySense = SpellTraitCode::getIt(SpellTraitCode::EVERY_SENSE);
+        $spellTraitsTable = $this->createSpellTraitsTable($everySense, $trap = $this->createTrap());
+        self::assertSame($trap, (new SpellTrait($everySense . '=123'))->getTrap($spellTraitsTable));
+    }
+
+    /**
+     * @param SpellTraitCode $spellTraitCode
+     * @param $trap
+     * @return \Mockery\MockInterface|SpellTraitsTable
+     */
+    private function createSpellTraitsTable(SpellTraitCode $spellTraitCode, $trap)
+    {
+        $spellTraitsTable = $this->mockery(SpellTraitsTable::class);
+        $spellTraitsTable->shouldReceive('getTrap')
+            ->with($spellTraitCode)
+            ->andReturn($trap);
+
+        return $spellTraitsTable;
+    }
+
+    /**
+     * @return \Mockery\MockInterface|Trap
+     */
+    private function createTrap()
+    {
+        return $this->mockery(Trap::class);
     }
 }

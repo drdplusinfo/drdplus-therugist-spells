@@ -2,6 +2,7 @@
 namespace DrdPlus\Theurgist\Formulas\CastingParameters;
 
 use DrdPlus\Theurgist\Codes\SpellTraitCode;
+use DrdPlus\Theurgist\Formulas\SpellTraitsTable;
 use Granam\Integer\Tools\ToInteger;
 use Granam\Strict\Object\StrictObject;
 use Granam\Tools\ValueDescriber;
@@ -88,6 +89,15 @@ class SpellTrait extends StrictObject
     public function getSpellTraitCode(): SpellTraitCode
     {
         return $this->traitCode;
+    }
+
+    /**
+     * @param SpellTraitsTable $spellTraitsTable
+     * @return Trap
+     */
+    public function getTrap(SpellTraitsTable $spellTraitsTable): Trap
+    {
+        return $spellTraitsTable->getTrap($this->getSpellTraitCode());
     }
 
     /**
