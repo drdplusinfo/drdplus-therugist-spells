@@ -15,14 +15,17 @@ class SpellTraitTest extends TestWithMockery
         $implicitSpellTrait = new SpellTrait(SpellTraitCode::ACTIVE);
         self::assertSame(SpellTraitCode::getIt(SpellTraitCode::ACTIVE), $implicitSpellTrait->getSpellTraitCode());
         self::assertSame(1, $implicitSpellTrait->getDifficultyChange());
+        self::assertSame('1=>active', (string)$implicitSpellTrait);
 
         $explicitSpellTrait = new SpellTrait(SpellTraitCode::BIDIRECTIONAL . '=123');
         self::assertSame(SpellTraitCode::getIt(SpellTraitCode::BIDIRECTIONAL), $explicitSpellTrait->getSpellTraitCode());
         self::assertSame(123, $explicitSpellTrait->getDifficultyChange());
+        self::assertSame('123=>bidirectional', (string)$explicitSpellTrait);
 
         $negativeSpellTrait = new SpellTrait(SpellTraitCode::NATURE_CHANGE . '=-456');
         self::assertSame(SpellTraitCode::getIt(SpellTraitCode::NATURE_CHANGE), $negativeSpellTrait->getSpellTraitCode());
         self::assertSame(-456, $negativeSpellTrait->getDifficultyChange());
+        self::assertSame('-456=>nature_change', (string)$negativeSpellTrait);
     }
 
     /**

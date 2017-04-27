@@ -89,4 +89,12 @@ class SpellTrait extends StrictObject
     {
         return $this->traitCode;
     }
+
+    /**
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return $this->getDifficultyChange() . '=>' . $this->getSpellTraitCode();
+    }
 }
