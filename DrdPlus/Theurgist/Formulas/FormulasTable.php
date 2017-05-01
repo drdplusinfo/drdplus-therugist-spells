@@ -146,7 +146,7 @@ class FormulasTable extends AbstractFileTable
             return $minimalPossibleRealm;
         }
         $formulaAdditionByRealms = $basicFormulaDifficulty->getAdditionByRealms();
-        $difficultyHandledByAdditionalRealm = $formulaAdditionByRealms->getAddition();
+        $difficultyHandledByAdditionalRealm = $formulaAdditionByRealms->getDefaultAddition();
         if ($difficultyHandledByAdditionalRealm <= 0) {
             // this should never happen, because every formula addition is currently greater than zero
             throw new Exceptions\CanNotBuildFormulaWithRequiredModification(
@@ -155,7 +155,7 @@ class FormulasTable extends AbstractFileTable
                 . " because of its addition by realms {$formulaAdditionByRealms}"
             );
         }
-        $realmIncrementToHandleAdditionalDifficulty = $formulaAdditionByRealms->getRealmIncrement();
+        $realmIncrementToHandleAdditionalDifficulty = $formulaAdditionByRealms->getRealmIncrementPerAddition();
         while ($maximalDifficultyHandledByFormula < $difficultyOfModifiedYetWithoutRealmChange) {
             $maximalDifficultyHandledByFormula += $difficultyHandledByAdditionalRealm;
             /** @noinspection ExceptionsAnnotatingAndHandlingInspection */

@@ -12,11 +12,11 @@ class AdditionByRealmsTest extends TestWithMockery
     public function I_can_create_it_with_just_an_addition()
     {
         $additionByRealms = new AdditionByRealms('123');
-        self::assertSame(123, $additionByRealms->getAddition());
-        self::assertSame(1, $additionByRealms->getRealmIncrement());
+        self::assertSame(123, $additionByRealms->getDefaultAddition());
+        self::assertSame(1, $additionByRealms->getRealmIncrementPerAddition());
         $sameAdditionByRealms = new AdditionByRealms('1=123');
-        self::assertSame(123, $sameAdditionByRealms->getAddition());
-        self::assertSame(1, $sameAdditionByRealms->getRealmIncrement());
+        self::assertSame(123, $sameAdditionByRealms->getDefaultAddition());
+        self::assertSame(1, $sameAdditionByRealms->getRealmIncrementPerAddition());
     }
 
     /**
@@ -25,8 +25,8 @@ class AdditionByRealmsTest extends TestWithMockery
     public function I_can_create_it_with_realms_price()
     {
         $additionByRealms = new AdditionByRealms('456=789');
-        self::assertSame(789, $additionByRealms->getAddition());
-        self::assertSame(456, $additionByRealms->getRealmIncrement());
+        self::assertSame(789, $additionByRealms->getDefaultAddition());
+        self::assertSame(456, $additionByRealms->getRealmIncrementPerAddition());
     }
 
     /**
