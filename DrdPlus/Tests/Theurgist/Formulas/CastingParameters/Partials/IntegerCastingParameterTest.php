@@ -7,7 +7,7 @@ use Granam\Tests\Tools\TestWithMockery;
 
 abstract class IntegerCastingParameterTest extends TestWithMockery
 {
-    use IntegerAddAndSubTestTrait;
+    use IntegerCastingParameterSetAdditionTrait;
 
     /**
      * @test
@@ -74,43 +74,29 @@ abstract class IntegerCastingParameterTest extends TestWithMockery
     /**
      * @test
      */
-    public function I_can_get_its_clone_with_increased_value()
+    public function I_can_get_its_clone_changed_by_addition()
     {
         $sutClass = self::getSutClass();
         /** @var IntegerCastingParameter $original */
         $original = new $sutClass(['123', '456=789']);
-        self::assertSame($original, $original->add(0));
-        $increased = $original->add(456);
-        self::assertSame($original->getValue() + 456, $increased->getValue());
-        self::assertEquals($original->getAdditionByRealms(), $increased->getAdditionByRealms());
+        self::assertSame($original, $original->setAddition(0));
+        $increased = $original->setAddition(456);
+        self::assertSame(579, $increased->getValue());
+        self::assertSame($original->getAdditionByRealms()->getNotation(), $increased->getAdditionByRealms()->getNotation());
+        self::assertSame(456, $increased->getAdditionByRealms()->getCurrentAddition());
         self::assertNotSame($original, $increased);
 
-        $zeroed = $increased->add(-579);
+        $zeroed = $original->setAddition(-123);
         self::assertSame(0, $zeroed->getValue());
         self::assertNotSame($original, $zeroed);
         self::assertNotSame($original, $increased);
-        self::assertEquals($original->getAdditionByRealms(), $zeroed->getAdditionByRealms());
-    }
+        self::assertSame(-123, $zeroed->getAdditionByRealms()->getCurrentAddition());
 
-    /**
-     * @test
-     */
-    public function I_can_get_its_clone_with_decreased_value()
-    {
-        $sutClass = self::getSutClass();
-        /** @var IntegerCastingParameter $original */
-        $original = new $sutClass(['123', '456=789']);
-        self::assertSame($original, $original->sub(0));
-        $decreased = $original->sub(111);
-        self::assertSame($original->getValue() - 111, $decreased->getValue());
-        self::assertEquals($original->getAdditionByRealms(), $decreased->getAdditionByRealms());
+        $decreased = $original->setAddition(-999);
+        self::assertSame(-876, $decreased->getValue());
+        self::assertSame($original->getAdditionByRealms()->getNotation(), $increased->getAdditionByRealms()->getNotation());
+        self::assertSame(-999, $decreased->getAdditionByRealms()->getCurrentAddition());
         self::assertNotSame($original, $decreased);
-
-        $restored = $decreased->sub(-111);
-        self::assertSame($original->getValue(), $restored->getValue());
-        self::assertNotSame($original, $restored);
-        self::assertNotSame($original, $decreased);
-        self::assertEquals($original->getAdditionByRealms(), $restored->getAdditionByRealms());
     }
 
 }

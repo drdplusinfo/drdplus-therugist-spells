@@ -658,7 +658,7 @@ PHPDOC
         $portalDifficulty = $formulasTable->getDifficulty($formulaCode);
         $unhandledDifficulty = ($modifiersDifficultyChangeValue + $spellTraitsDifficultyChangeValue + $portalDifficulty->getMinimal())
             - $portalDifficulty->getMaximal();
-        $handledDifficultyPerRealm = $portalDifficulty->getAdditionByRealms()->getDefaultAddition();
+        $handledDifficultyPerRealm = $portalDifficulty->getAdditionByRealms()->getAdditionPerRealmsIncrement();
         $realmsIncrement = (int)ceil($unhandledDifficulty / $handledDifficultyPerRealm);
         self::assertSame($basicFormulaRealmValue + $realmsIncrement, $requiredRealmOfModerateModifiedFormula->getValue());
 
@@ -698,7 +698,7 @@ PHPDOC
         $portalDifficulty = $formulasTable->getDifficulty($formulaCode);
         $unhandledDifficulty = ($modifiersDifficultyChangeValue + $spellTraitsDifficultyChangeValue + $portalDifficulty->getMinimal())
             - $portalDifficulty->getMaximal();
-        $handledDifficultyPerRealm = $portalDifficulty->getAdditionByRealms()->getDefaultAddition();
+        $handledDifficultyPerRealm = $portalDifficulty->getAdditionByRealms()->getAdditionPerRealmsIncrement();
         $realmsIncrement = (int)ceil($unhandledDifficulty / $handledDifficultyPerRealm);
         self::assertSame(
             $basicFormulaRealmValue + $realmsIncrement,
@@ -902,7 +902,7 @@ PHPDOC
             $modifiers,
             ['foo bar', 'bar BAZ']
         );
-        self::assertEquals($formulasTable->getRadius($discharge)->add(789), $radiusOfModifiedDischarge);
+        self::assertEquals($formulasTable->getRadius($discharge)->setAddition(789), $radiusOfModifiedDischarge);
     }
 
     /**
@@ -954,7 +954,7 @@ PHPDOC
         );
         $greatMassacre = FormulaCode::getIt(FormulaCode::GREAT_MASSACRE);
         $powerOfGreatMassacreWithChange = $formulasTable->getPowerOfModified($greatMassacre, $modifiers, ['foo bar', 'bar BAZ']);
-        self::assertEquals($formulasTable->getPower($greatMassacre)->add(789), $powerOfGreatMassacreWithChange);
+        self::assertEquals($formulasTable->getPower($greatMassacre)->setAddition(789), $powerOfGreatMassacreWithChange);
     }
 
     /**
@@ -1026,7 +1026,7 @@ PHPDOC
             ['foo bar', 'bar BAZ']
         );
         self::assertEquals(
-            $formulasTable->getEpicenterShift($greatMassacre)->add(789),
+            $formulasTable->getEpicenterShift($greatMassacre)->setAddition(789),
             $epicenterShiftOfModifiedGreatMassacre
         );
     }
@@ -1094,7 +1094,7 @@ PHPDOC
             $modifiers,
             ['foo bar', 'bar BAZ']
         );
-        self::assertEquals($formulasTable->getSpellSpeed($tsunami)->add(789), $spellSpeedOfModifiedTsunami);
+        self::assertEquals($formulasTable->getSpellSpeed($tsunami)->setAddition(789), $spellSpeedOfModifiedTsunami);
     }
 
     /**
@@ -1148,7 +1148,7 @@ PHPDOC
             $this->createSpellTraitsTableShell()
         );
         $attackOfModifiedDischarge = $formulasTable->getAttackOfModified($dischargeCode, $modifiers, ['foo FOO']);
-        self::assertEquals($dischargeAttack->add(789), $attackOfModifiedDischarge);
+        self::assertEquals($dischargeAttack->setAddition(789), $attackOfModifiedDischarge);
     }
 
     /**

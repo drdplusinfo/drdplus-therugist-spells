@@ -43,37 +43,27 @@ class DifficultyTest extends PositiveCastingParameterTest
     /**
      * @test
      */
-    public function I_can_get_its_clone_with_increased_value()
+    public function I_can_get_its_clone_changed_by_addition()
     {
-        $original = new Difficulty(['123', '456', '456=789']);
-        $increased = $original->add(456);
-        self::assertSame($original->getValue() + 456, $increased->getValue());
-        self::assertEquals($original->getAdditionByRealms(), $increased->getAdditionByRealms());
+        $original = new Difficulty(['123', '345', '456=789']);
+        $increased = $original->setAddition(456);
+        self::assertSame(579, $increased->getValue());
+        self::assertSame($original->getAdditionByRealms()->getNotation(), $increased->getAdditionByRealms()->getNotation());
+        self::assertSame(456, $increased->getAdditionByRealms()->getCurrentAddition());
         self::assertNotSame($original, $increased);
 
-        $zeroed = $increased->add(-579);
+        $zeroed = $increased->setAddition(-123);
         self::assertSame(0, $zeroed->getValue());
         self::assertNotSame($original, $zeroed);
         self::assertNotSame($original, $increased);
-        self::assertEquals($original->getAdditionByRealms(), $zeroed->getAdditionByRealms());
-    }
+        self::assertSame(-123, $zeroed->getAdditionByRealms()->getCurrentAddition());
+        self::assertSame($original->getAdditionByRealms()->getNotation(), $zeroed->getAdditionByRealms()->getNotation());
 
-    /**
-     * @test
-     */
-    public function I_can_get_its_clone_with_decreased_value()
-    {
-        $original = new Difficulty(['123', '234', '456=789']);
-        $decreased = $original->sub(111);
-        self::assertSame($original->getValue() - 111, $decreased->getValue());
-        self::assertEquals($original->getAdditionByRealms(), $decreased->getAdditionByRealms());
-        self::assertNotSame($original, $decreased);
-
-        $restored = $decreased->sub(-111);
-        self::assertSame($original->getValue(), $restored->getValue());
-        self::assertNotSame($original, $restored);
-        self::assertNotSame($original, $decreased);
-        self::assertEquals($original->getAdditionByRealms(), $restored->getAdditionByRealms());
+        $decreased = $zeroed->setAddition(-234);
+        self::assertSame(-111, $decreased->getValue());
+        self::assertSame($zeroed->getAdditionByRealms()->getNotation(), $decreased->getAdditionByRealms()->getNotation());
+        self::assertSame(-234, $decreased->getAdditionByRealms()->getCurrentAddition());
+        self::assertNotSame($zeroed, $decreased);
     }
 
     /**

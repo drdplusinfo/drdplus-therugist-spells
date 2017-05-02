@@ -146,7 +146,7 @@ class FormulasTable extends AbstractFileTable
             return $minimalPossibleRealm;
         }
         $formulaAdditionByRealms = $basicFormulaDifficulty->getAdditionByRealms();
-        $difficultyHandledByAdditionalRealm = $formulaAdditionByRealms->getDefaultAddition();
+        $difficultyHandledByAdditionalRealm = $formulaAdditionByRealms->getAdditionPerRealmsIncrement();
         if ($difficultyHandledByAdditionalRealm <= 0) {
             // this should never happen, because every formula addition is currently greater than zero
             throw new Exceptions\CanNotBuildFormulaWithRequiredModification(
@@ -301,7 +301,7 @@ class FormulasTable extends AbstractFileTable
     ): Difficulty
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return $this->getDifficulty($formulaCode)->add(
+        return $this->getDifficulty($formulaCode)->setAddition(
             +$this->modifiersTable->sumDifficultyChanges($modifierCodes)->getValue()
             + $this->spellTraitsTable->sumDifficultyChanges($spellTraitCodes)->getValue()
         );
@@ -341,7 +341,7 @@ class FormulasTable extends AbstractFileTable
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return $formulaRadius->add(
+        return $formulaRadius->setAddition(
             $this->modifiersTable->sumRadiusChange($modifierCodes)->getValue()
         );
     }
@@ -405,7 +405,7 @@ class FormulasTable extends AbstractFileTable
             return null;
         }
 
-        return $formulaPower->add($this->modifiersTable->sumPowerChanges($modifierCodes)->getValue());
+        return $formulaPower->setAddition($this->modifiersTable->sumPowerChanges($modifierCodes)->getValue());
     }
 
     /**
@@ -442,7 +442,7 @@ class FormulasTable extends AbstractFileTable
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return $formulaAttack->add($this->modifiersTable->sumAttackChange($modifierCodes)->getValue());
+        return $formulaAttack->setAddition($this->modifiersTable->sumAttackChange($modifierCodes)->getValue());
     }
 
     /**
@@ -580,7 +580,7 @@ class FormulasTable extends AbstractFileTable
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return $formulaSpeed->add($this->modifiersTable->sumSpellSpeedChange($modifierCodes)->getValue());
+        return $formulaSpeed->setAddition($this->modifiersTable->sumSpellSpeedChange($modifierCodes)->getValue());
     }
 
     /**
@@ -624,7 +624,7 @@ class FormulasTable extends AbstractFileTable
         }
 
         if ($formulaEpicenterShift) {
-            return $formulaEpicenterShift->add($this->modifiersTable->sumEpicenterShiftChange($modifierCodes)->getValue());
+            return $formulaEpicenterShift->setAddition($this->modifiersTable->sumEpicenterShiftChange($modifierCodes)->getValue());
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */

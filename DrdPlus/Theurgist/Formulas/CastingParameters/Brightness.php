@@ -4,8 +4,7 @@ namespace DrdPlus\Theurgist\Formulas\CastingParameters;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Partials\PositiveCastingParameter;
 
 /**
- * @method Brightness add($value)
- * @method Brightness sub($value)
+ * @method Brightness setAddition($additionValue)
  */
 class Brightness extends PositiveCastingParameter
 {

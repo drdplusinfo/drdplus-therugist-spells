@@ -12,16 +12,16 @@ class AdditionByRealmsTest extends TestWithMockery
     public function I_can_create_it_with_just_an_addition()
     {
         $additionByRealms = new AdditionByRealms('123');
-        self::assertSame(123, $additionByRealms->getDefaultAddition());
+        self::assertSame(123, $additionByRealms->getAdditionPerRealmsIncrement());
         self::assertSame(1, $additionByRealms->getRealmIncrementPerAddition());
-        self::assertSame($additionByRealms->getDefaultAddition(), $additionByRealms->getCurrentAddition());
-        self::assertSame($additionByRealms->getRealmIncrementPerAddition(), $additionByRealms->getCurrentRealmIncrement());
+        self::assertSame(0, $additionByRealms->getCurrentAddition());
+        self::assertSame(0, $additionByRealms->getCurrentRealmIncrement());
 
         $sameAdditionByRealms = new AdditionByRealms('1=123');
-        self::assertSame(123, $sameAdditionByRealms->getDefaultAddition());
+        self::assertSame(123, $sameAdditionByRealms->getAdditionPerRealmsIncrement());
         self::assertSame(1, $sameAdditionByRealms->getRealmIncrementPerAddition());
-        self::assertSame($sameAdditionByRealms->getDefaultAddition(), $sameAdditionByRealms->getCurrentAddition());
-        self::assertSame($sameAdditionByRealms->getRealmIncrementPerAddition(), $sameAdditionByRealms->getCurrentRealmIncrement());
+        self::assertSame(0, $sameAdditionByRealms->getCurrentAddition());
+        self::assertSame(0, $sameAdditionByRealms->getCurrentRealmIncrement());
     }
 
     /**
@@ -30,10 +30,10 @@ class AdditionByRealmsTest extends TestWithMockery
     public function I_can_create_it_with_realms_price()
     {
         $additionByRealms = new AdditionByRealms('456=789');
-        self::assertSame(789, $additionByRealms->getDefaultAddition());
+        self::assertSame(789, $additionByRealms->getAdditionPerRealmsIncrement());
         self::assertSame(456, $additionByRealms->getRealmIncrementPerAddition());
-        self::assertSame($additionByRealms->getDefaultAddition(), $additionByRealms->getCurrentAddition());
-        self::assertSame($additionByRealms->getRealmIncrementPerAddition(), $additionByRealms->getCurrentRealmIncrement());
+        self::assertSame(0, $additionByRealms->getCurrentAddition());
+        self::assertSame(0, $additionByRealms->getCurrentRealmIncrement());
     }
 
     /**
@@ -42,7 +42,7 @@ class AdditionByRealmsTest extends TestWithMockery
     public function I_can_create_it_with_custom_current_addition()
     {
         $additionByRealms = new AdditionByRealms('2=3', 7);
-        self::assertSame(3, $additionByRealms->getDefaultAddition());
+        self::assertSame(3, $additionByRealms->getAdditionPerRealmsIncrement());
         self::assertSame(2, $additionByRealms->getRealmIncrementPerAddition());
         self::assertSame(7, $additionByRealms->getCurrentAddition());
         self::assertSame(5 /* 7 / 3 * 2, round up */, $additionByRealms->getCurrentRealmIncrement());
@@ -54,14 +54,14 @@ class AdditionByRealmsTest extends TestWithMockery
     public function I_can_increase_current_addition()
     {
         $additionByRealms = new AdditionByRealms(5);
-        self::assertSame(5, $additionByRealms->getDefaultAddition());
-        self::assertSame(5, $additionByRealms->getCurrentAddition());
+        self::assertSame(5, $additionByRealms->getAdditionPerRealmsIncrement());
+        self::assertSame(0, $additionByRealms->getCurrentAddition());
         $same = $additionByRealms->add(0);
         self::assertSame($same, $additionByRealms);
         $increased = $additionByRealms->add(3);
-        self::assertSame(5, $additionByRealms->getCurrentAddition());
+        self::assertSame(0, $additionByRealms->getCurrentAddition(), 'Original addition should still has a zero current');
         self::assertNotSame($additionByRealms, $increased);
-        self::assertSame(8, $increased->getValue());
+        self::assertSame(3, $increased->getValue());
     }
 
     /**
@@ -70,14 +70,14 @@ class AdditionByRealmsTest extends TestWithMockery
     public function I_can_decrease_current_addition()
     {
         $additionByRealms = new AdditionByRealms(5);
-        self::assertSame(5, $additionByRealms->getDefaultAddition());
-        self::assertSame(5, $additionByRealms->getCurrentAddition());
+        self::assertSame(5, $additionByRealms->getAdditionPerRealmsIncrement());
+        self::assertSame(0, $additionByRealms->getCurrentAddition());
         $same = $additionByRealms->sub(0);
         self::assertSame($same, $additionByRealms);
         $increased = $additionByRealms->sub(7);
-        self::assertSame(5, $additionByRealms->getCurrentAddition());
+        self::assertSame(0, $additionByRealms->getCurrentAddition(), 'Original addition should still has a zero current');
         self::assertNotSame($additionByRealms, $increased);
-        self::assertSame(-2, $increased->getValue());
+        self::assertSame(-7, $increased->getValue());
     }
 
     /**

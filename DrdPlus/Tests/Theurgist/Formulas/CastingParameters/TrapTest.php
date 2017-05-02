@@ -59,46 +59,23 @@ class TrapTest extends IntegerCastingParameterTest
     /**
      * @test
      */
-    public function I_can_get_its_clone_with_increased_value()
+    public function I_can_get_its_clone_changed_by_addition()
     {
         $sutClass = self::getSutClass();
         /** @var Trap $original */
         $original = new $sutClass(['123', '456=789', PropertyCode::ENDURANCE]);
-        self::assertSame($original, $original->add(0));
-        $increased = $original->add(456);
-        self::assertSame($original->getValue() + 456, $increased->getValue());
-        self::assertEquals($original->getAdditionByRealms(), $increased->getAdditionByRealms());
+        self::assertSame($original, $original->setAddition(0));
+        $increased = $original->setAddition(456);
+        self::assertSame(579, $increased->getValue());
+        self::assertSame(456, $increased->getAdditionByRealms()->getCurrentAddition());
         self::assertSame($original->getPropertyCode(), $increased->getPropertyCode());
         self::assertNotSame($original, $increased);
 
-        $zeroed = $increased->add(-579);
-        self::assertSame(0, $zeroed->getValue());
-        self::assertNotSame($original, $zeroed);
+        $decreased = $original->setAddition(-579);
+        self::assertSame(-456, $decreased->getValue());
+        self::assertNotSame($original, $decreased);
         self::assertNotSame($original, $increased);
-        self::assertSame($original->getPropertyCode(), $zeroed->getPropertyCode());
-        self::assertEquals($original->getAdditionByRealms(), $zeroed->getAdditionByRealms());
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_get_its_clone_with_decreased_value()
-    {
-        $sutClass = self::getSutClass();
-        /** @var Trap $original */
-        $original = new $sutClass(['123', '456=789', PropertyCode::INTELLIGENCE]);
-        self::assertSame($original, $original->sub(0));
-        $decreased = $original->sub(111);
-        self::assertSame($original->getValue() - 111, $decreased->getValue());
-        self::assertEquals($original->getAdditionByRealms(), $decreased->getAdditionByRealms());
         self::assertSame($original->getPropertyCode(), $decreased->getPropertyCode());
-        self::assertNotSame($original, $decreased);
-
-        $restored = $decreased->sub(-111);
-        self::assertSame($original->getValue(), $restored->getValue());
-        self::assertNotSame($original, $restored);
-        self::assertNotSame($original, $decreased);
-        self::assertSame($original->getPropertyCode(), $restored->getPropertyCode());
-        self::assertEquals($original->getAdditionByRealms(), $restored->getAdditionByRealms());
+        self::assertSame(-579, $decreased->getAdditionByRealms()->getCurrentAddition());
     }
 }

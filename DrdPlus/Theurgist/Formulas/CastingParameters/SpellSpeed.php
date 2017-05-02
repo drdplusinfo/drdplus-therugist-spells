@@ -7,8 +7,7 @@ use DrdPlus\Tables\Measurements\Speed\SpeedTable;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Partials\IntegerCastingParameter;
 
 /**
- * @method SpellSpeed add($value)
- * @method SpellSpeed sub($value)
+ * @method SpellSpeed setAddition($additionValue)
  */
 class SpellSpeed extends IntegerCastingParameter
 {

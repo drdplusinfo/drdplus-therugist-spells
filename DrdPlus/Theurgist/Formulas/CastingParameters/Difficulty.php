@@ -18,7 +18,7 @@ class Difficulty extends PositiveCastingParameter
     private $maximal;
 
     /**
-     * @param array $values
+     * @param array $values [ 0 => minimal, 1 => maximal, 2 => addition by realm notation , 3 => current addition value]
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\MinimalDifficultyCanNotBeGreaterThanMaximal
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidValueForMinimalDifficulty
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidValueForMaximalDifficulty
@@ -34,7 +34,7 @@ class Difficulty extends PositiveCastingParameter
         } catch (\Granam\Integer\Tools\Exceptions\Exception $exception) {
             throw new Exceptions\InvalidValueForMinimalDifficulty(
                 'Expected positive integer for minimal difficulty, got '
-                . (array_key_exists(0, $values) ? ValueDescriber::describe($values[0], true) : 'nothing')
+                . (array_key_exists(0, $values) ? ValueDescriber::describe($values[0]) : 'nothing')
             );
         }
         try {
@@ -42,7 +42,7 @@ class Difficulty extends PositiveCastingParameter
         } catch (\Granam\Integer\Tools\Exceptions\Exception $exception) {
             throw new Exceptions\InvalidValueForMaximalDifficulty(
                 'Expected positive integer for maximal difficulty, got '
-                . (array_key_exists(0, $values) ? ValueDescriber::describe($values[1], true) : 'nothing')
+                . (array_key_exists(1, $values) ? ValueDescriber::describe($values[1]) : 'nothing')
             );
         }
         if ($this->minimal > $this->maximal) {
@@ -52,7 +52,11 @@ class Difficulty extends PositiveCastingParameter
             );
         }
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        parent::__construct([$values[3] ?? $this->minimal /* minimum as default difficulty */, $values[2] ?? null]);
+        parent::__construct([
+            $this->minimal /* minimum as default difficulty */,
+            $values[2] ?? '', // addition (content on index 2) is MANDATORY, but that will check a parent
+            $values[3] ?? null, // current addition value
+        ]);
     }
 
     /**
@@ -78,14 +82,14 @@ class Difficulty extends PositiveCastingParameter
     }
 
     /**
-     * @param int|float|NumberInterface $value
+     * @param int|float|NumberInterface $additionValue
      * @return Difficulty
      * @throws \Granam\Integer\Tools\Exceptions\Exception
      */
-    public function add($value): Difficulty
+    public function setAddition($additionValue): Difficulty
     {
-        $value = ToInteger::toInteger($value);
-        if ($value === 0) {
+        $additionValue = ToInteger::toInteger($additionValue);
+        if ($additionValue === 0) {
             return $this;
         }
 
@@ -95,30 +99,7 @@ class Difficulty extends PositiveCastingParameter
                 $this->getMinimal(),
                 $this->getMaximal(),
                 $this->getAdditionByRealms()->getNotation(),
-                $this->getValue() + ToInteger::toInteger($value) // current difficulty is injected via fourth index
-            ]
-        );
-    }
-
-    /**
-     * @param int|float|NumberInterface $value
-     * @return Difficulty
-     * @throws \Granam\Integer\Tools\Exceptions\Exception
-     */
-    public function sub($value): Difficulty
-    {
-        $value = ToInteger::toInteger($value);
-        if ($value === 0) {
-            return $this;
-        }
-
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new static(
-            [
-                $this->getMinimal(),
-                $this->getMaximal(),
-                $this->getAdditionByRealms()->getNotation(),
-                $this->getValue() - ToInteger::toInteger($value) // current difficulty is injected via fourth index
+                $additionValue
             ]
         );
     }

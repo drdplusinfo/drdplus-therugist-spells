@@ -7,8 +7,7 @@ use DrdPlus\Tables\Measurements\Distance\DistanceTable;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Partials\IntegerCastingParameter;
 
 /**
- * @method Radius add($value)
- * @method Radius sub($value)
+ * @method Radius setAddition($additionValue)
  */
 class Radius extends IntegerCastingParameter
 {

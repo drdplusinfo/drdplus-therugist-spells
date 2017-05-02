@@ -15,7 +15,7 @@ abstract class IntegerCastingParameter extends StrictObject implements IntegerIn
     /**
      * @var int
      */
-    private $value;
+    private $defaultValue;
     /**
      * @var AdditionByRealms
      */
@@ -32,7 +32,7 @@ abstract class IntegerCastingParameter extends StrictObject implements IntegerIn
     public function __construct(array $values)
     {
         try {
-            $this->value = ToInteger::toInteger($values[0] ?? null);
+            $this->defaultValue = ToInteger::toInteger($values[0] ?? null);
         } catch (\Granam\Integer\Tools\Exceptions\Exception $exception) {
             throw new Exceptions\InvalidValueForIntegerCastingParameter(
                 "Expected integer for {$this->getParameterName()}, got "
@@ -45,7 +45,15 @@ abstract class IntegerCastingParameter extends StrictObject implements IntegerIn
                 . ' for ' . $this->getParameterName()
             );
         }
-        $this->additionByRealms = new AdditionByRealms($values[1]);
+        $this->additionByRealms = new AdditionByRealms($values[1], $values[2] ?? null);
+    }
+
+    /**
+     * @return int
+     */
+    public function getDefaultValue(): int
+    {
+        return $this->defaultValue;
     }
 
     /**
@@ -53,7 +61,7 @@ abstract class IntegerCastingParameter extends StrictObject implements IntegerIn
      */
     public function getValue(): int
     {
-        return $this->value;
+        return $this->getDefaultValue() + $this->getAdditionByRealms()->getCurrentAddition();
     }
 
     /**
@@ -73,38 +81,20 @@ abstract class IntegerCastingParameter extends StrictObject implements IntegerIn
     }
 
     /**
-     * @param int|float|NumberInterface $value
+     * @param int|float|NumberInterface $additionValue
      * @return IntegerCastingParameter
      * @throws \Granam\Integer\Tools\Exceptions\Exception
      */
-    public function add($value)
+    public function setAddition($additionValue)
     {
-        $value = ToInteger::toInteger($value);
-        if ($value === 0) {
+        $additionValue = ToInteger::toInteger($additionValue);
+        if ($additionValue === 0) {
             return $this;
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new static(
-            [$this->getValue() + $value, $this->getAdditionByRealms()->getNotation()]
-        );
-    }
-
-    /**
-     * @param int|float|NumberInterface $value
-     * @return IntegerCastingParameter
-     * @throws \Granam\Integer\Tools\Exceptions\Exception
-     */
-    public function sub($value)
-    {
-        $value = ToInteger::toInteger($value);
-        if ($value === 0) {
-            return $this;
-        }
-
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new static(
-            [$this->getValue() - $value, $this->getAdditionByRealms()->getNotation()]
+            [$this->getValue(), $this->getAdditionByRealms()->getNotation(), $additionValue /* current addition */]
         );
     }
 }

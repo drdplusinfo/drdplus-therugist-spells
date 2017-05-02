@@ -4,8 +4,7 @@ namespace DrdPlus\Theurgist\Formulas\CastingParameters;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Partials\PositiveCastingParameter;
 
 /**
- * @method Grafts add($value)
- * @method Grafts sub($value)
+ * @method Grafts setAddition($additionValue)
  */
 class Grafts extends PositiveCastingParameter
 {

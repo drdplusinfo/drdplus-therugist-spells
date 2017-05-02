@@ -15,7 +15,7 @@ class Trap extends IntegerCastingParameter
     private $propertyCode;
 
     /**
-     * @param array $values with 'trap value', 'trap change by realms' and 'used property'
+     * @param array $values [0 => trap value, 1 => trap change by realms, 2=> used property, 3 => current addition]
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Partials\Exceptions\InvalidValueForIntegerCastingParameter
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Partials\Exceptions\MissingValueForAdditionByRealm
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfRealmIncrement
@@ -25,13 +25,19 @@ class Trap extends IntegerCastingParameter
      */
     public function __construct(array $values)
     {
+        $trapProperty = [];
+        if (array_key_exists(2, $values)) { // it SHOULD exists
+            $trapProperty[] = $values[2];
+            unset($values[2]);
+            $values = array_values($values); // reindexing
+        }
         parent::__construct($values);
         try {
-            $this->propertyCode = PropertyCode::getIt($values[2] ?? '');
+            $this->propertyCode = PropertyCode::getIt($trapProperty[0] ?? 0);
         } catch (\DrdPlus\Codes\Partials\Exceptions\UnknownValueForCode $unknownValueForCode) {
             throw new Exceptions\InvalidFormatOfPropertyUsedForTrap(
                 'Expected valid property code, got '
-                . (array_key_exists(2, $values) ? ValueDescriber::describe($values[2]) : 'nothing')
+                . (array_key_exists(0, $trapProperty) ? ValueDescriber::describe($trapProperty[0]) : 'nothing')
             );
         }
     }
@@ -45,38 +51,25 @@ class Trap extends IntegerCastingParameter
     }
 
     /**
-     * @param int|float|NumberInterface $value
+     * @param int|float|NumberInterface $additionValue
      * @return Trap
      * @throws \Granam\Integer\Tools\Exceptions\Exception
      */
-    public function add($value): Trap
+    public function setAddition($additionValue): Trap
     {
-        $value = ToInteger::toInteger($value);
-        if ($value === 0) {
+        $additionValue = ToInteger::toInteger($additionValue);
+        if ($additionValue === 0) {
             return $this;
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new static(
-            [$this->getValue() + $value, $this->getAdditionByRealms()->getNotation(), $this->getPropertyCode()]
-        );
-    }
-
-    /**
-     * @param int|float|NumberInterface $value
-     * @return Trap
-     * @throws \Granam\Integer\Tools\Exceptions\Exception
-     */
-    public function sub($value): Trap
-    {
-        $value = ToInteger::toInteger($value);
-        if ($value === 0) {
-            return $this;
-        }
-
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new static(
-            [$this->getValue() - $value, $this->getAdditionByRealms()->getNotation(), $this->getPropertyCode()]
+            [
+                $this->getValue(),
+                $this->getAdditionByRealms()->getNotation(),
+                $this->getPropertyCode(),
+                $additionValue,
+            ]
         );
     }
 

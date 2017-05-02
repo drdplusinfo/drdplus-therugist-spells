@@ -16,7 +16,7 @@ class AdditionByRealms extends StrictObject implements IntegerInterface
     /**
      * @var int
      */
-    private $defaultAddition;
+    private $additionPerRealmsIncrement;
     /**
      * @var int
      */
@@ -34,17 +34,17 @@ class AdditionByRealms extends StrictObject implements IntegerInterface
         $parts = $this->parseParts($additionByRealmNotation);
         if (count($parts) === 1 && array_keys($parts) === [0]) {
             $this->realmIncrementPerAddition = 1;
-            $this->defaultAddition = $this->sanitizeAddition($parts[0]);
+            $this->additionPerRealmsIncrement = $this->sanitizeAddition($parts[0]);
         } else if (count($parts) === 2 && array_keys($parts) === [0, 1]) {
             $this->realmIncrementPerAddition = $this->sanitizeRealmIncrement($parts[0]);
-            $this->defaultAddition = $this->sanitizeAddition($parts[1]);
+            $this->additionPerRealmsIncrement = $this->sanitizeAddition($parts[1]);
         } else {
             throw new Exceptions\UnexpectedFormatOfAdditionByRealm(
                 "Expected addition by realm in format 'number' or 'number=number', got "
                 . ValueDescriber::describe($additionByRealmNotation)
             );
         }
-        $this->currentAddition = $currentAddition ?? $this->defaultAddition;
+        $this->currentAddition = $currentAddition ?? 0;/* no addition, no realm increment */
     }
 
     /**
@@ -102,7 +102,7 @@ class AdditionByRealms extends StrictObject implements IntegerInterface
     }
 
     /**
-     * How much more realms are need to get addition, @see getDefaultAddition.
+     * How much more realms are need to get addition, @see getAdditionPerRealmsIncrement.
      *
      * @return int
      */
@@ -116,9 +116,9 @@ class AdditionByRealms extends StrictObject implements IntegerInterface
      *
      * @return int
      */
-    public function getDefaultAddition(): int
+    public function getAdditionPerRealmsIncrement(): int
     {
-        return $this->defaultAddition;
+        return $this->additionPerRealmsIncrement;
     }
 
     /**
@@ -138,7 +138,7 @@ class AdditionByRealms extends StrictObject implements IntegerInterface
      */
     public function getCurrentRealmIncrement(): int
     {
-        return ceil($this->getCurrentAddition() / $this->getDefaultAddition() * $this->getRealmIncrementPerAddition());
+        return ceil($this->getCurrentAddition() / $this->getAdditionPerRealmsIncrement() * $this->getRealmIncrementPerAddition());
     }
 
     /**
@@ -152,11 +152,11 @@ class AdditionByRealms extends StrictObject implements IntegerInterface
     /**
      * @param int|float|NumberInterface $value
      * @return AdditionByRealms
-     * @throws \Granam\Integer\Tools\Exceptions\Exception
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAdditionByRealmValue
      */
     public function add($value): AdditionByRealms
     {
-        $value = ToInteger::toInteger($value);
+        $value = $this->sanitizeAddition($value);
         if ($value === 0) {
             return $this;
         }
@@ -171,11 +171,11 @@ class AdditionByRealms extends StrictObject implements IntegerInterface
     /**
      * @param int|float|NumberInterface $value
      * @return AdditionByRealms
-     * @throws \Granam\Integer\Tools\Exceptions\Exception
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAdditionByRealmValue
      */
     public function sub($value): AdditionByRealms
     {
-        $value = ToInteger::toInteger($value);
+        $value = $this->sanitizeAddition($value);
         if ($value === 0) {
             return $this;
         }
@@ -192,7 +192,7 @@ class AdditionByRealms extends StrictObject implements IntegerInterface
      */
     public function __toString(): string
     {
-        return "{$this->getRealmIncrementPerAddition()}=>{$this->getDefaultAddition()}";
+        return "{$this->getRealmIncrementPerAddition()}=>{$this->getAdditionPerRealmsIncrement()}";
     }
 
     /**
@@ -200,6 +200,6 @@ class AdditionByRealms extends StrictObject implements IntegerInterface
      */
     public function getNotation(): string
     {
-        return "{$this->getRealmIncrementPerAddition()}={$this->getDefaultAddition()}";
+        return "{$this->getRealmIncrementPerAddition()}={$this->getAdditionPerRealmsIncrement()}";
     }
 }
