@@ -192,7 +192,7 @@ class AdditionByRealms extends StrictObject implements IntegerInterface
      */
     public function __toString(): string
     {
-        return "{$this->getRealmIncrementPerAddition()}=>{$this->getAdditionPerRealmsIncrement()}";
+        return "{$this->getValue()} {{$this->getRealmIncrementPerAddition()}=>{$this->getAdditionPerRealmsIncrement()}}";
     }
 
     /**
