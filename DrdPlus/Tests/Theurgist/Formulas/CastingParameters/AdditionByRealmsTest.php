@@ -56,6 +56,8 @@ class AdditionByRealmsTest extends TestWithMockery
         $additionByRealms = new AdditionByRealms(5);
         self::assertSame(5, $additionByRealms->getDefaultAddition());
         self::assertSame(5, $additionByRealms->getCurrentAddition());
+        $same = $additionByRealms->add(0);
+        self::assertSame($same, $additionByRealms);
         $increased = $additionByRealms->add(3);
         self::assertSame(5, $additionByRealms->getCurrentAddition());
         self::assertNotSame($additionByRealms, $increased);
@@ -70,6 +72,8 @@ class AdditionByRealmsTest extends TestWithMockery
         $additionByRealms = new AdditionByRealms(5);
         self::assertSame(5, $additionByRealms->getDefaultAddition());
         self::assertSame(5, $additionByRealms->getCurrentAddition());
+        $same = $additionByRealms->sub(0);
+        self::assertSame($same, $additionByRealms);
         $increased = $additionByRealms->sub(7);
         self::assertSame(5, $additionByRealms->getCurrentAddition());
         self::assertNotSame($additionByRealms, $increased);
