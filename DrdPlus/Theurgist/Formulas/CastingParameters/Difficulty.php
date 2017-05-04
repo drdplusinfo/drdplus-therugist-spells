@@ -1,12 +1,13 @@
 <?php
 namespace DrdPlus\Theurgist\Formulas\CastingParameters;
 
-use DrdPlus\Theurgist\Formulas\CastingParameters\Partials\PositiveCastingParameter;
+use Granam\Integer\PositiveInteger;
 use Granam\Integer\Tools\ToInteger;
 use Granam\Number\NumberInterface;
+use Granam\Strict\Object\StrictObject;
 use Granam\Tools\ValueDescriber;
 
-class Difficulty extends PositiveCastingParameter
+class Difficulty extends StrictObject implements PositiveInteger
 {
     /**
      * @var int
@@ -16,6 +17,10 @@ class Difficulty extends PositiveCastingParameter
      * @var int
      */
     private $maximal;
+    /**
+     * @var AdditionByRealms
+     */
+    private $additionByRealms;
 
     /**
      * @param array $values [ 0 => minimal, 1 => maximal, 2 => addition by realm notation , 3 => current addition value]
@@ -23,9 +28,8 @@ class Difficulty extends PositiveCastingParameter
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidValueForMinimalDifficulty
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidValueForMaximalDifficulty
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Partials\Exceptions\MissingValueForAdditionByRealm
-     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfRealmIncrement
-     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAdditionByRealmValue
-     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\UnexpectedFormatOfAdditionByRealm
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfRealmsIncrement
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAdditionByRealmsValue
      */
     public function __construct(array $values)
     {
@@ -51,12 +55,13 @@ class Difficulty extends PositiveCastingParameter
                 . " Got minimum {$this->minimal} and maximum {$this->maximal}"
             );
         }
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        parent::__construct([
-            $this->minimal /* minimum as default difficulty */,
-            $values[2] ?? '', // addition (content on index 2) is MANDATORY, but that will check a parent
-            $values[3] ?? null, // current addition value
-        ]);
+        if (!array_key_exists(2, $values)) {
+            throw new Partials\Exceptions\MissingValueForAdditionByRealm(
+                'Missing index 2 for addition by realm in given values ' . var_export($values, true)
+                . ' for difficulty'
+            );
+        }
+        $this->additionByRealms = new AdditionByRealms($values[2], $values[3] ?? null /* current addition value */);
     }
 
     /**
@@ -82,6 +87,22 @@ class Difficulty extends PositiveCastingParameter
     }
 
     /**
+     * @return int
+     */
+    public function getValue(): int
+    {
+        return $this->getMinimal() + $this->additionByRealms->getCurrentAddition();
+    }
+
+    /**
+     * @return AdditionByRealms
+     */
+    public function getAdditionByRealms(): AdditionByRealms
+    {
+        return $this->additionByRealms;
+    }
+
+    /**
      * @param int|float|NumberInterface $additionValue
      * @return Difficulty
      * @throws \Granam\Integer\Tools\Exceptions\Exception
@@ -99,7 +120,7 @@ class Difficulty extends PositiveCastingParameter
                 $this->getMinimal(),
                 $this->getMaximal(),
                 $this->getAdditionByRealms()->getNotation(),
-                $additionValue
+                $additionValue,
             ]
         );
     }

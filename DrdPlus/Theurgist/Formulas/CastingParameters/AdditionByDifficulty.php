@@ -7,12 +7,12 @@ use Granam\Number\NumberInterface;
 use Granam\Strict\Object\StrictObject;
 use Granam\Tools\ValueDescriber;
 
-class AdditionByRealms extends StrictObject implements IntegerInterface
+class AdditionByDifficulty extends StrictObject implements IntegerInterface
 {
     /**
      * @var int
      */
-    private $realmsOfAdditionStep;
+    private $difficultyOfAdditionStep;
     /**
      * @var int
      */
@@ -23,40 +23,41 @@ class AdditionByRealms extends StrictObject implements IntegerInterface
     private $currentAddition;
 
     /**
-     * @param string $additionByRealmsNotation in format 'number' or 'number=number'
+     * @param string $additionByDifficultyNotation in format 'number' or 'number=number'
      * @param int|null $currentAddition How much is currently active addition
-     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfRealmsIncrement
-     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAdditionByRealmsValue
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfDifficultyIncrement
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAdditionByDifficultyValue
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\UnexpectedFormatOfAdditionByDifficulty
      */
-    public function __construct(string $additionByRealmsNotation, int $currentAddition = null)
+    public function __construct(string $additionByDifficultyNotation, int $currentAddition = null)
     {
-        $parts = $this->parseParts($additionByRealmsNotation);
+        $parts = $this->parseParts($additionByDifficultyNotation);
         if (count($parts) === 1 && array_keys($parts) === [0]) {
-            $this->realmsOfAdditionStep = 1;
+            $this->difficultyOfAdditionStep = 1;
             $this->additionStep = $this->sanitizeAddition($parts[0]);
         } else if (count($parts) === 2 && array_keys($parts) === [0, 1]) {
-            $this->realmsOfAdditionStep = $this->sanitizeRealms($parts[0]);
+            $this->difficultyOfAdditionStep = $this->sanitizeDifficulty($parts[0]);
             $this->additionStep = $this->sanitizeAddition($parts[1]);
         } else {
-            throw new Exceptions\InvalidFormatOfAdditionByRealmsValue(
-                "Expected addition by realm in format 'number' or 'number=number', got "
-                . ValueDescriber::describe($additionByRealmsNotation)
+            throw new Exceptions\UnexpectedFormatOfAdditionByDifficulty(
+                "Expected addition by difficulty in format 'number' or 'number=number', got "
+                . ValueDescriber::describe($additionByDifficultyNotation)
             );
         }
-        $this->currentAddition = $currentAddition ?? 0;/* no addition, no realm increment */
+        $this->currentAddition = $currentAddition ?? 0;/* no addition, no difficulty change */
     }
 
     /**
-     * @param string $additionByRealmNotation
+     * @param string $additionByDifficultyNotation
      * @return array|string[]
      */
-    private function parseParts(string $additionByRealmNotation): array
+    private function parseParts(string $additionByDifficultyNotation): array
     {
         $parts = array_map(
             function (string $part) {
                 return trim($part);
             },
-            explode('=', $additionByRealmNotation)
+            explode('=', $additionByDifficultyNotation)
         );
 
         foreach ($parts as $part) {
@@ -69,17 +70,17 @@ class AdditionByRealms extends StrictObject implements IntegerInterface
     }
 
     /**
-     * @param $realmIncrement
+     * @param $difficultyChange
      * @return int
-     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfRealmsIncrement
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfDifficultyIncrement
      */
-    private function sanitizeRealms($realmIncrement): int
+    private function sanitizeDifficulty($difficultyChange): int
     {
         try {
-            return ToInteger::toPositiveInteger($realmIncrement);
+            return ToInteger::toPositiveInteger($difficultyChange);
         } catch (\Granam\Integer\Tools\Exceptions\Exception $exception) {
-            throw new Exceptions\InvalidFormatOfRealmsIncrement(
-                'Expected positive integer for realms increment , got ' . ValueDescriber::describe($realmIncrement)
+            throw new Exceptions\InvalidFormatOfDifficultyIncrement(
+                'Expected positive integer for difficulty increment , got ' . ValueDescriber::describe($difficultyChange)
             );
         }
     }
@@ -87,14 +88,14 @@ class AdditionByRealms extends StrictObject implements IntegerInterface
     /**
      * @param $addition
      * @return int
-     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAdditionByRealmsValue
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAdditionByDifficultyValue
      */
     private function sanitizeAddition($addition): int
     {
         try {
             return ToInteger::toInteger($addition);
         } catch (\Granam\Integer\Tools\Exceptions\Exception $exception) {
-            throw new Exceptions\InvalidFormatOfAdditionByRealmsValue(
+            throw new Exceptions\InvalidFormatOfAdditionByDifficultyValue(
                 'Expected integer for addition by difficulty, got ' . ValueDescriber::describe($addition)
             );
         }
@@ -105,13 +106,13 @@ class AdditionByRealms extends StrictObject implements IntegerInterface
      *
      * @return int
      */
-    public function getRealmsOfAdditionStep(): int
+    public function getDifficultyOfAdditionStep(): int
     {
-        return $this->realmsOfAdditionStep;
+        return $this->difficultyOfAdditionStep;
     }
 
     /**
-     * Bonus given by increasing difficulty by a point(s), @see getRealmsOfAdditionStep
+     * Bonus given by increasing difficulty by a point(s), @see getDifficultyOfAdditionStep
      *
      * @return int
      */
@@ -135,9 +136,9 @@ class AdditionByRealms extends StrictObject implements IntegerInterface
      *
      * @return int
      */
-    public function getCurrentRealmsIncrement(): int
+    public function getCurrentDifficultyIncrement(): int
     {
-        return ceil($this->getCurrentAddition() / $this->getAdditionStep() * $this->getRealmsOfAdditionStep());
+        return ceil($this->getCurrentAddition() / $this->getAdditionStep() * $this->getDifficultyOfAdditionStep());
     }
 
     /**
@@ -152,10 +153,10 @@ class AdditionByRealms extends StrictObject implements IntegerInterface
 
     /**
      * @param int|float|NumberInterface $value
-     * @return AdditionByRealms
-     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAdditionByRealmsValue
+     * @return AdditionByDifficulty
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAdditionByDifficultyValue
      */
-    public function add($value): AdditionByRealms
+    public function add($value): AdditionByDifficulty
     {
         $value = $this->sanitizeAddition($value);
         if ($value === 0) {
@@ -171,10 +172,10 @@ class AdditionByRealms extends StrictObject implements IntegerInterface
 
     /**
      * @param int|float|NumberInterface $value
-     * @return AdditionByRealms
-     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAdditionByRealmsValue
+     * @return AdditionByDifficulty
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAdditionByDifficultyValue
      */
-    public function sub($value): AdditionByRealms
+    public function sub($value): AdditionByDifficulty
     {
         $value = $this->sanitizeAddition($value);
         if ($value === 0) {
@@ -193,7 +194,7 @@ class AdditionByRealms extends StrictObject implements IntegerInterface
      */
     public function __toString(): string
     {
-        return "{$this->getValue()} {{$this->getRealmsOfAdditionStep()}=>{$this->getAdditionStep()}}";
+        return "{$this->getValue()} {{$this->getDifficultyOfAdditionStep()}=>{$this->getAdditionStep()}}";
     }
 
     /**
@@ -201,6 +202,6 @@ class AdditionByRealms extends StrictObject implements IntegerInterface
      */
     public function getNotation(): string
     {
-        return "{$this->getRealmsOfAdditionStep()}={$this->getAdditionStep()}";
+        return "{$this->getDifficultyOfAdditionStep()}={$this->getAdditionStep()}";
     }
 }

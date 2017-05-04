@@ -5,7 +5,7 @@ use DrdPlus\Codes\TimeUnitCode;
 use DrdPlus\Tables\Measurements\Time\Time;
 use DrdPlus\Tables\Measurements\Time\TimeTable;
 use DrdPlus\Tests\Theurgist\Formulas\CastingParameters\Partials\PositiveCastingParameterTest;
-use DrdPlus\Theurgist\Formulas\CastingParameters\AdditionByRealms;
+use DrdPlus\Theurgist\Formulas\CastingParameters\AdditionByDifficulty;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Duration;
 
 class DurationTest extends PositiveCastingParameterTest
@@ -14,16 +14,16 @@ class DurationTest extends PositiveCastingParameterTest
     {
         $duration = new Duration(['0', '78=321']);
         self::assertSame(0, $duration->getValue());
-        self::assertEquals(new AdditionByRealms('78=321'), $duration->getAdditionByRealms());
-        self::assertSame('0 (' . $duration->getAdditionByRealms() . ')', (string)$duration);
+        self::assertEquals(new AdditionByDifficulty('78=321'), $duration->getAdditionByDifficulty());
+        self::assertSame('0 (' . $duration->getAdditionByDifficulty() . ')', (string)$duration);
     }
 
     protected function I_can_create_it_positive()
     {
         $duration = new Duration(['35689', '332211']);
         self::assertSame(35689, $duration->getValue());
-        self::assertEquals(new AdditionByRealms('332211'), $duration->getAdditionByRealms());
-        self::assertSame('35689 (' . $duration->getAdditionByRealms() . ')', (string)$duration);
+        self::assertEquals(new AdditionByDifficulty('332211'), $duration->getAdditionByDifficulty());
+        self::assertSame('35689 (' . $duration->getAdditionByDifficulty() . ')', (string)$duration);
     }
 
     /**

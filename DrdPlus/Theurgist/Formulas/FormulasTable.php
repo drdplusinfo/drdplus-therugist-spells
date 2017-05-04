@@ -25,6 +25,7 @@ use DrdPlus\Theurgist\Formulas\CastingParameters\Realm;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SizeChange;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellSpeed;
 use DrdPlus\Theurgist\Formulas\CastingParameters\SpellTrait;
+use Granam\Integer\IntegerObject;
 
 class FormulasTable extends AbstractFileTable
 {
@@ -132,43 +133,30 @@ class FormulasTable extends AbstractFileTable
     ): Realm
     {
         $basicFormulaDifficulty = $this->getDifficulty($formulaCode);
-        $maximalDifficultyHandledByFormula = $basicFormulaDifficulty->getMaximal();
-        $minimalPossibleRealm = $this->getRealm($formulaCode);
-        $difficultyOfModifiedYetWithoutRealmChange = $this->getDifficultyOfModified(
+        $maximalDifficultyOfBasicFormula = $basicFormulaDifficulty->getMaximal();
+        $formulaBasicRealm = $this->getRealm($formulaCode);
+        $difficultyOfModifiedValue = $this->getDifficultyOfModified(
             $formulaCode,
             $modifierCodes,
             $spellTraitCodes
         )->getValue();
         $highestRequiredRealmByModifiers = $this->modifiersTable->getHighestRequiredRealm($modifierCodes);
-        if ($maximalDifficultyHandledByFormula >= $difficultyOfModifiedYetWithoutRealmChange
-            && $minimalPossibleRealm->getValue() >= $highestRequiredRealmByModifiers->getValue()
+        if ($maximalDifficultyOfBasicFormula >= $difficultyOfModifiedValue
+            && $formulaBasicRealm->getValue() >= $highestRequiredRealmByModifiers->getValue()
         ) {
-            return $minimalPossibleRealm;
+            // formula is able to handle requirements from its lowest possible realm
+            return $formulaBasicRealm;
         }
-        $formulaAdditionByRealms = $basicFormulaDifficulty->getAdditionByRealms();
-        $difficultyHandledByAdditionalRealm = $formulaAdditionByRealms->getAdditionPerRealmsIncrement();
-        if ($difficultyHandledByAdditionalRealm <= 0) {
-            // this should never happen, because every formula addition is currently greater than zero
-            throw new Exceptions\CanNotBuildFormulaWithRequiredModification(
-                "Formula {$formulaCode} with basic difficulty {$basicFormulaDifficulty}"
-                . " can not be build with difficulty {$difficultyOfModifiedYetWithoutRealmChange}"
-                . " because of its addition by realms {$formulaAdditionByRealms}"
-            );
-        }
-        $realmIncrementToHandleAdditionalDifficulty = $formulaAdditionByRealms->getRealmIncrementPerAddition();
-        while ($maximalDifficultyHandledByFormula < $difficultyOfModifiedYetWithoutRealmChange) {
-            $maximalDifficultyHandledByFormula += $difficultyHandledByAdditionalRealm;
-            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-            $minimalPossibleRealm = $minimalPossibleRealm->add($realmIncrementToHandleAdditionalDifficulty);
-        }
-        // handled difficulty is enough, but realm is still needed higher
-        /** @var Realm $minimalPossibleRealm */
-        while ($minimalPossibleRealm->getValue() < $highestRequiredRealmByModifiers->getValue()) {
-            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-            $minimalPossibleRealm = $minimalPossibleRealm->add($realmIncrementToHandleAdditionalDifficulty);
+        $missingDifficulty = $difficultyOfModifiedValue - $maximalDifficultyOfBasicFormula;
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        $requiredAdditionByRealms = $basicFormulaDifficulty->getAdditionByRealms()->add($missingDifficulty);
+        $byDifficultyRequiredRealm = $formulaBasicRealm->add($requiredAdditionByRealms->getCurrentRealmsIncrement());
+        if ($byDifficultyRequiredRealm->getValue() >= $highestRequiredRealmByModifiers->getValue()) {
+            return $byDifficultyRequiredRealm;
         }
 
-        return $minimalPossibleRealm;
+        // handled difficulty was enough, but realm is still required higher by modifiers
+        return $highestRequiredRealmByModifiers;
     }
 
     /**
@@ -299,7 +287,7 @@ class FormulasTable extends AbstractFileTable
         array $modifierCodes,
         array $spellTraitCodes
     ): Difficulty
-    {
+    { // todo give ModifiedDifficulty object as IntegerObject or something like that
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return $this->getDifficulty($formulaCode)->setAddition(
             +$this->modifiersTable->sumDifficultyChanges($modifierCodes)->getValue()
@@ -426,23 +414,33 @@ class FormulasTable extends AbstractFileTable
 
     /**
      * @param FormulaCode $formulaCode
+     * @ param int $formulaAttackAddition
      * @param array|ModifierCode[] $modifierCodes
+     * @ param array|int[]|NumberInterface[] $modifiersAttackAdditions by modifier names indexed their additions
      * @param array|SpellTraitCode[] $spellTraitCodes
-     * @return Attack|null
+     * @ param array|int[]|NumberInterface[] $spellTraitsAttackAdditions
+     * @return IntegerObject|null
      */
     public function getAttackOfModified(/** @noinspection PhpUnusedParameterInspection to keep same interface with others */
         FormulaCode $formulaCode,
+//        int $formulaAttackAddition,
         array $modifierCodes,
-        array $spellTraitCodes
+//        array $modifiersAttackAdditions,
+        array $spellTraitCodes = []
+//        array $spellTraitsAttackAdditions = []
     )
     {
         $formulaAttack = $this->getAttack($formulaCode);
         if (!$formulaAttack) {
             return null;
         }
+//        $formulaAttack = $formulaAttack->setAddition($formulaAttackAddition);
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return $formulaAttack->setAddition($this->modifiersTable->sumAttackChange($modifierCodes)->getValue());
+        return new IntegerObject(
+            $formulaAttack->getValue(),
+            $this->modifiersTable->sumAttackChange($modifierCodes, [] /* $modifiersAttackAdditions */)->getValue()
+        );
     }
 
     /**

@@ -3,7 +3,7 @@ namespace DrdPlus\Tests\Theurgist\Formulas\CastingParameters;
 
 use DrdPlus\Codes\Properties\PropertyCode;
 use DrdPlus\Tests\Theurgist\Formulas\CastingParameters\Partials\IntegerCastingParameterTest;
-use DrdPlus\Theurgist\Formulas\CastingParameters\AdditionByRealms;
+use DrdPlus\Theurgist\Formulas\CastingParameters\AdditionByDifficulty;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Trap;
 
 class TrapTest extends IntegerCastingParameterTest
@@ -14,7 +14,7 @@ class TrapTest extends IntegerCastingParameterTest
         $trap = new Trap(['-456', '4=6', PropertyCode::INTELLIGENCE]);
         self::assertSame(-456, $trap->getValue());
         self::assertSame($trap->getPropertyCode(), PropertyCode::getIt(PropertyCode::INTELLIGENCE));
-        self::assertEquals(new AdditionByRealms('4=6'), $trap->getAdditionByRealms());
+        self::assertEquals(new AdditionByDifficulty('4=6'), $trap->getAdditionByDifficulty());
         self::assertSame('-456 intelligence (0 {4=>6})', (string)$trap);
     }
 
@@ -23,7 +23,7 @@ class TrapTest extends IntegerCastingParameterTest
         $trap = new Trap(['0', '78=321', PropertyCode::CHARISMA]);
         self::assertSame(0, $trap->getValue());
         self::assertSame($trap->getPropertyCode(), PropertyCode::getIt(PropertyCode::CHARISMA));
-        self::assertEquals(new AdditionByRealms('78=321'), $trap->getAdditionByRealms());
+        self::assertEquals(new AdditionByDifficulty('78=321'), $trap->getAdditionByDifficulty());
         self::assertSame('0 charisma (0 {78=>321})', (string)$trap);
     }
 
@@ -32,7 +32,7 @@ class TrapTest extends IntegerCastingParameterTest
         $trap = new Trap(['35689', '332211', PropertyCode::ENDURANCE]);
         self::assertSame(35689, $trap->getValue());
         self::assertSame($trap->getPropertyCode(), PropertyCode::getIt(PropertyCode::ENDURANCE));
-        self::assertEquals(new AdditionByRealms('332211'), $trap->getAdditionByRealms());
+        self::assertEquals(new AdditionByDifficulty('332211'), $trap->getAdditionByDifficulty());
         self::assertSame('35689 endurance (0 {1=>332211})', (string)$trap);
     }
 
@@ -67,7 +67,7 @@ class TrapTest extends IntegerCastingParameterTest
         self::assertSame($original, $original->setAddition(0));
         $increased = $original->setAddition(456);
         self::assertSame(579, $increased->getValue());
-        self::assertSame(456, $increased->getAdditionByRealms()->getCurrentAddition());
+        self::assertSame(456, $increased->getAdditionByDifficulty()->getCurrentAddition());
         self::assertSame($original->getPropertyCode(), $increased->getPropertyCode());
         self::assertNotSame($original, $increased);
 
@@ -76,6 +76,6 @@ class TrapTest extends IntegerCastingParameterTest
         self::assertNotSame($original, $decreased);
         self::assertNotSame($original, $increased);
         self::assertSame($original->getPropertyCode(), $decreased->getPropertyCode());
-        self::assertSame(-579, $decreased->getAdditionByRealms()->getCurrentAddition());
+        self::assertSame(-579, $decreased->getAdditionByDifficulty()->getCurrentAddition());
     }
 }

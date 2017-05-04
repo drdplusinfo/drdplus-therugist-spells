@@ -18,9 +18,9 @@ class Trap extends IntegerCastingParameter
      * @param array $values [0 => trap value, 1 => trap change by realms, 2=> used property, 3 => current addition]
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Partials\Exceptions\InvalidValueForIntegerCastingParameter
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Partials\Exceptions\MissingValueForAdditionByRealm
-     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfRealmIncrement
-     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAdditionByRealmValue
-     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\UnexpectedFormatOfAdditionByRealm
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfDifficultyIncrement
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAdditionByDifficultyValue
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\UnexpectedFormatOfAdditionByDifficulty
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfPropertyUsedForTrap
      */
     public function __construct(array $values)
@@ -66,7 +66,7 @@ class Trap extends IntegerCastingParameter
         return new static(
             [
                 $this->getValue(),
-                $this->getAdditionByRealms()->getNotation(),
+                $this->getAdditionByDifficulty()->getNotation(),
                 $this->getPropertyCode(),
                 $additionValue,
             ]
@@ -78,6 +78,6 @@ class Trap extends IntegerCastingParameter
      */
     public function __toString(): string
     {
-        return "{$this->getValue()} {$this->getPropertyCode()} ({$this->getAdditionByRealms()})";
+        return "{$this->getValue()} {$this->getPropertyCode()} ({$this->getAdditionByDifficulty()})";
     }
 }

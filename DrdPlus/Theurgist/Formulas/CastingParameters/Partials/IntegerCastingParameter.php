@@ -1,7 +1,7 @@
 <?php
 namespace DrdPlus\Theurgist\Formulas\CastingParameters\Partials;
 
-use DrdPlus\Theurgist\Formulas\CastingParameters\AdditionByRealms;
+use DrdPlus\Theurgist\Formulas\CastingParameters\AdditionByDifficulty;
 use Granam\Integer\IntegerInterface;
 use Granam\Integer\Tools\ToInteger;
 use Granam\Number\NumberInterface;
@@ -17,17 +17,17 @@ abstract class IntegerCastingParameter extends StrictObject implements IntegerIn
      */
     private $defaultValue;
     /**
-     * @var AdditionByRealms
+     * @var AdditionByDifficulty
      */
-    private $additionByRealms;
+    private $additionByDifficulty;
 
     /**
      * @param array $values
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Partials\Exceptions\InvalidValueForIntegerCastingParameter
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Partials\Exceptions\MissingValueForAdditionByRealm
-     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfRealmIncrement
-     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAdditionByRealmValue
-     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\UnexpectedFormatOfAdditionByRealm
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfDifficultyIncrement
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAdditionByDifficultyValue
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\UnexpectedFormatOfAdditionByDifficulty
      */
     public function __construct(array $values)
     {
@@ -45,7 +45,7 @@ abstract class IntegerCastingParameter extends StrictObject implements IntegerIn
                 . ' for ' . $this->getParameterName()
             );
         }
-        $this->additionByRealms = new AdditionByRealms($values[1], $values[2] ?? null);
+        $this->additionByDifficulty = new AdditionByDifficulty($values[1], $values[2] ?? null);
     }
 
     /**
@@ -61,15 +61,15 @@ abstract class IntegerCastingParameter extends StrictObject implements IntegerIn
      */
     public function getValue(): int
     {
-        return $this->getDefaultValue() + $this->getAdditionByRealms()->getCurrentAddition();
+        return $this->getDefaultValue() + $this->getAdditionByDifficulty()->getCurrentAddition();
     }
 
     /**
-     * @return AdditionByRealms
+     * @return AdditionByDifficulty
      */
-    public function getAdditionByRealms(): AdditionByRealms
+    public function getAdditionByDifficulty(): AdditionByDifficulty
     {
-        return $this->additionByRealms;
+        return $this->additionByDifficulty;
     }
 
     /**
@@ -77,7 +77,7 @@ abstract class IntegerCastingParameter extends StrictObject implements IntegerIn
      */
     public function __toString(): string
     {
-        return "{$this->getValue()} ({$this->getAdditionByRealms()})";
+        return "{$this->getValue()} ({$this->getAdditionByDifficulty()})";
     }
 
     /**
@@ -94,7 +94,7 @@ abstract class IntegerCastingParameter extends StrictObject implements IntegerIn
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new static(
-            [$this->getValue(), $this->getAdditionByRealms()->getNotation(), $additionValue /* current addition */]
+            [$this->getValue(), $this->getAdditionByDifficulty()->getNotation(), $additionValue /* current addition */]
         );
     }
 }

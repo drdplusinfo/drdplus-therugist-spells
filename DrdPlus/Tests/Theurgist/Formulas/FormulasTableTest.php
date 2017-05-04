@@ -658,7 +658,7 @@ PHPDOC
         $portalDifficulty = $formulasTable->getDifficulty($formulaCode);
         $unhandledDifficulty = ($modifiersDifficultyChangeValue + $spellTraitsDifficultyChangeValue + $portalDifficulty->getMinimal())
             - $portalDifficulty->getMaximal();
-        $handledDifficultyPerRealm = $portalDifficulty->getAdditionByRealms()->getAdditionPerRealmsIncrement();
+        $handledDifficultyPerRealm = $portalDifficulty->getAdditionByRealms()->getAdditionStep();
         $realmsIncrement = (int)ceil($unhandledDifficulty / $handledDifficultyPerRealm);
         self::assertSame($basicFormulaRealmValue + $realmsIncrement, $requiredRealmOfModerateModifiedFormula->getValue());
 
@@ -698,7 +698,7 @@ PHPDOC
         $portalDifficulty = $formulasTable->getDifficulty($formulaCode);
         $unhandledDifficulty = ($modifiersDifficultyChangeValue + $spellTraitsDifficultyChangeValue + $portalDifficulty->getMinimal())
             - $portalDifficulty->getMaximal();
-        $handledDifficultyPerRealm = $portalDifficulty->getAdditionByRealms()->getAdditionPerRealmsIncrement();
+        $handledDifficultyPerRealm = $portalDifficulty->getAdditionByRealms()->getAdditionStep();
         $realmsIncrement = (int)ceil($unhandledDifficulty / $handledDifficultyPerRealm);
         self::assertSame(
             $basicFormulaRealmValue + $realmsIncrement,

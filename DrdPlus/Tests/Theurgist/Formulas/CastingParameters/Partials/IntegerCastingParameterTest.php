@@ -1,7 +1,7 @@
 <?php
 namespace DrdPlus\Tests\Theurgist\Formulas\CastingParameters\Partials;
 
-use DrdPlus\Theurgist\Formulas\CastingParameters\AdditionByRealms;
+use DrdPlus\Theurgist\Formulas\CastingParameters\AdditionByDifficulty;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Partials\IntegerCastingParameter;
 use Granam\Tests\Tools\TestWithMockery;
 
@@ -36,8 +36,8 @@ abstract class IntegerCastingParameterTest extends TestWithMockery
         /** @var IntegerCastingParameter $sut */
         $sut = new $sutClass(['-456', '4=6']);
         self::assertSame(-456, $sut->getValue());
-        self::assertEquals(new AdditionByRealms('4=6'), $sut->getAdditionByRealms());
-        self::assertSame('-456 (' . $sut->getAdditionByRealms() . ')', (string)$sut);
+        self::assertEquals(new AdditionByDifficulty('4=6'), $sut->getAdditionByDifficulty());
+        self::assertSame('-456 (' . $sut->getAdditionByDifficulty() . ')', (string)$sut);
     }
 
     protected function I_can_create_it_with_zero()
@@ -46,8 +46,8 @@ abstract class IntegerCastingParameterTest extends TestWithMockery
         /** @var IntegerCastingParameter $sut */
         $sut = new $sutClass(['0', '78=321']);
         self::assertSame(0, $sut->getValue());
-        self::assertEquals(new AdditionByRealms('78=321'), $sut->getAdditionByRealms());
-        self::assertSame('0 (' . $sut->getAdditionByRealms() . ')', (string)$sut);
+        self::assertEquals(new AdditionByDifficulty('78=321'), $sut->getAdditionByDifficulty());
+        self::assertSame('0 (' . $sut->getAdditionByDifficulty() . ')', (string)$sut);
     }
 
     protected function I_can_create_it_positive()
@@ -56,8 +56,8 @@ abstract class IntegerCastingParameterTest extends TestWithMockery
         /** @var IntegerCastingParameter $sut */
         $sut = new $sutClass(['35689', '332211']);
         self::assertSame(35689, $sut->getValue());
-        self::assertEquals(new AdditionByRealms('332211'), $sut->getAdditionByRealms());
-        self::assertSame('35689 (' . $sut->getAdditionByRealms() . ')', (string)$sut);
+        self::assertEquals(new AdditionByDifficulty('332211'), $sut->getAdditionByDifficulty());
+        self::assertSame('35689 (' . $sut->getAdditionByDifficulty() . ')', (string)$sut);
     }
 
     /**
@@ -82,20 +82,20 @@ abstract class IntegerCastingParameterTest extends TestWithMockery
         self::assertSame($original, $original->setAddition(0));
         $increased = $original->setAddition(456);
         self::assertSame(579, $increased->getValue());
-        self::assertSame($original->getAdditionByRealms()->getNotation(), $increased->getAdditionByRealms()->getNotation());
-        self::assertSame(456, $increased->getAdditionByRealms()->getCurrentAddition());
+        self::assertSame($original->getAdditionByDifficulty()->getNotation(), $increased->getAdditionByDifficulty()->getNotation());
+        self::assertSame(456, $increased->getAdditionByDifficulty()->getCurrentAddition());
         self::assertNotSame($original, $increased);
 
         $zeroed = $original->setAddition(-123);
         self::assertSame(0, $zeroed->getValue());
         self::assertNotSame($original, $zeroed);
         self::assertNotSame($original, $increased);
-        self::assertSame(-123, $zeroed->getAdditionByRealms()->getCurrentAddition());
+        self::assertSame(-123, $zeroed->getAdditionByDifficulty()->getCurrentAddition());
 
         $decreased = $original->setAddition(-999);
         self::assertSame(-876, $decreased->getValue());
-        self::assertSame($original->getAdditionByRealms()->getNotation(), $increased->getAdditionByRealms()->getNotation());
-        self::assertSame(-999, $decreased->getAdditionByRealms()->getCurrentAddition());
+        self::assertSame($original->getAdditionByDifficulty()->getNotation(), $increased->getAdditionByDifficulty()->getNotation());
+        self::assertSame(-999, $decreased->getAdditionByDifficulty()->getCurrentAddition());
         self::assertNotSame($original, $decreased);
     }
 
