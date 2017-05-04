@@ -27,7 +27,7 @@ class AdditionByDifficulty extends StrictObject implements IntegerInterface
      * @param int|null $currentAddition How much is currently active addition
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfDifficultyIncrement
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAdditionByDifficultyValue
-     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\UnexpectedFormatOfAdditionByDifficulty
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAdditionByDifficultyNotation
      */
     public function __construct(string $additionByDifficultyNotation, int $currentAddition = null)
     {
@@ -39,7 +39,7 @@ class AdditionByDifficulty extends StrictObject implements IntegerInterface
             $this->difficultyOfAdditionStep = $this->sanitizeDifficulty($parts[0]);
             $this->additionStep = $this->sanitizeAddition($parts[1]);
         } else {
-            throw new Exceptions\UnexpectedFormatOfAdditionByDifficulty(
+            throw new Exceptions\InvalidFormatOfAdditionByDifficultyNotation(
                 "Expected addition by difficulty in format 'number' or 'number=number', got "
                 . ValueDescriber::describe($additionByDifficultyNotation)
             );

@@ -29,7 +29,7 @@ class AdditionByDifficultyTest extends TestWithMockery
     /**
      * @test
      */
-    public function I_can_create_it_with_realms_price()
+    public function I_can_create_it_with_explicit_difficulty_price()
     {
         $additionByDifficulty = new AdditionByDifficulty('456=789');
         self::assertSame(789, $additionByDifficulty->getAdditionStep());
@@ -90,7 +90,7 @@ class AdditionByDifficultyTest extends TestWithMockery
 
     /**
      * @test
-     * @expectedException \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\UnexpectedFormatOfAdditionByDifficulty
+     * @expectedException \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAdditionByDifficultyNotation
      */
     public function I_can_not_create_it_without_value()
     {
@@ -99,7 +99,7 @@ class AdditionByDifficultyTest extends TestWithMockery
 
     /**
      * @test
-     * @expectedException \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\UnexpectedFormatOfAdditionByDifficulty
+     * @expectedException \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAdditionByDifficultyNotation
      * @expectedExceptionMessageRegExp ~1=2=3~
      */
     public function I_can_not_create_it_with_too_many_parts()
@@ -109,9 +109,9 @@ class AdditionByDifficultyTest extends TestWithMockery
 
     /**
      * @test
-     * @expectedException \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\UnexpectedFormatOfAdditionByDifficulty
+     * @expectedException \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAdditionByDifficultyNotation
      */
-    public function I_can_not_create_it_with_empty_realm_price()
+    public function I_can_not_create_it_with_empty_difficulty_price()
     {
         new AdditionByDifficulty('=2');
     }
@@ -121,14 +121,14 @@ class AdditionByDifficultyTest extends TestWithMockery
      * @expectedException \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfDifficultyIncrement
      * @expectedExceptionMessageRegExp ~foo~
      */
-    public function I_can_not_create_it_with_invalid_realm_price()
+    public function I_can_not_create_it_with_invalid_difficulty_price()
     {
         new AdditionByDifficulty('foo=2');
     }
 
     /**
      * @test
-     * @expectedException \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\UnexpectedFormatOfAdditionByDifficulty
+     * @expectedException \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAdditionByDifficultyNotation
      * @expectedExceptionMessageRegExp ~5=~
      */
     public function I_can_not_create_it_with_empty_addition()

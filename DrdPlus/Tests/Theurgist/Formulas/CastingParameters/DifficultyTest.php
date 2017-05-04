@@ -1,12 +1,33 @@
 <?php
 namespace DrdPlus\Tests\Theurgist\Formulas\CastingParameters;
 
-use DrdPlus\Tests\Theurgist\Formulas\CastingParameters\Partials\PositiveCastingParameterTest;
+use DrdPlus\Tests\Theurgist\Formulas\CastingParameters\Partials\IntegerCastingParameterSetAdditionTrait;
 use DrdPlus\Theurgist\Formulas\CastingParameters\AdditionByRealms;
 use DrdPlus\Theurgist\Formulas\CastingParameters\Difficulty;
+use Granam\Tests\Tools\TestWithMockery;
 
-class DifficultyTest extends PositiveCastingParameterTest
+class DifficultyTest extends TestWithMockery
 {
+    use IntegerCastingParameterSetAdditionTrait;
+
+    /**
+     * @test
+     * @expectedException \DrdPlus\Theurgist\Formulas\CastingParameters\Partials\Exceptions\MissingValueForAdditionByRealm
+     * @expectedExceptionMessageRegExp ~123~
+     */
+    public function I_can_not_create_it_with_invalid_points_to_annotation()
+    {
+        new Difficulty([123, 456]);
+    }
+
+    /**
+     * @test
+     */
+    public function I_can_create_it()
+    {
+        $this->I_can_create_it_with_zero();
+        $this->I_can_create_it_positive();
+    }
 
     protected function I_can_create_it_with_zero()
     {
@@ -22,22 +43,6 @@ class DifficultyTest extends PositiveCastingParameterTest
         self::assertSame(35689, $difficulty->getValue());
         self::assertEquals(new AdditionByRealms('332211'), $difficulty->getAdditionByRealms());
         self::assertSame('35689 (35689...356891 [' . $difficulty->getAdditionByRealms() . '])', (string)$difficulty);
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_not_create_it_non_numeric()
-    {
-        self::assertTrue(true); // this is solved by Difficulty itself as 'minimal' and 'maximal' values check
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_not_create_it_negative()
-    {
-        self::assertTrue(true); // this is solved by Difficulty itself as 'minimal' and 'maximal' values check
     }
 
     /**

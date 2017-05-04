@@ -124,7 +124,6 @@ class FormulasTable extends AbstractFileTable
      * @param array|ModifierCode[] $modifierCodes
      * @param array|SpellTraitCode[] $spellTraitCodes
      * @return Realm
-     * @throws \DrdPlus\Theurgist\Formulas\Exceptions\CanNotBuildFormulaWithRequiredModification
      */
     public function getRealmOfModified(/** @noinspection PhpUnusedParameterInspection to keep same interface with others */
         FormulaCode $formulaCode,
@@ -174,7 +173,6 @@ class FormulasTable extends AbstractFileTable
      * @param array|ModifierCode[] $modifierCodes
      * @param array|SpellTraitCode[] $spellTraitCodes
      * @return array|Affection[]
-     * @throws \DrdPlus\Theurgist\Formulas\Exceptions\CanNotBuildFormulaWithRequiredModification
      */
     public function getAffectionsOfModified(/** @noinspection PhpUnusedParameterInspection */
         FormulaCode $formulaCode,
@@ -438,8 +436,8 @@ class FormulasTable extends AbstractFileTable
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new IntegerObject(
-            $formulaAttack->getValue(),
-            $this->modifiersTable->sumAttackChange($modifierCodes, [] /* $modifiersAttackAdditions */)->getValue()
+            $formulaAttack->getValue()
+            + $this->modifiersTable->sumAttackChange($modifierCodes, [] /* $modifiersAttackAdditions */)->getValue()
         );
     }
 

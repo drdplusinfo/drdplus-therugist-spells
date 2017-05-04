@@ -431,6 +431,7 @@ class ModifiersTable extends AbstractFileTable
     public function sumAttackChange(array $modifierCodes, array $modifiersAttackAdditions): IntegerObject
     {
         $attackSum = 0;
+        $difficultySum = 0;
         $modifierValues = [];
         foreach ($this->toFlatArray($modifierCodes) as $modifierCode) {
             $attack = $this->getAttack($modifierCode);
@@ -442,8 +443,8 @@ class ModifiersTable extends AbstractFileTable
                 $attack->setAddition($modifiersAttackAdditions[$modifierValue]);
                 unset($modifiersAttackAdditions[$modifierValue]); // remove for evidence of remaining
             }
-            $attack->getAdditionByDifficulty()->
-            // TODO we need difficulty also
+            // TODO WRONG! what about branch of more Transpositions? We cannot add addition to every single one
+            $difficultySum += $attack->getAdditionByDifficulty()->getCurrentDifficultyIncrement();
             $attackSum += $attack->getValue();
         }
         if (count($modifiersAttackAdditions) > 0) { // some addition left but should not
@@ -453,6 +454,7 @@ class ModifiersTable extends AbstractFileTable
             );
         }
 
+        // TODO we need difficulty also
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new IntegerObject($attackSum);
     }

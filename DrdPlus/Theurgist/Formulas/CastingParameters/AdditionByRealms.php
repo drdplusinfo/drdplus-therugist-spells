@@ -25,6 +25,7 @@ class AdditionByRealms extends StrictObject implements IntegerInterface
     /**
      * @param string $additionByRealmsNotation in format 'number' or 'number=number'
      * @param int|null $currentAddition How much is currently active addition
+     * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAdditionByRealmsNotation
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfRealmsIncrement
      * @throws \DrdPlus\Theurgist\Formulas\CastingParameters\Exceptions\InvalidFormatOfAdditionByRealmsValue
      */
@@ -38,8 +39,8 @@ class AdditionByRealms extends StrictObject implements IntegerInterface
             $this->realmsOfAdditionStep = $this->sanitizeRealms($parts[0]);
             $this->additionStep = $this->sanitizeAddition($parts[1]);
         } else {
-            throw new Exceptions\InvalidFormatOfAdditionByRealmsValue(
-                "Expected addition by realm in format 'number' or 'number=number', got "
+            throw new Exceptions\InvalidFormatOfAdditionByRealmsNotation(
+                "Expected addition by realms in format 'number' or 'number=number', got "
                 . ValueDescriber::describe($additionByRealmsNotation)
             );
         }
@@ -95,13 +96,13 @@ class AdditionByRealms extends StrictObject implements IntegerInterface
             return ToInteger::toInteger($addition);
         } catch (\Granam\Integer\Tools\Exceptions\Exception $exception) {
             throw new Exceptions\InvalidFormatOfAdditionByRealmsValue(
-                'Expected integer for addition by difficulty, got ' . ValueDescriber::describe($addition)
+                'Expected integer for addition by realm, got ' . ValueDescriber::describe($addition)
             );
         }
     }
 
     /**
-     * How is difficulty increased on addition step, @see getAdditionStep.
+     * How is realms increased on addition step, @see getAdditionStep.
      *
      * @return int
      */
@@ -111,7 +112,7 @@ class AdditionByRealms extends StrictObject implements IntegerInterface
     }
 
     /**
-     * Bonus given by increasing difficulty by a point(s), @see getRealmsOfAdditionStep
+     * Bonus given by increasing realms, @see getRealmsOfAdditionStep
      *
      * @return int
      */
@@ -121,7 +122,7 @@ class AdditionByRealms extends StrictObject implements IntegerInterface
     }
 
     /**
-     * Current value of a bonus paid by difficulty points, steps x @see getAdditionStep
+     * Current value of a bonus paid by realms, steps x @see getAdditionStep
      *
      * @return int
      */
@@ -131,7 +132,7 @@ class AdditionByRealms extends StrictObject implements IntegerInterface
     }
 
     /**
-     * How much is difficulty increased to get total bonus, steps x @see getCurrentAddition
+     * How much have to be realms increased to get total bonus, steps x @see getCurrentAddition
      *
      * @return int
      */

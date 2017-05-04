@@ -796,7 +796,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
     {
         $modifiersTable = new ModifiersTable(Tables::getIt());
 
-        self::assertEquals(new IntegerObject(0), $modifiersTable->sumAttackChange([]));
+        self::assertEquals(new IntegerObject(0), $modifiersTable->sumAttackChange([], []));
 
         self::assertEquals(
             new IntegerObject(0),
@@ -809,14 +809,15 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
                         ModifierCode::getIt(ModifierCode::THUNDER), // null
                         ModifierCode::getIt(ModifierCode::INTERACTIVE_ILLUSION), // null
                     ],
-                ]
+                ],
+                []
             )
         );
 
         self::assertEquals(
             new IntegerObject(8),
             $modifiersTable->sumAttackChange(
-                [
+                $withTranspositions = [
                     [ModifierCode::getIt(ModifierCode::MOVEMENT), // null
                         [ModifierCode::getIt(ModifierCode::EXPLOSION), // null
                             [ModifierCode::getIt(ModifierCode::FILTER), // null
@@ -828,9 +829,11 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
                             ],
                         ],
                     ],
-                ]
+                ],
+                []
             )
         );
+        // TODO tests with additions
     }
 
     /**
