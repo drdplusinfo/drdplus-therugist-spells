@@ -5,10 +5,12 @@ use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ModifierMutableCastingParameterCode;
 use DrdPlus\Theurgist\Spells\CastingParameters\Attack;
 use DrdPlus\Theurgist\Spells\CastingParameters\Conditions;
+use DrdPlus\Theurgist\Spells\CastingParameters\DifficultyChange;
 use DrdPlus\Theurgist\Spells\CastingParameters\EpicenterShift;
 use DrdPlus\Theurgist\Spells\CastingParameters\Grafts;
 use DrdPlus\Theurgist\Spells\CastingParameters\Invisibility;
 use DrdPlus\Theurgist\Spells\CastingParameters\NumberOfSituations;
+use DrdPlus\Theurgist\Spells\CastingParameters\Partials\IntegerCastingParameter;
 use DrdPlus\Theurgist\Spells\CastingParameters\Points;
 use DrdPlus\Theurgist\Spells\CastingParameters\Power;
 use DrdPlus\Theurgist\Spells\CastingParameters\Quality;
@@ -34,6 +36,7 @@ class Modifier extends StrictObject
      * @param ModifierCode $modifierCode
      * @param ModifiersTable $modifiersTable
      * @param array $additions
+     * @throws \DrdPlus\Theurgist\Spells\Exceptions\UselessAdditionForUnusedCastingParameter
      * @throws \DrdPlus\Theurgist\Spells\Exceptions\UnknownModifierParameter
      * @throws \DrdPlus\Theurgist\Spells\Exceptions\InvalidValueForModifierParameterAddition
      */
@@ -96,6 +99,36 @@ class Modifier extends StrictObject
     public function getModifierCode(): ModifierCode
     {
         return $this->modifierCode;
+    }
+
+    public function getDifficultyChangeSum(): DifficultyChange
+    {
+        $parameters = [
+            $this->getCurrentAttack(),
+            $this->getCurrentConditions(),
+            $this->getCurrentEpicenterShift(),
+            $this->getCurrentGrafts(),
+            $this->getCurrentInvisibility(),
+            $this->getCurrentNumberOfSituations(),
+            $this->getCurrentPoints(),
+            $this->getCurrentPower(),
+            $this->getCurrentQuality(),
+            $this->getCurrentRadius(),
+            $this->getCurrentResistance(),
+            $this->getCurrentSpellSpeed(),
+            $this->getCurrentThreshold(),
+        ];
+        $parameters = array_filter($parameters, function (IntegerCastingParameter $castingParameter = null) {
+            return $castingParameter !== null;
+        });
+        $parametersDifficultyChangeSum = 0;
+        /** @var IntegerCastingParameter $parameter */
+        foreach ($parameters as $parameter) {
+            $parametersDifficultyChangeSum += $parameter->getAdditionByDifficulty()->getValue();
+        }
+        $difficultyChange = $this->modifiersTable->getDifficultyChange($this->getModifierCode());
+
+        return $difficultyChange->add($parametersDifficultyChangeSum);
     }
 
     /**

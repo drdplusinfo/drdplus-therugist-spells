@@ -3,6 +3,8 @@ namespace DrdPlus\Tests\Theurgist\Spells;
 
 use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ModifierMutableCastingParameterCode;
+use DrdPlus\Theurgist\Spells\CastingParameters\AdditionByDifficulty;
+use DrdPlus\Theurgist\Spells\CastingParameters\DifficultyChange;
 use DrdPlus\Theurgist\Spells\CastingParameters\Partials\IntegerCastingParameter;
 use DrdPlus\Theurgist\Spells\CastingParameters\SpellSpeed;
 use DrdPlus\Theurgist\Spells\Modifier;
@@ -181,6 +183,89 @@ class ModifierTest extends TestWithMockery
                 self::assertSame($addition, $modifier->$getParameterAddition());
             }
         }
+    }
+
+    /**
+     * @test
+     */
+    public function I_get_basic_difficulty_change_without_any_parameter()
+    {
+        foreach (ModifierCode::getPossibleValues() as $modifierValue) {
+            $modifierCode = ModifierCode::getIt($modifierValue);
+            $modifiersTable = $this->createModifiersTable();
+            foreach (ModifierMutableCastingParameterCode::getPossibleValues() as $mutableParameterName) {
+                $this->addBaseParameterGetter($mutableParameterName, $modifierCode, $modifiersTable, null);
+            }
+            $difficultyChange = $this->createDifficultyChange(0);
+            $this->addDifficultyChangeGetter($difficultyChange, $modifierCode, $modifiersTable);
+            $modifier = new Modifier($modifierCode, $modifiersTable, []);
+            self::assertSame($difficultyChange, $modifier->getDifficultyChangeSum());
+        }
+    }
+
+    /**
+     * @param int $expectedAdd
+     * @return MockInterface|DifficultyChange
+     */
+    private function createDifficultyChange(int $expectedAdd)
+    {
+        $difficultyChange = $this->mockery(DifficultyChange::class);
+        $difficultyChange->shouldReceive('add')
+            ->with($expectedAdd)
+            ->once()
+            ->andReturn($difficultyChange);
+
+        return $difficultyChange;
+    }
+
+    private function addDifficultyChangeGetter(
+        MockInterface $difficultyChange,
+        ModifierCode $modifierCode,
+        MockInterface $modifierTable
+    )
+    {
+        $modifierTable->shouldReceive('getDifficultyChange')
+            ->with($modifierCode)
+            ->andReturn($difficultyChange);
+    }
+
+    /**
+     * @test
+     */
+    public function I_get_basic_difficulty_change_with_every_parameter()
+    {
+        foreach (ModifierCode::getPossibleValues() as $modifierValue) {
+            $modifierCode = ModifierCode::getIt($modifierValue);
+            $modifiersTable = $this->createModifiersTable();
+            $parameterDifficulties = [];
+            foreach (ModifierMutableCastingParameterCode::getPossibleValues() as $mutableParameterName) {
+                $parameter = $this->createExpectedParameter($mutableParameterName);
+                $this->addBaseParameterGetter($mutableParameterName, $modifierCode, $modifiersTable, $parameter);
+                $changedParameter = $this->createExpectedParameter($mutableParameterName);
+                $this->addExpectedAdditionSetter(0, $parameter, $changedParameter);
+                $parameterDifficulties[] = $difficultyChange = random_int(-10, 10);
+                $this->addAdditionByDifficultyGetter($difficultyChange, $changedParameter);
+            }
+            $difficultyChange = $this->createDifficultyChange(array_sum($parameterDifficulties));
+            $this->addDifficultyChangeGetter($difficultyChange, $modifierCode, $modifiersTable);
+            $modifier = new Modifier($modifierCode, $modifiersTable, []);
+            try {
+                self::assertSame($difficultyChange, $modifier->getDifficultyChangeSum());
+            } catch (NoMatchingExpectationException $expectationException) {
+                self::fail(
+                    'Expected difficulty sum ' . array_sum($parameterDifficulties) . ' as sum of '
+                    . implode(',', $parameterDifficulties) . ': ' . $expectationException->getMessage()
+                );
+            }
+        }
+    }
+
+    private function addAdditionByDifficultyGetter(int $difficultyChange, MockInterface $parameter)
+    {
+        $parameter->shouldReceive('getAdditionByDifficulty')
+            ->andReturn($additionByDifficulty = $this->mockery(AdditionByDifficulty::class));
+        $additionByDifficulty->shouldReceive('getValue')
+            ->andReturn($difficultyChange);
     }
 
     /**
