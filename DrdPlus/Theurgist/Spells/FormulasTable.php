@@ -412,27 +412,20 @@ class FormulasTable extends AbstractFileTable
 
     /**
      * @param FormulaCode $formulaCode
-     * @ param int $formulaAttackAddition
      * @param array|ModifierCode[] $modifierCodes
-     * @ param array|int[]|NumberInterface[] $modifiersAttackAdditions by modifier names indexed their additions
      * @param array|SpellTraitCode[] $spellTraitCodes
-     * @ param array|int[]|NumberInterface[] $spellTraitsAttackAdditions
      * @return IntegerObject|null
      */
     public function getAttackOfModified(/** @noinspection PhpUnusedParameterInspection to keep same interface with others */
         FormulaCode $formulaCode,
-//        int $formulaAttackAddition,
         array $modifierCodes,
-//        array $modifiersAttackAdditions,
         array $spellTraitCodes = []
-//        array $spellTraitsAttackAdditions = []
     )
     {
         $formulaAttack = $this->getAttack($formulaCode);
         if (!$formulaAttack) {
             return null;
         }
-//        $formulaAttack = $formulaAttack->setAddition($formulaAttackAddition);
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new IntegerObject(
