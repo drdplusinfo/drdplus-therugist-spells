@@ -4,7 +4,6 @@ namespace DrdPlus\Tests\Theurgist\Spells;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\FormulaMutableCastingParameterCode;
 use DrdPlus\Theurgist\Spells\CastingParameters\AdditionByDifficulty;
-use DrdPlus\Theurgist\Spells\CastingParameters\DifficultyChange;
 use DrdPlus\Theurgist\Spells\CastingParameters\FormulaDifficulty;
 use DrdPlus\Theurgist\Spells\CastingParameters\Partials\IntegerCastingParameter;
 use DrdPlus\Theurgist\Spells\CastingParameters\SpellSpeed;
@@ -211,9 +210,27 @@ class FormulaTest extends TestWithMockery
                 }
                 $this->addBaseParameterGetter($mutableParameterName, $formulaCode, $formulasTable, $baseParameter);
             }
+            $this->addFormulaDifficultyGetter($formulasTable, $formulaCode, 0);
             $formula = new Formula($formulaCode, $formulasTable, []);
-            self::assertEquals(new DifficultyChange(0), $formula->getDifficultyChangeSum());
+            self::assertSame(
+                $formulasTable->getFormulaDifficulty($formulaCode)->createWithChange(0),
+                $formula->getDifficultyOfChanged()
+            );
         }
+    }
+
+    private function addFormulaDifficultyGetter(
+        MockInterface $formulaTable,
+        FormulaCode $expectedFormulaCode,
+        int $expectedDifficultyChange
+    )
+    {
+        $formulaTable->shouldReceive('getFormulaDifficulty')
+            ->with($expectedFormulaCode)
+            ->andReturn($formulaDifficulty = $this->mockery(FormulaDifficulty::class));
+        $formulaDifficulty->shouldReceive('createWithChange')
+            ->with($expectedDifficultyChange)
+            ->andReturn($this->mockery(FormulaDifficulty::class));
     }
 
     /**
@@ -233,11 +250,13 @@ class FormulaTest extends TestWithMockery
                 $parameterDifficulties[] = $difficultyChange = random_int(-10, 10);
                 $this->addAdditionByDifficultyGetter($difficultyChange, $changedParameter);
             }
+            $this->addFormulaDifficultyGetter($formulasTable, $formulaCode, array_sum($parameterDifficulties));
             $formula = new Formula($formulaCode, $formulasTable, []);
             try {
+                self::assertNotEquals($formulasTable->getFormulaDifficulty($formulaCode), $formula->getDifficultyOfChanged());
                 self::assertEquals(
-                    new DifficultyChange(array_sum($parameterDifficulties)),
-                    $formula->getDifficultyChangeSum()
+                    $formulasTable->getFormulaDifficulty($formulaCode)->createWithChange(array_sum($parameterDifficulties)),
+                    $formula->getDifficultyOfChanged()
                 );
             } catch (NoMatchingExpectationException $expectationException) {
                 self::fail(

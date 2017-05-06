@@ -6,9 +6,9 @@ use DrdPlus\Theurgist\Codes\FormulaMutableCastingParameterCode;
 use DrdPlus\Theurgist\Spells\CastingParameters\Attack;
 use DrdPlus\Theurgist\Spells\CastingParameters\Brightness;
 use DrdPlus\Theurgist\Spells\CastingParameters\DetailLevel;
-use DrdPlus\Theurgist\Spells\CastingParameters\DifficultyChange;
 use DrdPlus\Theurgist\Spells\CastingParameters\Duration;
 use DrdPlus\Theurgist\Spells\CastingParameters\EpicenterShift;
+use DrdPlus\Theurgist\Spells\CastingParameters\FormulaDifficulty;
 use DrdPlus\Theurgist\Spells\CastingParameters\Partials\IntegerCastingParameter;
 use DrdPlus\Theurgist\Spells\CastingParameters\Power;
 use DrdPlus\Theurgist\Spells\CastingParameters\Radius;
@@ -90,7 +90,7 @@ class Formula extends StrictObject
         return $sanitized;
     }
 
-    public function getDifficultyChangeSum(): DifficultyChange
+    public function getDifficultyOfChanged(): FormulaDifficulty
     {
         $parameters = [
             $this->getCurrentAttack(),
@@ -111,15 +111,14 @@ class Formula extends StrictObject
         foreach ($parameters as $parameter) {
             $parametersDifficultyChangeSum += $parameter->getAdditionByDifficulty()->getValue();
         }
+        $formulaDifficulty = $this->formulasTable->getFormulaDifficulty($this->getFormulaCode());
 
-        return new DifficultyChange($parametersDifficultyChangeSum);
+        return $formulaDifficulty->createWithChange($parametersDifficultyChangeSum);
     }
 
     public function getRequiredRealm(): Realm
     {
-        $formulaDifficulty = $this->formulasTable->getFormulaDifficulty($this->getFormulaCode());
-        $changedFormulaDifficulty = $formulaDifficulty->getFormulaDifficultyOfChanged($this->getDifficultyChangeSum());
-        $realmsIncrement = $changedFormulaDifficulty->getFormulaDifficultyAddition()->getCurrentRealmsIncrement();
+        $realmsIncrement = $this->getDifficultyOfChanged()->getFormulaDifficultyAddition()->getCurrentRealmsIncrement();
         $realm = $this->formulasTable->getRealm($this->getFormulaCode());
 
         return $realm->add($realmsIncrement);

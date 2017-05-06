@@ -108,7 +108,7 @@ class FormulaDifficulty extends StrictObject implements PositiveInteger
      * @return FormulaDifficulty
      * @throws \Granam\Integer\Tools\Exceptions\Exception
      */
-    public function getFormulaDifficultyOfChanged($difficultyChangeValue): FormulaDifficulty
+    public function createWithChange($difficultyChangeValue): FormulaDifficulty
     {
         $difficultyChangeValue = ToInteger::toInteger($difficultyChangeValue);
         if ($difficultyChangeValue === 0) {

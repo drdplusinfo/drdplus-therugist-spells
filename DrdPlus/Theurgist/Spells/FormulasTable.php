@@ -287,7 +287,7 @@ class FormulasTable extends AbstractFileTable
     ): FormulaDifficulty
     { // todo give ModifiedDifficulty object as IntegerObject or something like that
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return $this->getFormulaDifficulty($formulaCode)->getFormulaDifficultyOfChanged(
+        return $this->getFormulaDifficulty($formulaCode)->createWithChange(
             + $this->modifiersTable->sumDifficultyChanges($modifierCodes)->getValue()
             + $this->spellTraitsTable->sumDifficultyChanges($spellTraitCodes)->getValue()
         );

@@ -15,7 +15,7 @@ class FormulaDifficultyTest extends TestWithMockery
     {
         $reflectionClass = new \ReflectionClass(FormulaDifficulty::class);
         $classBaseName = preg_replace('~^.*[\\\](\w+)$~', '$1', FormulaDifficulty::class);
-        $add = $reflectionClass->getMethod('getFormulaDifficultyOfChanged');
+        $add = $reflectionClass->getMethod('createWithChange');
         self::assertSame($phpDoc = <<<PHPDOC
 /**
  * @param int|float|NumberInterface \$difficultyChangeValue
@@ -69,20 +69,20 @@ PHPDOC
     public function I_can_get_its_clone_changed_by_addition()
     {
         $original = new FormulaDifficulty(['123', '345', '456=789']);
-        $increased = $original->getFormulaDifficultyOfChanged(456);
+        $increased = $original->createWithChange(456);
         self::assertSame(579, $increased->getValue());
         self::assertSame($original->getFormulaDifficultyAddition()->getNotation(), $increased->getFormulaDifficultyAddition()->getNotation());
         self::assertSame(456, $increased->getFormulaDifficultyAddition()->getCurrentAddition());
         self::assertNotSame($original, $increased);
 
-        $zeroed = $increased->getFormulaDifficultyOfChanged(-123);
+        $zeroed = $increased->createWithChange(-123);
         self::assertSame(0, $zeroed->getValue());
         self::assertNotSame($original, $zeroed);
         self::assertNotSame($original, $increased);
         self::assertSame(-123, $zeroed->getFormulaDifficultyAddition()->getCurrentAddition());
         self::assertSame($original->getFormulaDifficultyAddition()->getNotation(), $zeroed->getFormulaDifficultyAddition()->getNotation());
 
-        $decreased = $zeroed->getFormulaDifficultyOfChanged(-234);
+        $decreased = $zeroed->createWithChange(-234);
         self::assertSame(-111, $decreased->getValue());
         self::assertSame($zeroed->getFormulaDifficultyAddition()->getNotation(), $decreased->getFormulaDifficultyAddition()->getNotation());
         self::assertSame(-234, $decreased->getFormulaDifficultyAddition()->getCurrentAddition());
