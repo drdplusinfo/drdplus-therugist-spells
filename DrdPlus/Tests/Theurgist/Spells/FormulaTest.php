@@ -5,7 +5,9 @@ use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\FormulaMutableCastingParameterCode;
 use DrdPlus\Theurgist\Spells\CastingParameters\AdditionByDifficulty;
 use DrdPlus\Theurgist\Spells\CastingParameters\FormulaDifficulty;
+use DrdPlus\Theurgist\Spells\CastingParameters\FormulaDifficultyAddition;
 use DrdPlus\Theurgist\Spells\CastingParameters\Partials\IntegerCastingParameter;
+use DrdPlus\Theurgist\Spells\CastingParameters\Realm;
 use DrdPlus\Theurgist\Spells\CastingParameters\SpellSpeed;
 use DrdPlus\Theurgist\Spells\Formula;
 use DrdPlus\Theurgist\Spells\FormulasTable;
@@ -203,7 +205,7 @@ class FormulaTest extends TestWithMockery
             foreach (FormulaMutableCastingParameterCode::getPossibleValues() as $mutableParameterName) {
                 $baseParameter = null;
                 if ($mutableParameterName === FormulaMutableCastingParameterCode::DURATION) {
-                    // duration can not be null, skipping
+                    // duration can not be null
                     $baseParameter = $this->createExpectedParameter(FormulaMutableCastingParameterCode::DURATION);
                     $this->addExpectedAdditionSetter(0, $baseParameter, $baseParameter);
                     $this->addAdditionByDifficultyGetter(0, $baseParameter);
@@ -222,7 +224,8 @@ class FormulaTest extends TestWithMockery
     private function addFormulaDifficultyGetter(
         MockInterface $formulaTable,
         FormulaCode $expectedFormulaCode,
-        int $expectedDifficultyChange
+        int $expectedDifficultyChange,
+        $formulaChangedDifficulty = null
     )
     {
         $formulaTable->shouldReceive('getFormulaDifficulty')
@@ -230,7 +233,7 @@ class FormulaTest extends TestWithMockery
             ->andReturn($formulaDifficulty = $this->mockery(FormulaDifficulty::class));
         $formulaDifficulty->shouldReceive('createWithChange')
             ->with($expectedDifficultyChange)
-            ->andReturn($this->mockery(FormulaDifficulty::class));
+            ->andReturn($formulaChangedDifficulty ?? $this->mockery(FormulaDifficulty::class));
     }
 
     /**
@@ -273,6 +276,60 @@ class FormulaTest extends TestWithMockery
             ->andReturn($additionByDifficulty = $this->mockery(AdditionByDifficulty::class));
         $additionByDifficulty->shouldReceive('getValue')
             ->andReturn($difficultyChange);
+    }
+
+    /**
+     * @test
+     */
+    public function I_get_basic_realm_when_no_change()
+    {
+        foreach (FormulaCode::getPossibleValues() as $formulaValue) {
+            $formulaCode = FormulaCode::getIt($formulaValue);
+            $formulasTable = $this->createFormulasTable();
+            foreach (FormulaMutableCastingParameterCode::getPossibleValues() as $mutableParameterName) {
+                $baseParameter = null;
+                if ($mutableParameterName === FormulaMutableCastingParameterCode::DURATION) {
+                    // duration can not be null
+                    $baseParameter = $this->createExpectedParameter(FormulaMutableCastingParameterCode::DURATION);
+                    $this->addExpectedAdditionSetter(0, $baseParameter, $baseParameter);
+                    $this->addAdditionByDifficultyGetter(0, $baseParameter);
+                }
+                $this->addBaseParameterGetter($mutableParameterName, $formulaCode, $formulasTable, $baseParameter);
+            }
+            $this->addFormulaDifficultyGetter(
+                $formulasTable,
+                $formulaCode,
+                0,
+                $changedDifficulty = $this->mockery(FormulaDifficulty::class)
+            );
+            $this->addCurrentRealmsIncrementGetter($changedDifficulty, 123);
+            $this->addRealmGetter($formulasTable, $formulaCode, 123, $finalRealm = $this->mockery(Realm::class));
+            $formula = new Formula($formulaCode, $formulasTable, []);
+            self::assertSame($finalRealm, $formula->getRequiredRealm());
+        }
+    }
+
+    private function addCurrentRealmsIncrementGetter(MockInterface $formulaDifficulty, int $currentRealmsIncrement)
+    {
+        $formulaDifficulty->shouldReceive('getFormulaDifficultyAddition')
+            ->andReturn($formulaDifficultyAddition = $this->mockery(FormulaDifficultyAddition::class));
+        $formulaDifficultyAddition->shouldReceive('getCurrentRealmsIncrement')
+            ->andReturn($currentRealmsIncrement);
+    }
+
+    private function addRealmGetter(
+        MockInterface $formulasTable,
+        FormulaCode $formulaCode,
+        int $expectedRealmsIncrement,
+        $finalRealm
+    )
+    {
+        $formulasTable->shouldReceive('getRealm')
+            ->with($formulaCode)
+            ->andReturn($realm = $this->mockery(Realm::class));
+        $realm->shouldReceive('add')
+            ->with($expectedRealmsIncrement)
+            ->andReturn($finalRealm);
     }
 
     /**
