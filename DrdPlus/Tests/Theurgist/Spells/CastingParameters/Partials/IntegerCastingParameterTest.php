@@ -11,7 +11,7 @@ abstract class IntegerCastingParameterTest extends TestWithMockery
 
     /**
      * @test
-     * @expectedException \DrdPlus\Theurgist\Spells\CastingParameters\Partials\Exceptions\MissingValueForAdditionByRealm
+     * @expectedException \DrdPlus\Theurgist\Spells\CastingParameters\Partials\Exceptions\MissingValueForFormulaDifficultyAddition
      * @expectedExceptionMessageRegExp ~123~
      */
     public function I_can_not_create_it_with_invalid_points_to_annotation()

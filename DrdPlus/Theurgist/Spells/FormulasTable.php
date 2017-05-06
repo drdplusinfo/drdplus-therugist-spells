@@ -16,7 +16,7 @@ use DrdPlus\Theurgist\Spells\CastingParameters\Attack;
 use DrdPlus\Theurgist\Spells\CastingParameters\Brightness;
 use DrdPlus\Theurgist\Spells\CastingParameters\Evocation;
 use DrdPlus\Theurgist\Spells\CastingParameters\DetailLevel;
-use DrdPlus\Theurgist\Spells\CastingParameters\Difficulty;
+use DrdPlus\Theurgist\Spells\CastingParameters\FormulaDifficulty;
 use DrdPlus\Theurgist\Spells\CastingParameters\Duration;
 use DrdPlus\Theurgist\Spells\CastingParameters\EpicenterShift;
 use DrdPlus\Theurgist\Spells\CastingParameters\Power;
@@ -62,7 +62,7 @@ class FormulasTable extends AbstractFileTable
     const REALM = 'realm';
     const AFFECTION = 'affection';
     const EVOCATION = 'evocation';
-    const DIFFICULTY = 'difficulty';
+    const FORMULA_DIFFICULTY = 'formula_difficulty';
     const RADIUS = 'radius';
     const DURATION = 'duration';
     const POWER = 'power';
@@ -83,7 +83,7 @@ class FormulasTable extends AbstractFileTable
             self::REALM => self::POSITIVE_INTEGER,
             self::AFFECTION => self::ARRAY,
             self::EVOCATION => self::ARRAY,
-            self::DIFFICULTY => self::ARRAY,
+            self::FORMULA_DIFFICULTY => self::ARRAY,
             self::RADIUS => self::ARRAY,
             self::DURATION => self::ARRAY,
             self::POWER => self::ARRAY,
@@ -131,10 +131,10 @@ class FormulasTable extends AbstractFileTable
         array $spellTraitCodes
     ): Realm
     {
-        $basicFormulaDifficulty = $this->getDifficulty($formulaCode);
+        $basicFormulaDifficulty = $this->getFormulaDifficulty($formulaCode);
         $maximalDifficultyOfBasicFormula = $basicFormulaDifficulty->getMaximal();
         $formulaBasicRealm = $this->getRealm($formulaCode);
-        $difficultyOfModifiedValue = $this->getDifficultyOfModified(
+        $difficultyOfModifiedValue = $this->getFormulaDifficultyOfModified(
             $formulaCode,
             $modifierCodes,
             $spellTraitCodes
@@ -148,7 +148,7 @@ class FormulasTable extends AbstractFileTable
         }
         $missingDifficulty = $difficultyOfModifiedValue - $maximalDifficultyOfBasicFormula;
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        $requiredAdditionByRealms = $basicFormulaDifficulty->getAdditionByRealms()->add($missingDifficulty);
+        $requiredAdditionByRealms = $basicFormulaDifficulty->getFormulaDifficultyAddition()->add($missingDifficulty);
         $byDifficultyRequiredRealm = $formulaBasicRealm->add($requiredAdditionByRealms->getCurrentRealmsIncrement());
         if ($byDifficultyRequiredRealm->getValue() >= $highestRequiredRealmByModifiers->getValue()) {
             return $byDifficultyRequiredRealm;
@@ -266,28 +266,28 @@ class FormulasTable extends AbstractFileTable
 
     /**
      * @param FormulaCode $formulaCode
-     * @return Difficulty
+     * @return FormulaDifficulty
      */
-    public function getDifficulty(FormulaCode $formulaCode): Difficulty
+    public function getFormulaDifficulty(FormulaCode $formulaCode): FormulaDifficulty
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new Difficulty($this->getValue($formulaCode, self::DIFFICULTY));
+        return new FormulaDifficulty($this->getValue($formulaCode, self::FORMULA_DIFFICULTY));
     }
 
     /**
      * @param FormulaCode $formulaCode
      * @param array|ModifierCode[] $modifierCodes
      * @param array|SpellTraitCode[] $spellTraitCodes
-     * @return Difficulty
+     * @return FormulaDifficulty
      */
-    public function getDifficultyOfModified(
+    public function getFormulaDifficultyOfModified(
         FormulaCode $formulaCode,
         array $modifierCodes,
         array $spellTraitCodes
-    ): Difficulty
+    ): FormulaDifficulty
     { // todo give ModifiedDifficulty object as IntegerObject or something like that
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return $this->getDifficulty($formulaCode)->setAddition(
+        return $this->getFormulaDifficulty($formulaCode)->setAddition(
             +$this->modifiersTable->sumDifficultyChanges($modifierCodes)->getValue()
             + $this->spellTraitsTable->sumDifficultyChanges($spellTraitCodes)->getValue()
         );

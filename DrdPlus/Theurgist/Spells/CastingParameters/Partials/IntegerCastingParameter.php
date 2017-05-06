@@ -24,7 +24,7 @@ abstract class IntegerCastingParameter extends StrictObject implements IntegerIn
     /**
      * @param array $values
      * @throws \DrdPlus\Theurgist\Spells\CastingParameters\Partials\Exceptions\InvalidValueForIntegerCastingParameter
-     * @throws \DrdPlus\Theurgist\Spells\CastingParameters\Partials\Exceptions\MissingValueForAdditionByRealm
+     * @throws \DrdPlus\Theurgist\Spells\CastingParameters\Partials\Exceptions\MissingValueForFormulaDifficultyAddition
      * @throws \DrdPlus\Theurgist\Spells\CastingParameters\Exceptions\InvalidFormatOfDifficultyIncrement
      * @throws \DrdPlus\Theurgist\Spells\CastingParameters\Exceptions\InvalidFormatOfAdditionByDifficultyValue
      * @throws \DrdPlus\Theurgist\Spells\CastingParameters\Exceptions\InvalidFormatOfAdditionByDifficultyNotation
@@ -40,7 +40,7 @@ abstract class IntegerCastingParameter extends StrictObject implements IntegerIn
             );
         }
         if (!array_key_exists(1, $values)) {
-            throw new Exceptions\MissingValueForAdditionByRealm(
+            throw new Exceptions\MissingValueForFormulaDifficultyAddition(
                 'Missing index 1 for addition by realm in given values ' . var_export($values, true)
                 . ' for ' . $this->getParameterName()
             );

@@ -7,7 +7,7 @@ use Granam\Number\NumberInterface;
 use Granam\Strict\Object\StrictObject;
 use Granam\Tools\ValueDescriber;
 
-class Difficulty extends StrictObject implements PositiveInteger
+class FormulaDifficulty extends StrictObject implements PositiveInteger
 {
     /**
      * @var int
@@ -18,16 +18,16 @@ class Difficulty extends StrictObject implements PositiveInteger
      */
     private $maximal;
     /**
-     * @var AdditionByRealms
+     * @var FormulaDifficultyAddition
      */
-    private $additionByRealms;
+    private $formulaDifficultyAddition;
 
     /**
-     * @param array $values [ 0 => minimal, 1 => maximal, 2 => addition by realm notation , 3 => current addition value]
+     * @param array $values [ 0 => minimal, 1 => maximal, 2 => difficulty addition per realm, 3 => current difficulty addition value]
      * @throws \DrdPlus\Theurgist\Spells\CastingParameters\Exceptions\MinimalDifficultyCanNotBeGreaterThanMaximal
      * @throws \DrdPlus\Theurgist\Spells\CastingParameters\Exceptions\InvalidValueForMinimalDifficulty
      * @throws \DrdPlus\Theurgist\Spells\CastingParameters\Exceptions\InvalidValueForMaximalDifficulty
-     * @throws \DrdPlus\Theurgist\Spells\CastingParameters\Partials\Exceptions\MissingValueForAdditionByRealm
+     * @throws \DrdPlus\Theurgist\Spells\CastingParameters\Partials\Exceptions\MissingValueForFormulaDifficultyAddition
      * @throws \DrdPlus\Theurgist\Spells\CastingParameters\Exceptions\InvalidFormatOfAdditionByRealmsNotation
      * @throws \DrdPlus\Theurgist\Spells\CastingParameters\Exceptions\InvalidFormatOfRealmsIncrement
      * @throws \DrdPlus\Theurgist\Spells\CastingParameters\Exceptions\InvalidFormatOfAdditionByRealmsValue
@@ -57,12 +57,12 @@ class Difficulty extends StrictObject implements PositiveInteger
             );
         }
         if (!array_key_exists(2, $values)) {
-            throw new Partials\Exceptions\MissingValueForAdditionByRealm(
-                'Missing index 2 for addition by realm in given values ' . var_export($values, true)
+            throw new Partials\Exceptions\MissingValueForFormulaDifficultyAddition(
+                'Missing index 2 for formula difficulty addition by realm in given values ' . var_export($values, true)
                 . ' for difficulty'
             );
         }
-        $this->additionByRealms = new AdditionByRealms($values[2], $values[3] ?? null /* current addition value */);
+        $this->formulaDifficultyAddition = new FormulaDifficultyAddition($values[2], $values[3] ?? null /* current addition value */);
     }
 
     /**
@@ -92,23 +92,23 @@ class Difficulty extends StrictObject implements PositiveInteger
      */
     public function getValue(): int
     {
-        return $this->getMinimal() + $this->additionByRealms->getCurrentAddition();
+        return $this->getMinimal() + $this->formulaDifficultyAddition->getCurrentAddition();
     }
 
     /**
-     * @return AdditionByRealms
+     * @return FormulaDifficultyAddition
      */
-    public function getAdditionByRealms(): AdditionByRealms
+    public function getFormulaDifficultyAddition(): FormulaDifficultyAddition
     {
-        return $this->additionByRealms;
+        return $this->formulaDifficultyAddition;
     }
 
     /**
      * @param int|float|NumberInterface $additionValue
-     * @return Difficulty
+     * @return FormulaDifficulty
      * @throws \Granam\Integer\Tools\Exceptions\Exception
      */
-    public function setAddition($additionValue): Difficulty
+    public function setAddition($additionValue): FormulaDifficulty
     {
         $additionValue = ToInteger::toInteger($additionValue);
         if ($additionValue === 0) {
@@ -120,7 +120,7 @@ class Difficulty extends StrictObject implements PositiveInteger
             [
                 $this->getMinimal(),
                 $this->getMaximal(),
-                $this->getAdditionByRealms()->getNotation(),
+                $this->getFormulaDifficultyAddition()->getNotation(),
                 $additionValue,
             ]
         );
@@ -133,7 +133,7 @@ class Difficulty extends StrictObject implements PositiveInteger
     {
         $asString = (string)$this->getValue();
         $asString .= ' (' . $this->getMinimal() . '...' . $this->getMaximal();
-        $asString .= ' [' . $this->getAdditionByRealms() . ']';
+        $asString .= ' [' . $this->getFormulaDifficultyAddition() . ']';
         $asString .= ')';
 
         return $asString;

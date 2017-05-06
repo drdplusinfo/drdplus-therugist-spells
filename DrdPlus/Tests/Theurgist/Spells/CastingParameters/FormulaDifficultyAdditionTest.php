@@ -1,26 +1,26 @@
 <?php
 namespace DrdPlus\Tests\Theurgist\Spells\CastingParameters;
 
-use DrdPlus\Theurgist\Spells\CastingParameters\AdditionByRealms;
+use DrdPlus\Theurgist\Spells\CastingParameters\FormulaDifficultyAddition;
 use Granam\Tests\Tools\TestWithMockery;
 
-class AdditionByRealmsTest extends TestWithMockery
+class FormulaDifficultyAdditionTest extends TestWithMockery
 {
     /**
      * @test
      */
     public function I_can_create_it_with_just_an_addition()
     {
-        $additionByRealms = new AdditionByRealms('123');
-        self::assertSame(123, $additionByRealms->getAdditionStep());
-        self::assertSame(1, $additionByRealms->getRealmsOfAdditionStep());
+        $additionByRealms = new FormulaDifficultyAddition('123');
+        self::assertSame(123, $additionByRealms->getDifficultyAdditionPerRealm());
+        self::assertSame(1, $additionByRealms->getRealmsChangePerAdditionStep());
         self::assertSame(0, $additionByRealms->getCurrentAddition());
         self::assertSame(0, $additionByRealms->getCurrentRealmsIncrement());
         self::assertSame('0 {1=>123}', (string)$additionByRealms);
 
-        $sameAdditionByRealms = new AdditionByRealms('1=123');
-        self::assertSame(123, $sameAdditionByRealms->getAdditionStep());
-        self::assertSame(1, $sameAdditionByRealms->getRealmsOfAdditionStep());
+        $sameAdditionByRealms = new FormulaDifficultyAddition('1=123');
+        self::assertSame(123, $sameAdditionByRealms->getDifficultyAdditionPerRealm());
+        self::assertSame(1, $sameAdditionByRealms->getRealmsChangePerAdditionStep());
         self::assertSame(0, $sameAdditionByRealms->getCurrentAddition());
         self::assertSame(0, $sameAdditionByRealms->getCurrentRealmsIncrement());
         self::assertSame('0 {1=>123}', (string)$additionByRealms);
@@ -31,9 +31,9 @@ class AdditionByRealmsTest extends TestWithMockery
      */
     public function I_can_create_it_with_realms_price()
     {
-        $additionByRealms = new AdditionByRealms('456=789');
-        self::assertSame(789, $additionByRealms->getAdditionStep());
-        self::assertSame(456, $additionByRealms->getRealmsOfAdditionStep());
+        $additionByRealms = new FormulaDifficultyAddition('456=789');
+        self::assertSame(789, $additionByRealms->getDifficultyAdditionPerRealm());
+        self::assertSame(456, $additionByRealms->getRealmsChangePerAdditionStep());
         self::assertSame(0, $additionByRealms->getCurrentAddition());
         self::assertSame(0, $additionByRealms->getCurrentRealmsIncrement());
         self::assertSame('0 {456=>789}', (string)$additionByRealms);
@@ -44,9 +44,9 @@ class AdditionByRealmsTest extends TestWithMockery
      */
     public function I_can_create_it_with_custom_current_addition()
     {
-        $additionByRealms = new AdditionByRealms('2=3', 7);
-        self::assertSame(3, $additionByRealms->getAdditionStep());
-        self::assertSame(2, $additionByRealms->getRealmsOfAdditionStep());
+        $additionByRealms = new FormulaDifficultyAddition('2=3', 7);
+        self::assertSame(3, $additionByRealms->getDifficultyAdditionPerRealm());
+        self::assertSame(2, $additionByRealms->getRealmsChangePerAdditionStep());
         self::assertSame(7, $additionByRealms->getCurrentAddition());
         self::assertSame(5 /* 7 / 3 * 2, round up */, $additionByRealms->getCurrentRealmsIncrement());
         self::assertSame('7 {2=>3}', (string)$additionByRealms);
@@ -57,8 +57,8 @@ class AdditionByRealmsTest extends TestWithMockery
      */
     public function I_can_increase_current_addition()
     {
-        $additionByRealms = new AdditionByRealms(5);
-        self::assertSame(5, $additionByRealms->getAdditionStep());
+        $additionByRealms = new FormulaDifficultyAddition(5);
+        self::assertSame(5, $additionByRealms->getDifficultyAdditionPerRealm());
         self::assertSame(0, $additionByRealms->getCurrentAddition());
         self::assertSame('0 {1=>5}', (string)$additionByRealms);
         $same = $additionByRealms->add(0);
@@ -75,8 +75,8 @@ class AdditionByRealmsTest extends TestWithMockery
      */
     public function I_can_decrease_current_addition()
     {
-        $additionByRealms = new AdditionByRealms(5);
-        self::assertSame(5, $additionByRealms->getAdditionStep());
+        $additionByRealms = new FormulaDifficultyAddition(5);
+        self::assertSame(5, $additionByRealms->getDifficultyAdditionPerRealm());
         self::assertSame(0, $additionByRealms->getCurrentAddition());
         self::assertSame('0 {1=>5}', (string)$additionByRealms);
         $same = $additionByRealms->sub(0);
@@ -94,7 +94,7 @@ class AdditionByRealmsTest extends TestWithMockery
      */
     public function I_can_not_create_it_without_value()
     {
-        new AdditionByRealms('');
+        new FormulaDifficultyAddition('');
     }
 
     /**
@@ -104,7 +104,7 @@ class AdditionByRealmsTest extends TestWithMockery
      */
     public function I_can_not_create_it_with_too_many_parts()
     {
-        new AdditionByRealms('1=2=3');
+        new FormulaDifficultyAddition('1=2=3');
     }
 
     /**
@@ -113,7 +113,7 @@ class AdditionByRealmsTest extends TestWithMockery
      */
     public function I_can_not_create_it_with_empty_realm_price()
     {
-        new AdditionByRealms('=2');
+        new FormulaDifficultyAddition('=2');
     }
 
     /**
@@ -123,7 +123,7 @@ class AdditionByRealmsTest extends TestWithMockery
      */
     public function I_can_not_create_it_with_invalid_realm_price()
     {
-        new AdditionByRealms('foo=2');
+        new FormulaDifficultyAddition('foo=2');
     }
 
     /**
@@ -133,7 +133,7 @@ class AdditionByRealmsTest extends TestWithMockery
      */
     public function I_can_not_create_it_with_empty_addition()
     {
-        new AdditionByRealms('5=');
+        new FormulaDifficultyAddition('5=');
     }
 
     /**
@@ -143,6 +143,6 @@ class AdditionByRealmsTest extends TestWithMockery
      */
     public function I_can_not_create_it_with_invalid_addition()
     {
-        new AdditionByRealms('13=bar');
+        new FormulaDifficultyAddition('13=bar');
     }
 }

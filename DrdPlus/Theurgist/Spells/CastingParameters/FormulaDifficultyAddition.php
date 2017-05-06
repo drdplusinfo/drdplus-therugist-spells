@@ -7,41 +7,41 @@ use Granam\Number\NumberInterface;
 use Granam\Strict\Object\StrictObject;
 use Granam\Tools\ValueDescriber;
 
-class AdditionByRealms extends StrictObject implements IntegerInterface
+class FormulaDifficultyAddition extends StrictObject implements IntegerInterface
 {
     /**
      * @var int
      */
-    private $realmsOfAdditionStep;
+    private $realmsChangePerAdditionStep;
     /**
      * @var int
      */
-    private $additionStep;
+    private $difficultyAdditionPerRealm;
     /**
      * @var int
      */
     private $currentAddition;
 
     /**
-     * @param string $additionByRealmsNotation in format 'number' or 'number=number'
+     * @param string $difficultyAdditionByRealmsNotation in format 'difficulty per realm' or 'realms=difficulty per realms'
      * @param int|null $currentAddition How much is currently active addition
      * @throws \DrdPlus\Theurgist\Spells\CastingParameters\Exceptions\InvalidFormatOfAdditionByRealmsNotation
      * @throws \DrdPlus\Theurgist\Spells\CastingParameters\Exceptions\InvalidFormatOfRealmsIncrement
      * @throws \DrdPlus\Theurgist\Spells\CastingParameters\Exceptions\InvalidFormatOfAdditionByRealmsValue
      */
-    public function __construct(string $additionByRealmsNotation, int $currentAddition = null)
+    public function __construct(string $difficultyAdditionByRealmsNotation, int $currentAddition = null)
     {
-        $parts = $this->parseParts($additionByRealmsNotation);
+        $parts = $this->parseParts($difficultyAdditionByRealmsNotation);
         if (count($parts) === 1 && array_keys($parts) === [0]) {
-            $this->realmsOfAdditionStep = 1;
-            $this->additionStep = $this->sanitizeAddition($parts[0]);
+            $this->realmsChangePerAdditionStep = 1;
+            $this->difficultyAdditionPerRealm = $this->sanitizeAddition($parts[0]);
         } else if (count($parts) === 2 && array_keys($parts) === [0, 1]) {
-            $this->realmsOfAdditionStep = $this->sanitizeRealms($parts[0]);
-            $this->additionStep = $this->sanitizeAddition($parts[1]);
+            $this->realmsChangePerAdditionStep = $this->sanitizeRealms($parts[0]);
+            $this->difficultyAdditionPerRealm = $this->sanitizeAddition($parts[1]);
         } else {
             throw new Exceptions\InvalidFormatOfAdditionByRealmsNotation(
                 "Expected addition by realms in format 'number' or 'number=number', got "
-                . ValueDescriber::describe($additionByRealmsNotation)
+                . ValueDescriber::describe($difficultyAdditionByRealmsNotation)
             );
         }
         $this->currentAddition = $currentAddition ?? 0;/* no addition, no realm increment */
@@ -102,27 +102,27 @@ class AdditionByRealms extends StrictObject implements IntegerInterface
     }
 
     /**
-     * How is realms increased on addition step, @see getAdditionStep.
+     * How is realms increased on addition step, @see getDifficultyAdditionPerRealm.
      *
      * @return int
      */
-    public function getRealmsOfAdditionStep(): int
+    public function getRealmsChangePerAdditionStep(): int
     {
-        return $this->realmsOfAdditionStep;
+        return $this->realmsChangePerAdditionStep;
     }
 
     /**
-     * Bonus given by increasing realms, @see getRealmsOfAdditionStep
+     * Bonus given by increasing realms, @see getRealmsChangePerAdditionStep
      *
      * @return int
      */
-    public function getAdditionStep(): int
+    public function getDifficultyAdditionPerRealm(): int
     {
-        return $this->additionStep;
+        return $this->difficultyAdditionPerRealm;
     }
 
     /**
-     * Current value of a bonus paid by realms, steps x @see getAdditionStep
+     * Current value of a bonus paid by realms, steps x @see getDifficultyAdditionPerRealm
      *
      * @return int
      */
@@ -138,7 +138,7 @@ class AdditionByRealms extends StrictObject implements IntegerInterface
      */
     public function getCurrentRealmsIncrement(): int
     {
-        return ceil($this->getCurrentAddition() / $this->getAdditionStep() * $this->getRealmsOfAdditionStep());
+        return ceil($this->getCurrentAddition() / $this->getDifficultyAdditionPerRealm() * $this->getRealmsChangePerAdditionStep());
     }
 
     /**
@@ -153,10 +153,10 @@ class AdditionByRealms extends StrictObject implements IntegerInterface
 
     /**
      * @param int|float|NumberInterface $value
-     * @return AdditionByRealms
+     * @return FormulaDifficultyAddition
      * @throws \DrdPlus\Theurgist\Spells\CastingParameters\Exceptions\InvalidFormatOfAdditionByRealmsValue
      */
-    public function add($value): AdditionByRealms
+    public function add($value): FormulaDifficultyAddition
     {
         $value = $this->sanitizeAddition($value);
         if ($value === 0) {
@@ -172,10 +172,10 @@ class AdditionByRealms extends StrictObject implements IntegerInterface
 
     /**
      * @param int|float|NumberInterface $value
-     * @return AdditionByRealms
+     * @return FormulaDifficultyAddition
      * @throws \DrdPlus\Theurgist\Spells\CastingParameters\Exceptions\InvalidFormatOfAdditionByRealmsValue
      */
-    public function sub($value): AdditionByRealms
+    public function sub($value): FormulaDifficultyAddition
     {
         $value = $this->sanitizeAddition($value);
         if ($value === 0) {
@@ -194,7 +194,7 @@ class AdditionByRealms extends StrictObject implements IntegerInterface
      */
     public function __toString(): string
     {
-        return "{$this->getValue()} {{$this->getRealmsOfAdditionStep()}=>{$this->getAdditionStep()}}";
+        return "{$this->getValue()} {{$this->getRealmsChangePerAdditionStep()}=>{$this->getDifficultyAdditionPerRealm()}}";
     }
 
     /**
@@ -202,6 +202,6 @@ class AdditionByRealms extends StrictObject implements IntegerInterface
      */
     public function getNotation(): string
     {
-        return "{$this->getRealmsOfAdditionStep()}={$this->getAdditionStep()}";
+        return "{$this->getRealmsChangePerAdditionStep()}={$this->getDifficultyAdditionPerRealm()}";
     }
 }

@@ -7,6 +7,9 @@ use Granam\Number\NumberInterface;
 use Granam\Strict\Object\StrictObject;
 use Granam\Tools\ValueDescriber;
 
+/**
+ * A bonus paid by difficulty increment
+ */
 class AdditionByDifficulty extends StrictObject implements IntegerInterface
 {
     /**
