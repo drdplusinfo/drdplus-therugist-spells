@@ -4,7 +4,7 @@ namespace DrdPlus\Theurgist\Spells\CastingParameters;
 use DrdPlus\Theurgist\Spells\CastingParameters\Partials\IntegerCastingParameter;
 
 /**
- * @method Resistance setAddition($additionValue)
+ * @method Resistance getWithAddition($additionValue)
  */
 class Resistance extends IntegerCastingParameter
 {

@@ -7,7 +7,7 @@ use DrdPlus\Tables\Measurements\Time\TimeTable;
 use DrdPlus\Theurgist\Spells\CastingParameters\Partials\PositiveCastingParameter;
 
 /**
- * @method Evocation setAddition($additionValue)
+ * @method Evocation getWithAddition($additionValue)
  */
 class Evocation extends PositiveCastingParameter
 {

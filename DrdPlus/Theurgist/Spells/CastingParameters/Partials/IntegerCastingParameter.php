@@ -85,7 +85,7 @@ abstract class IntegerCastingParameter extends StrictObject implements IntegerIn
      * @return IntegerCastingParameter
      * @throws \Granam\Integer\Tools\Exceptions\Exception
      */
-    public function setAddition($additionValue)
+    public function getWithAddition($additionValue)
     {
         $additionValue = ToInteger::toInteger($additionValue);
         if ($additionValue === 0) {

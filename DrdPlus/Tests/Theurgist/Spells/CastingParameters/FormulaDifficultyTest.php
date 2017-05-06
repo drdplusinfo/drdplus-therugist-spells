@@ -1,14 +1,32 @@
 <?php
 namespace DrdPlus\Tests\Theurgist\Spells\CastingParameters;
 
-use DrdPlus\Tests\Theurgist\Spells\CastingParameters\Partials\IntegerCastingParameterSetAdditionTrait;
 use DrdPlus\Theurgist\Spells\CastingParameters\FormulaDifficultyAddition;
 use DrdPlus\Theurgist\Spells\CastingParameters\FormulaDifficulty;
 use Granam\Tests\Tools\TestWithMockery;
 
 class FormulaDifficultyTest extends TestWithMockery
 {
-    use IntegerCastingParameterSetAdditionTrait;
+
+    /**
+     * @test
+     */
+    public function I_get_whispered_current_class_as_return_value_of_set_addition()
+    {
+        $reflectionClass = new \ReflectionClass(FormulaDifficulty::class);
+        $classBaseName = preg_replace('~^.*[\\\](\w+)$~', '$1', FormulaDifficulty::class);
+        $add = $reflectionClass->getMethod('getFormulaDifficultyOfChanged');
+        self::assertSame($phpDoc = <<<PHPDOC
+/**
+ * @param int|float|NumberInterface \$difficultyChangeValue
+ * @return {$classBaseName}
+ * @throws \Granam\Integer\Tools\Exceptions\Exception
+ */
+PHPDOC
+            , preg_replace('~ {2,}~', ' ', $add->getDocComment()),
+            "Expected:\n$phpDoc\nfor method 'getWithAddition'"
+        );
+    }
 
     /**
      * @test
@@ -51,20 +69,20 @@ class FormulaDifficultyTest extends TestWithMockery
     public function I_can_get_its_clone_changed_by_addition()
     {
         $original = new FormulaDifficulty(['123', '345', '456=789']);
-        $increased = $original->setAddition(456);
+        $increased = $original->getFormulaDifficultyOfChanged(456);
         self::assertSame(579, $increased->getValue());
         self::assertSame($original->getFormulaDifficultyAddition()->getNotation(), $increased->getFormulaDifficultyAddition()->getNotation());
         self::assertSame(456, $increased->getFormulaDifficultyAddition()->getCurrentAddition());
         self::assertNotSame($original, $increased);
 
-        $zeroed = $increased->setAddition(-123);
+        $zeroed = $increased->getFormulaDifficultyOfChanged(-123);
         self::assertSame(0, $zeroed->getValue());
         self::assertNotSame($original, $zeroed);
         self::assertNotSame($original, $increased);
         self::assertSame(-123, $zeroed->getFormulaDifficultyAddition()->getCurrentAddition());
         self::assertSame($original->getFormulaDifficultyAddition()->getNotation(), $zeroed->getFormulaDifficultyAddition()->getNotation());
 
-        $decreased = $zeroed->setAddition(-234);
+        $decreased = $zeroed->getFormulaDifficultyOfChanged(-234);
         self::assertSame(-111, $decreased->getValue());
         self::assertSame($zeroed->getFormulaDifficultyAddition()->getNotation(), $decreased->getFormulaDifficultyAddition()->getNotation());
         self::assertSame(-234, $decreased->getFormulaDifficultyAddition()->getCurrentAddition());

@@ -847,7 +847,7 @@ PHPDOC
             $modifiers,
             ['foo bar', 'bar BAZ']
         );
-        self::assertEquals($formulasTable->getRadius($discharge)->setAddition(789), $radiusOfModifiedDischarge);
+        self::assertEquals($formulasTable->getRadius($discharge)->getWithAddition(789), $radiusOfModifiedDischarge);
     }
 
     /**
@@ -899,7 +899,7 @@ PHPDOC
         );
         $greatMassacre = FormulaCode::getIt(FormulaCode::GREAT_MASSACRE);
         $powerOfGreatMassacreWithChange = $formulasTable->getPowerOfModified($greatMassacre, $modifiers, ['foo bar', 'bar BAZ']);
-        self::assertEquals($formulasTable->getPower($greatMassacre)->setAddition(789), $powerOfGreatMassacreWithChange);
+        self::assertEquals($formulasTable->getPower($greatMassacre)->getWithAddition(789), $powerOfGreatMassacreWithChange);
     }
 
     /**
@@ -971,7 +971,7 @@ PHPDOC
             ['foo bar', 'bar BAZ']
         );
         self::assertEquals(
-            $formulasTable->getEpicenterShift($greatMassacre)->setAddition(789),
+            $formulasTable->getEpicenterShift($greatMassacre)->getWithAddition(789),
             $epicenterShiftOfModifiedGreatMassacre
         );
     }
@@ -1039,7 +1039,7 @@ PHPDOC
             $modifiers,
             ['foo bar', 'bar BAZ']
         );
-        self::assertEquals($formulasTable->getSpellSpeed($tsunami)->setAddition(789), $spellSpeedOfModifiedTsunami);
+        self::assertEquals($formulasTable->getSpellSpeed($tsunami)->getWithAddition(789), $spellSpeedOfModifiedTsunami);
     }
 
     /**
@@ -1093,7 +1093,7 @@ PHPDOC
             $this->createSpellTraitsTableShell()
         );
         $attackOfModifiedDischarge = $formulasTable->getAttackOfModified($dischargeCode, $modifiers, ['foo FOO']);
-        self::assertEquals(new IntegerObject($dischargeAttack->setAddition(789)->getValue()), $attackOfModifiedDischarge);
+        self::assertEquals(new IntegerObject($dischargeAttack->getWithAddition(789)->getValue()), $attackOfModifiedDischarge);
     }
 
     /**

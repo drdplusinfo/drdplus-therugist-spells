@@ -102,7 +102,7 @@ class FormulaTest extends TestWithMockery
         IntegerCastingParameter $modifiedParameter
     )
     {
-        $parameter->shouldReceive('setAddition')
+        $parameter->shouldReceive('getWithAddition')
             ->with($addition)
             ->andReturn($modifiedParameter);
     }
@@ -201,7 +201,6 @@ class FormulaTest extends TestWithMockery
         foreach (FormulaCode::getPossibleValues() as $formulaValue) {
             $formulaCode = FormulaCode::getIt($formulaValue);
             $formulasTable = $this->createFormulasTable();
-            $this->addFormulaDifficultyGetter($formulasTable, $formulaCode, 0);
             foreach (FormulaMutableCastingParameterCode::getPossibleValues() as $mutableParameterName) {
                 $baseParameter = null;
                 if ($mutableParameterName === FormulaMutableCastingParameterCode::DURATION) {
@@ -217,19 +216,6 @@ class FormulaTest extends TestWithMockery
         }
     }
 
-    private function addFormulaDifficultyGetter(
-        MockInterface $formulaTable,
-        FormulaCode $expectedFormulaCode,
-        int $difficultyValue
-    )
-    {
-        $formulaTable->shouldReceive('getFormulaDifficulty')
-            ->with($expectedFormulaCode)
-            ->andReturn($formulaDifficulty = $this->mockery(FormulaDifficulty::class));
-        $formulaDifficulty->shouldReceive('getValue')
-            ->andReturn($difficultyValue);
-    }
-
     /**
      * @test
      */
@@ -238,7 +224,6 @@ class FormulaTest extends TestWithMockery
         foreach (FormulaCode::getPossibleValues() as $formulaValue) {
             $formulaCode = FormulaCode::getIt($formulaValue);
             $formulasTable = $this->createFormulasTable();
-            $this->addFormulaDifficultyGetter($formulasTable, $formulaCode, $formulaDifficulty = 123);
             $parameterDifficulties = [];
             foreach (FormulaMutableCastingParameterCode::getPossibleValues() as $mutableParameterName) {
                 $parameter = $this->createExpectedParameter($mutableParameterName);
@@ -251,14 +236,13 @@ class FormulaTest extends TestWithMockery
             $formula = new Formula($formulaCode, $formulasTable, []);
             try {
                 self::assertEquals(
-                    new DifficultyChange($formulaDifficulty + array_sum($parameterDifficulties)),
+                    new DifficultyChange(array_sum($parameterDifficulties)),
                     $formula->getDifficultyChangeSum()
                 );
             } catch (NoMatchingExpectationException $expectationException) {
                 self::fail(
-                    'Expected difficulty sum ' . ($formulaDifficulty + array_sum($parameterDifficulties))
-                    . ' as sum of ' . $formulaDifficulty
-                    . ' and ' . implode(',', $parameterDifficulties) . ': ' . $expectationException->getMessage()
+                    'Expected difficulty sum ' . array_sum($parameterDifficulties)
+                    . ' as sum of ' . implode(',', $parameterDifficulties) . ': ' . $expectationException->getMessage()
                 );
             }
         }

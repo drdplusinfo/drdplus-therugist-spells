@@ -104,14 +104,14 @@ class FormulaDifficulty extends StrictObject implements PositiveInteger
     }
 
     /**
-     * @param int|float|NumberInterface $additionValue
+     * @param int|float|NumberInterface $difficultyChangeValue
      * @return FormulaDifficulty
      * @throws \Granam\Integer\Tools\Exceptions\Exception
      */
-    public function setAddition($additionValue): FormulaDifficulty
+    public function getFormulaDifficultyOfChanged($difficultyChangeValue): FormulaDifficulty
     {
-        $additionValue = ToInteger::toInteger($additionValue);
-        if ($additionValue === 0) {
+        $difficultyChangeValue = ToInteger::toInteger($difficultyChangeValue);
+        if ($difficultyChangeValue === 0) {
             return $this;
         }
 
@@ -121,7 +121,7 @@ class FormulaDifficulty extends StrictObject implements PositiveInteger
                 $this->getMinimal(),
                 $this->getMaximal(),
                 $this->getFormulaDifficultyAddition()->getNotation(),
-                $additionValue,
+                $difficultyChangeValue,
             ]
         );
     }

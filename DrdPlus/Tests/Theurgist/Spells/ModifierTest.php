@@ -101,7 +101,7 @@ class ModifierTest extends TestWithMockery
         IntegerCastingParameter $modifiedParameter
     )
     {
-        $parameter->shouldReceive('setAddition')
+        $parameter->shouldReceive('getWithAddition')
             ->with($addition)
             ->andReturn($modifiedParameter);
     }

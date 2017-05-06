@@ -7,7 +7,7 @@ use DrdPlus\Tables\Measurements\Distance\DistanceTable;
 use DrdPlus\Theurgist\Spells\CastingParameters\Partials\IntegerCastingParameter;
 
 /**
- * @method EpicenterShift setAddition($additionValue)
+ * @method EpicenterShift getWithAddition($additionValue)
  */
 class EpicenterShift extends IntegerCastingParameter
 {

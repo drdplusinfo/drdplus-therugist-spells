@@ -287,7 +287,7 @@ class FormulasTable extends AbstractFileTable
     ): FormulaDifficulty
     { // todo give ModifiedDifficulty object as IntegerObject or something like that
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return $this->getFormulaDifficulty($formulaCode)->setAddition(
+        return $this->getFormulaDifficulty($formulaCode)->getFormulaDifficultyOfChanged(
             + $this->modifiersTable->sumDifficultyChanges($modifierCodes)->getValue()
             + $this->spellTraitsTable->sumDifficultyChanges($spellTraitCodes)->getValue()
         );
@@ -327,7 +327,7 @@ class FormulasTable extends AbstractFileTable
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return $formulaRadius->setAddition(
+        return $formulaRadius->getWithAddition(
             $this->modifiersTable->sumRadiusChange($modifierCodes)->getValue()
         );
     }
@@ -391,7 +391,7 @@ class FormulasTable extends AbstractFileTable
             return null;
         }
 
-        return $formulaPower->setAddition($this->modifiersTable->sumPowerChanges($modifierCodes)->getValue());
+        return $formulaPower->getWithAddition($this->modifiersTable->sumPowerChanges($modifierCodes)->getValue());
     }
 
     /**
@@ -569,7 +569,7 @@ class FormulasTable extends AbstractFileTable
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return $formulaSpeed->setAddition($this->modifiersTable->sumSpellSpeedChange($modifierCodes)->getValue());
+        return $formulaSpeed->getWithAddition($this->modifiersTable->sumSpellSpeedChange($modifierCodes)->getValue());
     }
 
     /**
@@ -613,7 +613,7 @@ class FormulasTable extends AbstractFileTable
         }
 
         if ($formulaEpicenterShift) {
-            return $formulaEpicenterShift->setAddition($this->modifiersTable->sumEpicenterShiftChange($modifierCodes)->getValue());
+            return $formulaEpicenterShift->getWithAddition($this->modifiersTable->sumEpicenterShiftChange($modifierCodes)->getValue());
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */

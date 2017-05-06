@@ -4,7 +4,7 @@ namespace DrdPlus\Theurgist\Spells\CastingParameters;
 use DrdPlus\Theurgist\Spells\CastingParameters\Partials\PositiveCastingParameter;
 
 /**
- * @method Invisibility setAddition($additionValue)
+ * @method Invisibility getWithAddition($additionValue)
  */
 class Invisibility extends PositiveCastingParameter
 {

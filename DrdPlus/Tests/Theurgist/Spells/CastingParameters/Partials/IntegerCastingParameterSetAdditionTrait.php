@@ -15,8 +15,8 @@ trait IntegerCastingParameterSetAdditionTrait
     {
         $reflectionClass = new \ReflectionClass(self::getSutClass());
         $classBaseName = preg_replace('~^.*[\\\](\w+)$~', '$1', self::getSutClass());
-        $add = $reflectionClass->getMethod('setAddition');
-        if (strpos($add->getDocComment(), $classBaseName) !== false) {
+        $getWithAddition = $reflectionClass->getMethod('getWithAddition');
+        if (strpos($getWithAddition->getDocComment(), $classBaseName) !== false) {
             self::assertSame($phpDoc = <<<PHPDOC
 /**
  * @param int|float|NumberInterface \$additionValue
@@ -24,13 +24,13 @@ trait IntegerCastingParameterSetAdditionTrait
  * @throws \Granam\Integer\Tools\Exceptions\Exception
  */
 PHPDOC
-                , preg_replace('~ {2,}~', ' ', $add->getDocComment()),
-                "Expected:\n$phpDoc\nfor method 'setAddition'"
+                , preg_replace('~ {2,}~', ' ', $getWithAddition->getDocComment()),
+                "Expected:\n$phpDoc\nfor method 'getWithAddition'"
             );
         } else {
             self::assertSame($phpDoc = <<<PHPDOC
 /**
- * @method {$classBaseName} setAddition(\$additionValue)
+ * @method {$classBaseName} getWithAddition(\$additionValue)
  */
 PHPDOC
                 , $reflectionClass->getDocComment(),

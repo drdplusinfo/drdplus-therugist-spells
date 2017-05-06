@@ -12,6 +12,7 @@ use DrdPlus\Theurgist\Spells\CastingParameters\EpicenterShift;
 use DrdPlus\Theurgist\Spells\CastingParameters\Partials\IntegerCastingParameter;
 use DrdPlus\Theurgist\Spells\CastingParameters\Power;
 use DrdPlus\Theurgist\Spells\CastingParameters\Radius;
+use DrdPlus\Theurgist\Spells\CastingParameters\Realm;
 use DrdPlus\Theurgist\Spells\CastingParameters\SizeChange;
 use DrdPlus\Theurgist\Spells\CastingParameters\SpellSpeed;
 use Granam\Integer\Tools\ToInteger;
@@ -110,9 +111,18 @@ class Formula extends StrictObject
         foreach ($parameters as $parameter) {
             $parametersDifficultyChangeSum += $parameter->getAdditionByDifficulty()->getValue();
         }
-        $difficulty = $this->formulasTable->getFormulaDifficulty($this->getFormulaCode());
 
-        return new DifficultyChange($difficulty->getValue() + $parametersDifficultyChangeSum);
+        return new DifficultyChange($parametersDifficultyChangeSum);
+    }
+
+    public function getRequiredRealm(): Realm
+    {
+        $formulaDifficulty = $this->formulasTable->getFormulaDifficulty($this->getFormulaCode());
+        $changedFormulaDifficulty = $formulaDifficulty->getFormulaDifficultyOfChanged($this->getDifficultyChangeSum());
+        $realmsIncrement = $changedFormulaDifficulty->getFormulaDifficultyAddition()->getCurrentRealmsIncrement();
+        $realm = $this->formulasTable->getRealm($this->getFormulaCode());
+
+        return $realm->add($realmsIncrement);
     }
 
     /**
@@ -141,7 +151,7 @@ class Formula extends StrictObject
             return null;
         }
 
-        return $baseRadius->setAddition($this->getRadiusAddition());
+        return $baseRadius->getWithAddition($this->getRadiusAddition());
     }
 
     public function getRadiusAddition(): int
@@ -167,7 +177,7 @@ class Formula extends StrictObject
             return null;
         }
 
-        return $baseEpicenterShift->setAddition($this->getEpicenterShiftAddition());
+        return $baseEpicenterShift->getWithAddition($this->getEpicenterShiftAddition());
     }
 
     public function getEpicenterShiftAddition(): int
@@ -193,7 +203,7 @@ class Formula extends StrictObject
             return null;
         }
 
-        return $basePower->setAddition($this->getPowerAddition());
+        return $basePower->getWithAddition($this->getPowerAddition());
     }
 
     public function getPowerAddition(): int
@@ -219,7 +229,7 @@ class Formula extends StrictObject
             return null;
         }
 
-        return $baseAttack->setAddition($this->getAttackAddition());
+        return $baseAttack->getWithAddition($this->getAttackAddition());
     }
 
     public function getAttackAddition(): int
@@ -245,7 +255,7 @@ class Formula extends StrictObject
             return null;
         }
 
-        return $baseSpellSpeed->setAddition($this->getSpellSpeedAddition());
+        return $baseSpellSpeed->getWithAddition($this->getSpellSpeedAddition());
     }
 
     public function getSpellSpeedAddition(): int
@@ -271,7 +281,7 @@ class Formula extends StrictObject
             return null;
         }
 
-        return $baseDetailLevel->setAddition($this->getDetailLevelAddition());
+        return $baseDetailLevel->getWithAddition($this->getDetailLevelAddition());
     }
 
     public function getDetailLevelAddition(): int
@@ -297,7 +307,7 @@ class Formula extends StrictObject
             return null;
         }
 
-        return $baseBrightness->setAddition($this->getBrightnessAddition());
+        return $baseBrightness->getWithAddition($this->getBrightnessAddition());
     }
 
     public function getBrightnessAddition(): int
@@ -320,7 +330,7 @@ class Formula extends StrictObject
     {
         $baseDuration = $this->getBaseDuration();
 
-        return $baseDuration->setAddition($this->getDurationAddition());
+        return $baseDuration->getWithAddition($this->getDurationAddition());
     }
 
     public function getDurationAddition(): int
@@ -346,7 +356,7 @@ class Formula extends StrictObject
             return null;
         }
 
-        return $baseSizeChange->setAddition($this->getSizeChangeAddition());
+        return $baseSizeChange->getWithAddition($this->getSizeChangeAddition());
     }
 
     public function getSizeChangeAddition(): int

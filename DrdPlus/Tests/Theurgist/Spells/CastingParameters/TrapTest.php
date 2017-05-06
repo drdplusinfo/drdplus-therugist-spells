@@ -64,14 +64,14 @@ class TrapTest extends IntegerCastingParameterTest
         $sutClass = self::getSutClass();
         /** @var Trap $original */
         $original = new $sutClass(['123', '456=789', PropertyCode::ENDURANCE]);
-        self::assertSame($original, $original->setAddition(0));
-        $increased = $original->setAddition(456);
+        self::assertSame($original, $original->getWithAddition(0));
+        $increased = $original->getWithAddition(456);
         self::assertSame(579, $increased->getValue());
         self::assertSame(456, $increased->getAdditionByDifficulty()->getCurrentAddition());
         self::assertSame($original->getPropertyCode(), $increased->getPropertyCode());
         self::assertNotSame($original, $increased);
 
-        $decreased = $original->setAddition(-579);
+        $decreased = $original->getWithAddition(-579);
         self::assertSame(-456, $decreased->getValue());
         self::assertNotSame($original, $decreased);
         self::assertNotSame($original, $increased);

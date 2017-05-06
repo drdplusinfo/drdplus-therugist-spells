@@ -79,20 +79,20 @@ abstract class IntegerCastingParameterTest extends TestWithMockery
         $sutClass = self::getSutClass();
         /** @var IntegerCastingParameter $original */
         $original = new $sutClass(['123', '456=789']);
-        self::assertSame($original, $original->setAddition(0));
-        $increased = $original->setAddition(456);
+        self::assertSame($original, $original->getWithAddition(0));
+        $increased = $original->getWithAddition(456);
         self::assertSame(579, $increased->getValue());
         self::assertSame($original->getAdditionByDifficulty()->getNotation(), $increased->getAdditionByDifficulty()->getNotation());
         self::assertSame(456, $increased->getAdditionByDifficulty()->getCurrentAddition());
         self::assertNotSame($original, $increased);
 
-        $zeroed = $original->setAddition(-123);
+        $zeroed = $original->getWithAddition(-123);
         self::assertSame(0, $zeroed->getValue());
         self::assertNotSame($original, $zeroed);
         self::assertNotSame($original, $increased);
         self::assertSame(-123, $zeroed->getAdditionByDifficulty()->getCurrentAddition());
 
-        $decreased = $original->setAddition(-999);
+        $decreased = $original->getWithAddition(-999);
         self::assertSame(-876, $decreased->getValue());
         self::assertSame($original->getAdditionByDifficulty()->getNotation(), $increased->getAdditionByDifficulty()->getNotation());
         self::assertSame(-999, $decreased->getAdditionByDifficulty()->getCurrentAddition());

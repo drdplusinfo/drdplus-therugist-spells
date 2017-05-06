@@ -55,7 +55,7 @@ class Trap extends IntegerCastingParameter
      * @return Trap
      * @throws \Granam\Integer\Tools\Exceptions\Exception
      */
-    public function setAddition($additionValue): Trap
+    public function getWithAddition($additionValue): Trap
     {
         $additionValue = ToInteger::toInteger($additionValue);
         if ($additionValue === 0) {

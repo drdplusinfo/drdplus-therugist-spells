@@ -4,7 +4,7 @@ namespace DrdPlus\Theurgist\Spells\CastingParameters;
 use DrdPlus\Theurgist\Spells\CastingParameters\Partials\IntegerCastingParameter;
 
 /**
- * @method Power setAddition($additionValue)
+ * @method Power getWithAddition($additionValue)
  */
 class Power extends IntegerCastingParameter
 {

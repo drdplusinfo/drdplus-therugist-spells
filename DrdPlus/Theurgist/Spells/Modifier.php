@@ -149,7 +149,7 @@ class Modifier extends StrictObject
             return null;
         }
 
-        return $baseRadius->setAddition($this->getRadiusAddition());
+        return $baseRadius->getWithAddition($this->getRadiusAddition());
     }
 
     public function getRadiusAddition(): int
@@ -175,7 +175,7 @@ class Modifier extends StrictObject
             return null;
         }
 
-        return $baseEpicenterShift->setAddition($this->getEpicenterShiftAddition());
+        return $baseEpicenterShift->getWithAddition($this->getEpicenterShiftAddition());
     }
 
     public function getEpicenterShiftAddition(): int
@@ -201,7 +201,7 @@ class Modifier extends StrictObject
             return null;
         }
 
-        return $basePower->setAddition($this->getPowerAddition());
+        return $basePower->getWithAddition($this->getPowerAddition());
     }
 
     public function getPowerAddition(): int
@@ -227,7 +227,7 @@ class Modifier extends StrictObject
             return null;
         }
 
-        return $baseAttack->setAddition($this->getAttackAddition());
+        return $baseAttack->getWithAddition($this->getAttackAddition());
     }
 
     public function getAttackAddition(): int
@@ -253,7 +253,7 @@ class Modifier extends StrictObject
             return null;
         }
 
-        return $baseGrafts->setAddition($this->getGraftsAddition());
+        return $baseGrafts->getWithAddition($this->getGraftsAddition());
     }
 
     public function getGraftsAddition(): int
@@ -279,7 +279,7 @@ class Modifier extends StrictObject
             return null;
         }
 
-        return $baseSpellSpeed->setAddition($this->getSpellSpeedAddition());
+        return $baseSpellSpeed->getWithAddition($this->getSpellSpeedAddition());
     }
 
     public function getSpellSpeedAddition(): int
@@ -305,7 +305,7 @@ class Modifier extends StrictObject
             return null;
         }
 
-        return $baseInvisibility->setAddition($this->getInvisibilityAddition());
+        return $baseInvisibility->getWithAddition($this->getInvisibilityAddition());
     }
 
     public function getInvisibilityAddition(): int
@@ -331,7 +331,7 @@ class Modifier extends StrictObject
             return null;
         }
 
-        return $baseQuality->setAddition($this->getQualityAddition());
+        return $baseQuality->getWithAddition($this->getQualityAddition());
     }
 
     public function getQualityAddition(): int
@@ -357,7 +357,7 @@ class Modifier extends StrictObject
             return null;
         }
 
-        return $baseConditions->setAddition($this->getConditionsAddition());
+        return $baseConditions->getWithAddition($this->getConditionsAddition());
     }
 
     public function getConditionsAddition(): int
@@ -383,7 +383,7 @@ class Modifier extends StrictObject
             return null;
         }
 
-        return $baseResistance->setAddition($this->getResistanceAddition());
+        return $baseResistance->getWithAddition($this->getResistanceAddition());
     }
 
     public function getResistanceAddition(): int
@@ -409,7 +409,7 @@ class Modifier extends StrictObject
             return null;
         }
 
-        return $baseNumberOfSituations->setAddition($this->getNumberOfSituationsAddition());
+        return $baseNumberOfSituations->getWithAddition($this->getNumberOfSituationsAddition());
     }
 
     public function getNumberOfSituationsAddition(): int
@@ -435,7 +435,7 @@ class Modifier extends StrictObject
             return null;
         }
 
-        return $baseThreshold->setAddition($this->getThresholdAddition());
+        return $baseThreshold->getWithAddition($this->getThresholdAddition());
     }
 
     public function getThresholdAddition(): int
@@ -461,7 +461,7 @@ class Modifier extends StrictObject
             return null;
         }
 
-        return $basePoints->setAddition($this->getPointsAddition());
+        return $basePoints->getWithAddition($this->getPointsAddition());
     }
 
     public function getPointsAddition(): int
