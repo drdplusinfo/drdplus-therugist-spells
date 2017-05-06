@@ -199,7 +199,7 @@ class ModifierTest extends TestWithMockery
             $difficultyChange = $this->createDifficultyChange(0);
             $this->addDifficultyChangeGetter($difficultyChange, $modifierCode, $modifiersTable);
             $modifier = new Modifier($modifierCode, $modifiersTable, []);
-            self::assertSame($difficultyChange, $modifier->getDifficultyChangeSum());
+            self::assertSame($difficultyChange, $modifier->getDifficultyChange());
         }
     }
 
@@ -250,7 +250,7 @@ class ModifierTest extends TestWithMockery
             $this->addDifficultyChangeGetter($difficultyChange, $modifierCode, $modifiersTable);
             $modifier = new Modifier($modifierCode, $modifiersTable, []);
             try {
-                self::assertSame($difficultyChange, $modifier->getDifficultyChangeSum());
+                self::assertSame($difficultyChange, $modifier->getDifficultyChange());
             } catch (NoMatchingExpectationException $expectationException) {
                 self::fail(
                     'Expected difficulty sum ' . array_sum($parameterDifficulties) . ' as sum of '

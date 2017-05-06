@@ -31,6 +31,8 @@ use Granam\Integer\IntegerObject;
 
 class ModifiersTable extends AbstractFileTable
 {
+    use ToFlatArrayTrait;
+
     /**
      * @var Tables
      */
@@ -151,26 +153,6 @@ class ModifiersTable extends AbstractFileTable
         }
 
         return $highestRealm;
-    }
-
-    /**
-     * @param array $items
-     * @return array
-     */
-    private function toFlatArray(array $items): array
-    {
-        $flat = [];
-        foreach ($items as $item) {
-            if (is_array($item)) {
-                foreach ($this->toFlatArray($item) as $subItem) {
-                    $flat[] = $subItem;
-                }
-            } else {
-                $flat[] = $item;
-            }
-        }
-
-        return $flat;
     }
 
     /**

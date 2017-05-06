@@ -22,26 +22,38 @@ use Granam\Tools\ValueDescriber;
 
 class Formula extends StrictObject
 {
+    use ToFlatArrayTrait;
+
     /** @var FormulaCode */
     private $formulaCode;
     /** @var FormulasTable */
     private $formulasTable;
-    /** @var array|int[] */
+    /** @var int[] */
     private $additions;
+    /** @var Modifier[] */
+    private $modifiers;
 
     /**
      * @param FormulaCode $formulaCode
      * @param FormulasTable $formulasTable
-     * @param array $additions
+     * @param array $formulaAdditions by FormulaMutableCastingParameterCode value indexed its value change
+     * @param Modifier[] $modifiers
      * @throws \DrdPlus\Theurgist\Spells\Exceptions\UselessAdditionForUnusedCastingParameter
      * @throws \DrdPlus\Theurgist\Spells\Exceptions\UnknownFormulaParameter
      * @throws \DrdPlus\Theurgist\Spells\Exceptions\InvalidValueForFormulaParameterAddition
+     * @throws \DrdPlus\Theurgist\Spells\Exceptions\InvalidModifier
      */
-    public function __construct(FormulaCode $formulaCode, FormulasTable $formulasTable, array $additions)
+    public function __construct(
+        FormulaCode $formulaCode,
+        FormulasTable $formulasTable,
+        array $formulaAdditions,
+        array $modifiers
+    )
     {
         $this->formulaCode = $formulaCode;
         $this->formulasTable = $formulasTable;
-        $this->additions = $this->sanitizeAdditions($additions);
+        $this->additions = $this->sanitizeAdditions($formulaAdditions);
+        $this->modifiers = $this->getCheckedModifiers($this->toFlatArray($modifiers));
     }
 
     /**
@@ -90,6 +102,24 @@ class Formula extends StrictObject
         return $sanitized;
     }
 
+    /**
+     * @param array $modifiers
+     * @return array|Modifier[]
+     * @throws \DrdPlus\Theurgist\Spells\Exceptions\InvalidModifier
+     */
+    private function getCheckedModifiers(array $modifiers): array
+    {
+        foreach ($modifiers as $modifier) {
+            if (!is_a($modifier, Modifier::class)) {
+                throw new Exceptions\InvalidModifier(
+                    'Expected instance of ' . Modifier::class . ', got ' . ValueDescriber::describe($modifier)
+                );
+            }
+        }
+
+        return $modifiers;
+    }
+
     public function getDifficultyOfChanged(): FormulaDifficulty
     {
         $parameters = [
@@ -111,9 +141,13 @@ class Formula extends StrictObject
         foreach ($parameters as $parameter) {
             $parametersDifficultyChangeSum += $parameter->getAdditionByDifficulty()->getValue();
         }
+        $modifiersDifficultyChangeSum = 0;
+        foreach ($this->modifiers as $modifier) {
+            $modifiersDifficultyChangeSum += $modifier->getDifficultyChange()->getValue();
+        }
         $formulaDifficulty = $this->formulasTable->getFormulaDifficulty($this->getFormulaCode());
 
-        return $formulaDifficulty->createWithChange($parametersDifficultyChangeSum);
+        return $formulaDifficulty->createWithChange($parametersDifficultyChangeSum + $modifiersDifficultyChangeSum);
     }
 
     public function getRequiredRealm(): Realm

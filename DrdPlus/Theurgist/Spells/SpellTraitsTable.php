@@ -10,6 +10,8 @@ use DrdPlus\Theurgist\Spells\CastingParameters\Trap;
 
 class SpellTraitsTable extends AbstractFileTable
 {
+    use ToFlatArrayTrait;
+
     protected function getDataFileName(): string
     {
         return __DIR__ . '/data/spell_traits.csv';
@@ -90,26 +92,6 @@ class SpellTraitsTable extends AbstractFileTable
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new DifficultyChange($sumOfDifficultyChange);
-    }
-
-    /**
-     * @param array $items
-     * @return array
-     */
-    private function toFlatArray(array $items): array
-    {
-        $flat = [];
-        foreach ($items as $item) {
-            if (is_array($item)) {
-                foreach ($this->toFlatArray($item) as $subItem) {
-                    $flat[] = $subItem;
-                }
-            } else {
-                $flat[] = $item;
-            }
-        }
-
-        return $flat;
     }
 
     /**

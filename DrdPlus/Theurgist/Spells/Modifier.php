@@ -101,7 +101,7 @@ class Modifier extends StrictObject
         return $this->modifierCode;
     }
 
-    public function getDifficultyChangeSum(): DifficultyChange
+    public function getDifficultyChange(): DifficultyChange
     {
         $parameters = [
             $this->getCurrentAttack(),
