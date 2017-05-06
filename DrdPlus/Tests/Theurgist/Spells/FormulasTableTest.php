@@ -14,6 +14,7 @@ use DrdPlus\Theurgist\Spells\CastingParameters\Affection;
 use DrdPlus\Theurgist\Spells\CastingParameters\CastingRounds;
 use DrdPlus\Theurgist\Spells\CastingParameters\DifficultyChange;
 use DrdPlus\Theurgist\Spells\CastingParameters\EpicenterShift;
+use DrdPlus\Theurgist\Spells\CastingParameters\PropertyChange;
 use DrdPlus\Theurgist\Spells\CastingParameters\Realm;
 use DrdPlus\Theurgist\Spells\CastingParameters\SpellTrait;
 use DrdPlus\Theurgist\Spells\SpellTraitsTable;
@@ -125,7 +126,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
                 self::assertNull($modified);
             } else {
                 self::assertInstanceOf($parameterClass, $basic);
-// TODO               self::assertInstanceOf($parameterClass, $modified);
+// TODO $modified should be something like ModifiedAttack, not Attack self::assertInstanceOf($parameterClass, $modified);
             }
         }
     }
@@ -1104,8 +1105,8 @@ PHPDOC
     {
         $modifiersTable = $this->mockery(ModifiersTable::class);
         $modifiersTable->shouldReceive('sumAttackChange')
-            ->with($expectedModifiers, [] /* TODO */)
-            ->andReturn(new IntegerObject($sumOfAttackChange));
+            ->with($expectedModifiers)
+            ->andReturn(new PropertyChange($sumOfAttackChange, 0));
 
         return $modifiersTable;
     }

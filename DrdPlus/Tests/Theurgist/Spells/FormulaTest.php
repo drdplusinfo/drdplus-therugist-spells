@@ -3,6 +3,9 @@ namespace DrdPlus\Tests\Theurgist\Spells;
 
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\FormulaMutableCastingParameterCode;
+use DrdPlus\Theurgist\Spells\CastingParameters\AdditionByDifficulty;
+use DrdPlus\Theurgist\Spells\CastingParameters\DifficultyChange;
+use DrdPlus\Theurgist\Spells\CastingParameters\FormulaDifficulty;
 use DrdPlus\Theurgist\Spells\CastingParameters\Partials\IntegerCastingParameter;
 use DrdPlus\Theurgist\Spells\CastingParameters\SpellSpeed;
 use DrdPlus\Theurgist\Spells\Formula;
@@ -188,6 +191,85 @@ class FormulaTest extends TestWithMockery
                 self::assertSame($addition, $formula->$getParameterAddition());
             }
         }
+    }
+
+    /**
+     * @test
+     */
+    public function I_get_basic_difficulty_change_without_any_parameter()
+    {
+        foreach (FormulaCode::getPossibleValues() as $formulaValue) {
+            $formulaCode = FormulaCode::getIt($formulaValue);
+            $formulasTable = $this->createFormulasTable();
+            $this->addFormulaDifficultyGetter($formulasTable, $formulaCode, 0);
+            foreach (FormulaMutableCastingParameterCode::getPossibleValues() as $mutableParameterName) {
+                $baseParameter = null;
+                if ($mutableParameterName === FormulaMutableCastingParameterCode::DURATION) {
+                    // duration can not be null, skipping
+                    $baseParameter = $this->createExpectedParameter(FormulaMutableCastingParameterCode::DURATION);
+                    $this->addExpectedAdditionSetter(0, $baseParameter, $baseParameter);
+                    $this->addAdditionByDifficultyGetter(0, $baseParameter);
+                }
+                $this->addBaseParameterGetter($mutableParameterName, $formulaCode, $formulasTable, $baseParameter);
+            }
+            $formula = new Formula($formulaCode, $formulasTable, []);
+            self::assertEquals(new DifficultyChange(0), $formula->getDifficultyChangeSum());
+        }
+    }
+
+    private function addFormulaDifficultyGetter(
+        MockInterface $formulaTable,
+        FormulaCode $expectedFormulaCode,
+        int $difficultyValue
+    )
+    {
+        $formulaTable->shouldReceive('getFormulaDifficulty')
+            ->with($expectedFormulaCode)
+            ->andReturn($formulaDifficulty = $this->mockery(FormulaDifficulty::class));
+        $formulaDifficulty->shouldReceive('getValue')
+            ->andReturn($difficultyValue);
+    }
+
+    /**
+     * @test
+     */
+    public function I_get_basic_difficulty_change_with_every_parameter()
+    {
+        foreach (FormulaCode::getPossibleValues() as $formulaValue) {
+            $formulaCode = FormulaCode::getIt($formulaValue);
+            $formulasTable = $this->createFormulasTable();
+            $this->addFormulaDifficultyGetter($formulasTable, $formulaCode, $formulaDifficulty = 123);
+            $parameterDifficulties = [];
+            foreach (FormulaMutableCastingParameterCode::getPossibleValues() as $mutableParameterName) {
+                $parameter = $this->createExpectedParameter($mutableParameterName);
+                $this->addBaseParameterGetter($mutableParameterName, $formulaCode, $formulasTable, $parameter);
+                $changedParameter = $this->createExpectedParameter($mutableParameterName);
+                $this->addExpectedAdditionSetter(0, $parameter, $changedParameter);
+                $parameterDifficulties[] = $difficultyChange = random_int(-10, 10);
+                $this->addAdditionByDifficultyGetter($difficultyChange, $changedParameter);
+            }
+            $formula = new Formula($formulaCode, $formulasTable, []);
+            try {
+                self::assertEquals(
+                    new DifficultyChange($formulaDifficulty + array_sum($parameterDifficulties)),
+                    $formula->getDifficultyChangeSum()
+                );
+            } catch (NoMatchingExpectationException $expectationException) {
+                self::fail(
+                    'Expected difficulty sum ' . ($formulaDifficulty + array_sum($parameterDifficulties))
+                    . ' as sum of ' . $formulaDifficulty
+                    . ' and ' . implode(',', $parameterDifficulties) . ': ' . $expectationException->getMessage()
+                );
+            }
+        }
+    }
+
+    private function addAdditionByDifficultyGetter(int $difficultyChange, MockInterface $parameter)
+    {
+        $parameter->shouldReceive('getAdditionByDifficulty')
+            ->andReturn($additionByDifficulty = $this->mockery(AdditionByDifficulty::class));
+        $additionByDifficulty->shouldReceive('getValue')
+            ->andReturn($difficultyChange);
     }
 
     /**

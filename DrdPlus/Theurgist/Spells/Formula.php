@@ -6,8 +6,10 @@ use DrdPlus\Theurgist\Codes\FormulaMutableCastingParameterCode;
 use DrdPlus\Theurgist\Spells\CastingParameters\Attack;
 use DrdPlus\Theurgist\Spells\CastingParameters\Brightness;
 use DrdPlus\Theurgist\Spells\CastingParameters\DetailLevel;
+use DrdPlus\Theurgist\Spells\CastingParameters\DifficultyChange;
 use DrdPlus\Theurgist\Spells\CastingParameters\Duration;
 use DrdPlus\Theurgist\Spells\CastingParameters\EpicenterShift;
+use DrdPlus\Theurgist\Spells\CastingParameters\Partials\IntegerCastingParameter;
 use DrdPlus\Theurgist\Spells\CastingParameters\Power;
 use DrdPlus\Theurgist\Spells\CastingParameters\Radius;
 use DrdPlus\Theurgist\Spells\CastingParameters\SizeChange;
@@ -85,6 +87,32 @@ class Formula extends StrictObject
         }
 
         return $sanitized;
+    }
+
+    public function getDifficultyChangeSum(): DifficultyChange
+    {
+        $parameters = [
+            $this->getCurrentAttack(),
+            $this->getCurrentBrightness(),
+            $this->getCurrentDetailLevel(),
+            $this->getCurrentDuration(),
+            $this->getCurrentEpicenterShift(),
+            $this->getCurrentPower(),
+            $this->getCurrentRadius(),
+            $this->getCurrentSizeChange(),
+            $this->getCurrentSpellSpeed(),
+        ];
+        $parameters = array_filter($parameters, function (IntegerCastingParameter $castingParameter = null) {
+            return $castingParameter !== null;
+        });
+        $parametersDifficultyChangeSum = 0;
+        /** @var IntegerCastingParameter $parameter */
+        foreach ($parameters as $parameter) {
+            $parametersDifficultyChangeSum += $parameter->getAdditionByDifficulty()->getValue();
+        }
+        $difficulty = $this->formulasTable->getFormulaDifficulty($this->getFormulaCode());
+
+        return new DifficultyChange($difficulty->getValue() + $parametersDifficultyChangeSum);
     }
 
     /**

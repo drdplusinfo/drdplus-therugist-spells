@@ -17,6 +17,7 @@ use DrdPlus\Theurgist\Spells\CastingParameters\Grafts;
 use DrdPlus\Theurgist\Spells\CastingParameters\Invisibility;
 use DrdPlus\Theurgist\Spells\CastingParameters\Points;
 use DrdPlus\Theurgist\Spells\CastingParameters\Power;
+use DrdPlus\Theurgist\Spells\CastingParameters\PropertyChange;
 use DrdPlus\Theurgist\Spells\CastingParameters\Quality;
 use DrdPlus\Theurgist\Spells\CastingParameters\Radius;
 use DrdPlus\Theurgist\Spells\CastingParameters\Realm;
@@ -27,7 +28,6 @@ use DrdPlus\Theurgist\Spells\CastingParameters\SpellSpeed;
 use DrdPlus\Theurgist\Spells\CastingParameters\SpellTrait;
 use DrdPlus\Theurgist\Spells\CastingParameters\Threshold;
 use Granam\Integer\IntegerObject;
-use Granam\Number\NumberInterface;
 
 class ModifiersTable extends AbstractFileTable
 {
@@ -423,40 +423,24 @@ class ModifiersTable extends AbstractFileTable
     }
 
     /**
-     * @param array|ModifierCode[] $modifierCodes
-     * @param array|int[]|NumberInterface[] $modifiersAttackAdditions
-     * @return IntegerObject
-     * @throws \DrdPlus\Theurgist\Spells\Exceptions\AdditionsOfUnexpectedModifiers
+     * @param array|Modifier[] $modifiers
+     * @return PropertyChange
      */
-    public function sumAttackChange(array $modifierCodes, array $modifiersAttackAdditions): IntegerObject
+    public function sumAttackChange(array $modifiers): PropertyChange
     {
         $attackSum = 0;
         $difficultySum = 0;
-        $modifierValues = [];
-        foreach ($this->toFlatArray($modifierCodes) as $modifierCode) {
-            $attack = $this->getAttack($modifierCode);
+        /** @var Modifier $modifier */
+        foreach ($this->toFlatArray($modifiers) as $modifier) {
+            $attack = $modifier->getCurrentAttack();
             if (!$attack) {
                 continue;
             }
-            $modifierValues[] = $modifierValue = $modifierCode->getValue();
-            if (array_key_exists($modifierValue, $modifiersAttackAdditions)) {
-                $attack->setAddition($modifiersAttackAdditions[$modifierValue]);
-                unset($modifiersAttackAdditions[$modifierValue]); // remove for evidence of remaining
-            }
-            // TODO WRONG! what about branch of more Transpositions? We cannot add addition to every single one
-            $difficultySum += $attack->getAdditionByDifficulty()->getCurrentDifficultyIncrement();
             $attackSum += $attack->getValue();
-        }
-        if (count($modifiersAttackAdditions) > 0) { // some addition left but should not
-            throw new Exceptions\AdditionsOfUnexpectedModifiers(
-                'Expected only modifiers ' . implode(',', $modifierValues) . ', got attack additions also for modifiers '
-                . implode(',', array_keys($modifiersAttackAdditions))
-            );
+            $difficultySum += $attack->getAdditionByDifficulty()->getCurrentDifficultyIncrement();
         }
 
-        // TODO we need difficulty also
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new IntegerObject($attackSum);
+        return new PropertyChange($attackSum, $difficultySum);
     }
 
     /**

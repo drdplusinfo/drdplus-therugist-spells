@@ -1,6 +1,7 @@
 <?php
 namespace DrdPlus\Tests\Theurgist\Spells;
 
+use DrdPlus\Properties\Combat\Attack;
 use DrdPlus\Tables\Tables;
 use DrdPlus\Theurgist\Codes\AffectionPeriodCode;
 use DrdPlus\Theurgist\Codes\FormCode;
@@ -8,12 +9,15 @@ use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ProfileCode;
 use DrdPlus\Theurgist\Codes\SpellTraitCode;
+use DrdPlus\Theurgist\Spells\CastingParameters\AdditionByDifficulty;
 use DrdPlus\Theurgist\Spells\CastingParameters\Affection;
 use DrdPlus\Theurgist\Spells\CastingParameters\CastingRounds;
 use DrdPlus\Theurgist\Spells\CastingParameters\DifficultyChange;
+use DrdPlus\Theurgist\Spells\CastingParameters\PropertyChange;
 use DrdPlus\Theurgist\Spells\CastingParameters\Realm;
 use DrdPlus\Theurgist\Spells\CastingParameters\SpellTrait;
 use DrdPlus\Theurgist\Spells\FormulasTable;
+use DrdPlus\Theurgist\Spells\Modifier;
 use DrdPlus\Theurgist\Spells\ModifiersTable;
 use DrdPlus\Theurgist\Spells\ProfilesTable;
 use Granam\Integer\IntegerObject;
@@ -796,44 +800,66 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
     {
         $modifiersTable = new ModifiersTable(Tables::getIt());
 
-        self::assertEquals(new IntegerObject(0), $modifiersTable->sumAttackChange([], []));
+        self::assertEquals(new PropertyChange(0, 0), $modifiersTable->sumAttackChange([]));
 
         self::assertEquals(
-            new IntegerObject(0),
+            new PropertyChange(0, 0),
             $modifiersTable->sumAttackChange(
                 [
-                    ModifierCode::getIt(ModifierCode::GATE), // null
-                    ModifierCode::getIt(ModifierCode::EXPLOSION), // null
+                    $this->createModifierForAttackChange(0, 0),
                     [
-                        ModifierCode::getIt(ModifierCode::FILTER), // null
-                        ModifierCode::getIt(ModifierCode::THUNDER), // null
-                        ModifierCode::getIt(ModifierCode::INTERACTIVE_ILLUSION), // null
+                        $this->createModifierForAttackChange(null, 0),
+                        [
+                            $this->createModifierForAttackChange(0, 0),
+                            [$this->createModifierForAttackChange(null, 1)], // should be skipped
+                        ],
                     ],
-                ],
-                []
+                ]
             )
         );
 
         self::assertEquals(
-            new IntegerObject(8),
+            new PropertyChange(108, 12),
             $modifiersTable->sumAttackChange(
                 $withTranspositions = [
-                    [ModifierCode::getIt(ModifierCode::MOVEMENT), // null
-                        [ModifierCode::getIt(ModifierCode::EXPLOSION), // null
-                            [ModifierCode::getIt(ModifierCode::FILTER), // null
-                                [ModifierCode::getIt(ModifierCode::TRANSPOSITION)], // +4
+                    [$this->createModifierForAttackChange(0, 0),
+                        [$this->createModifierForAttackChange(3, 1),
+                            [$this->createModifierForAttackChange(0, 5), // should NOT be skipped
+                                [$this->createModifierForAttackChange(5, 6)],
                                 [
-                                    ModifierCode::getIt(ModifierCode::INTERACTIVE_ILLUSION), // null
-                                    ModifierCode::getIt(ModifierCode::TRANSPOSITION), // +4
+                                    $this->createModifierForAttackChange(100, 0),
+                                    $this->createModifierForAttackChange(null, 999), // should be skipped
                                 ],
                             ],
                         ],
                     ],
-                ],
-                []
+                ]
             )
         );
-        // TODO tests with additions
+    }
+
+    /**
+     * @param int|null $currentAttackValue
+     * @param int $currentDifficultyIncrement
+     * @return \Mockery\MockInterface|Modifier
+     */
+    private function createModifierForAttackChange(int $currentAttackValue = null, int $currentDifficultyIncrement)
+    {
+        $modifier = $this->mockery(Modifier::class);
+        $attack = $currentAttackValue !== null ? $this->mockery(Attack::class) : null;
+        $modifier->shouldReceive('getCurrentAttack')
+            ->andReturn($currentAttackValue !== null ? $attack : null);
+        if ($attack === null) {
+            return $modifier;
+        }
+        $attack->shouldReceive('getValue')
+            ->andReturn($currentAttackValue);
+        $attack->shouldReceive('getAdditionByDifficulty')
+            ->andReturn($additionByDifficulty = $this->mockery(AdditionByDifficulty::class));
+        $additionByDifficulty->shouldReceive('getCurrentDifficultyIncrement')
+            ->andReturn($currentDifficultyIncrement);
+
+        return $modifier;
     }
 
     /**

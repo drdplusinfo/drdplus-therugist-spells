@@ -288,7 +288,7 @@ class FormulasTable extends AbstractFileTable
     { // todo give ModifiedDifficulty object as IntegerObject or something like that
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return $this->getFormulaDifficulty($formulaCode)->setAddition(
-            +$this->modifiersTable->sumDifficultyChanges($modifierCodes)->getValue()
+            + $this->modifiersTable->sumDifficultyChanges($modifierCodes)->getValue()
             + $this->spellTraitsTable->sumDifficultyChanges($spellTraitCodes)->getValue()
         );
     }
@@ -430,7 +430,7 @@ class FormulasTable extends AbstractFileTable
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new IntegerObject(
             $formulaAttack->getValue()
-            + $this->modifiersTable->sumAttackChange($modifierCodes, [] /* $modifiersAttackAdditions */)->getValue()
+            + $this->modifiersTable->sumAttackChange($modifierCodes)->getValue()
         );
     }
 
