@@ -847,7 +847,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
     {
         $modifier = $this->mockery(Modifier::class);
         $attack = $currentAttackValue !== null ? $this->mockery(Attack::class) : null;
-        $modifier->shouldReceive('getCurrentAttack')
+        $modifier->shouldReceive('getAttackWithAddition')
             ->andReturn($currentAttackValue !== null ? $attack : null);
         if ($attack === null) {
             return $modifier;

@@ -414,7 +414,7 @@ class ModifiersTable extends AbstractFileTable
         $difficultySum = 0;
         /** @var Modifier $modifier */
         foreach ($this->toFlatArray($modifiers) as $modifier) {
-            $attack = $modifier->getCurrentAttack();
+            $attack = $modifier->getAttackWithAddition();
             if (!$attack) {
                 continue;
             }
