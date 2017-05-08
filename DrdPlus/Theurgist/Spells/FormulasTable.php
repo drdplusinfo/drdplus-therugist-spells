@@ -412,13 +412,13 @@ class FormulasTable extends AbstractFileTable
 
     /**
      * @param FormulaCode $formulaCode
-     * @param array|ModifierCode[] $modifierCodes
+     * @param array|Modifier[] $modifiers
      * @param array|SpellTraitCode[] $spellTraitCodes
      * @return IntegerObject|null
      */
     public function getAttackOfModified(/** @noinspection PhpUnusedParameterInspection to keep same interface with others */
         FormulaCode $formulaCode,
-        array $modifierCodes,
+        array $modifiers,
         array $spellTraitCodes = []
     )
     {
@@ -430,7 +430,7 @@ class FormulasTable extends AbstractFileTable
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new IntegerObject(
             $formulaAttack->getValue()
-            + $this->modifiersTable->sumAttackChange($modifierCodes)->getValue()
+            + $this->modifiersTable->sumAttackChange($modifiers)->getValue()
         );
     }
 
