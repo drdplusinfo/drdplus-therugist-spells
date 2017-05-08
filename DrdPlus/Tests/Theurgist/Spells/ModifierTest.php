@@ -42,7 +42,7 @@ class ModifierTest extends TestWithMockery
                 self::assertSame($baseParameter, $modifier->$getBaseParameter());
 
                 /** like @see Modifier::getCurrentRadius() */
-                $getCurrentParameter = StringTools::assembleGetterForName('current_' . $mutableParameterName);
+                $getCurrentParameter = StringTools::assembleGetterForName($mutableParameterName . '_with_addition');
                 $this->addExpectedAdditionSetter(0, $baseParameter, $baseParameter);
                 self::assertSame($baseParameter, $modifier->$getCurrentParameter());
 
@@ -126,7 +126,7 @@ class ModifierTest extends TestWithMockery
                 self::assertNull($modifier->$getBaseParameter());
 
                 /** like @see Modifier::getCurrentRadius() */
-                $getCurrentParameter = StringTools::assembleGetterForName('current_' . $mutableParameterName);
+                $getCurrentParameter = StringTools::assembleGetterForName($mutableParameterName . '_with_addition');
                 self::assertNull($modifier->$getCurrentParameter());
 
                 /** like @see Modifier::getRadiusAddition */
@@ -164,7 +164,7 @@ class ModifierTest extends TestWithMockery
                 $getBaseParameter = StringTools::assembleGetterForName('base_' . $mutableParameterName);
                 self::assertSame($baseParameter, $modifier->$getBaseParameter());
                 /** like @see Modifier::getCurrentRadius() */
-                $getCurrentParameter = StringTools::assembleGetterForName('current_' . $mutableParameterName);
+                $getCurrentParameter = StringTools::assembleGetterForName($mutableParameterName . '_with_addition');
                 $this->addExpectedAdditionSetter(
                     $addition,
                     $baseParameter,

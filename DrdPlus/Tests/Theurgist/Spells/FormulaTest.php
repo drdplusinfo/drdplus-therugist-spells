@@ -46,9 +46,9 @@ class FormulaTest extends TestWithMockery
                 self::assertSame($baseParameter, $formula->$getBaseParameter());
 
                 /** like @see Formula::getCurrentRadius() */
-                $getCurrentParameter = StringTools::assembleGetterForName('current_' . $mutableParameterName);
+                $getParameterWithAddition = StringTools::assembleGetterForName($mutableParameterName. '_with_addition');
                 $this->addExpectedAdditionSetter(0, $baseParameter, $baseParameter);
-                self::assertSame($baseParameter, $formula->$getCurrentParameter());
+                self::assertSame($baseParameter, $formula->$getParameterWithAddition());
 
                 /** like @see Formula::getRadiusAddition */
                 $getParameterAddition = StringTools::assembleGetterForName($mutableParameterName) . 'Addition';
@@ -130,8 +130,8 @@ class FormulaTest extends TestWithMockery
                 self::assertNull($formula->$getBaseParameter());
 
                 /** like @see Formula::getCurrentRadius() */
-                $getCurrentParameter = StringTools::assembleGetterForName('current_' . $mutableParameterName);
-                self::assertNull($formula->$getCurrentParameter());
+                $getParameterWithAddition = StringTools::assembleGetterForName($mutableParameterName . '_with_addition');
+                self::assertNull($formula->$getParameterWithAddition());
 
                 /** like @see Formula::getRadiusAddition */
                 $getParameterAddition = StringTools::assembleGetterForName($mutableParameterName) . 'Addition';
@@ -175,7 +175,7 @@ class FormulaTest extends TestWithMockery
                 $getBaseParameter = StringTools::assembleGetterForName('base_' . $mutableParameterName);
                 self::assertSame($baseParameter, $formula->$getBaseParameter());
                 /** like @see Formula::getCurrentRadius() */
-                $getCurrentParameter = StringTools::assembleGetterForName('current_' . $mutableParameterName);
+                $getParameterWithAddition = StringTools::assembleGetterForName($mutableParameterName . '_with_addition');
                 $this->addExpectedAdditionSetter(
                     $addition,
                     $baseParameter,
@@ -183,7 +183,7 @@ class FormulaTest extends TestWithMockery
                 );
                 self::assertSame($baseParameter, $formula->$getBaseParameter());
                 try {
-                    self::assertSame($changedParameter, $formula->$getCurrentParameter());
+                    self::assertSame($changedParameter, $formula->$getParameterWithAddition());
                 } catch (NoMatchingExpectationException $expectationException) {
                     self::fail("Parameter {$mutableParameterName} uses wrong addition: " . $expectationException->getMessage());
                 }

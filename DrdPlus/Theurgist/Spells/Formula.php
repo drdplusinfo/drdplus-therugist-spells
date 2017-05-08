@@ -3,6 +3,8 @@ namespace DrdPlus\Theurgist\Spells;
 
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\FormulaMutableCastingParameterCode;
+use DrdPlus\Theurgist\Codes\ModifierCode;
+use DrdPlus\Theurgist\Codes\ModifierMutableCastingParameterCode;
 use DrdPlus\Theurgist\Spells\CastingParameters\Attack;
 use DrdPlus\Theurgist\Spells\CastingParameters\Brightness;
 use DrdPlus\Theurgist\Spells\CastingParameters\DetailLevel;
@@ -15,6 +17,7 @@ use DrdPlus\Theurgist\Spells\CastingParameters\Radius;
 use DrdPlus\Theurgist\Spells\CastingParameters\Realm;
 use DrdPlus\Theurgist\Spells\CastingParameters\SizeChange;
 use DrdPlus\Theurgist\Spells\CastingParameters\SpellSpeed;
+use Granam\Integer\IntegerObject;
 use Granam\Integer\Tools\ToInteger;
 use Granam\Strict\Object\StrictObject;
 use Granam\String\StringTools;
@@ -123,15 +126,15 @@ class Formula extends StrictObject
     public function getDifficultyOfChanged(): FormulaDifficulty
     {
         $parameters = [
-            $this->getCurrentAttack(),
-            $this->getCurrentBrightness(),
-            $this->getCurrentDetailLevel(),
-            $this->getCurrentDuration(),
-            $this->getCurrentEpicenterShift(),
-            $this->getCurrentPower(),
-            $this->getCurrentRadius(),
-            $this->getCurrentSizeChange(),
-            $this->getCurrentSpellSpeed(),
+            $this->getAttackWithAddition(),
+            $this->getBrightnessWithAddition(),
+            $this->getDetailLevelWithAddition(),
+            $this->getDurationWithAddition(),
+            $this->getEpicenterShiftWithAddition(),
+            $this->getPowerWithAddition(),
+            $this->getRadiusWithAddition(),
+            $this->getSizeChangeWithAddition(),
+            $this->getSpellSpeedWithAddition(),
         ];
         $parameters = array_filter($parameters, function (IntegerCastingParameter $castingParameter = null) {
             return $castingParameter !== null;
@@ -177,7 +180,7 @@ class Formula extends StrictObject
     /**
      * @return Radius|null
      */
-    public function getCurrentRadius()
+    public function getRadiusWithAddition()
     {
         $baseRadius = $this->getBaseRadius();
         if ($baseRadius === null) {
@@ -193,6 +196,26 @@ class Formula extends StrictObject
     }
 
     /**
+     * Radius can be only increased, not added
+     *
+     * @return Radius|null
+     */
+    public function getCurrentRadius()
+    {
+        $radiusWithAddition = $this->getRadiusWithAddition();
+        if (!$radiusWithAddition) {
+            return null;
+        }
+
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new Radius([
+            $radiusWithAddition->getValue()
+            + $this->getParameterBonusFromModifiers(ModifierMutableCastingParameterCode::RADIUS),
+            0
+        ]);
+    }
+
+    /**
      * @return EpicenterShift|null
      */
     public function getBaseEpicenterShift()
@@ -203,7 +226,7 @@ class Formula extends StrictObject
     /**
      * @return EpicenterShift|null
      */
-    public function getCurrentEpicenterShift()
+    public function getEpicenterShiftWithAddition()
     {
         $baseEpicenterShift = $this->getBaseEpicenterShift();
         if ($baseEpicenterShift === null) {
@@ -219,6 +242,29 @@ class Formula extends StrictObject
     }
 
     /**
+     * Any formula (spell) can be shifted
+     *
+     * @return EpicenterShift|null
+     */
+    public function getCurrentEpicenterShift()
+    {
+        $epicenterShiftWithAddition = $this->getEpicenterShiftWithAddition();
+        $epicenterShiftBonus = $this->getParameterBonusFromModifiers(ModifierMutableCastingParameterCode::EPICENTER_SHIFT);
+        if (!$epicenterShiftWithAddition && $epicenterShiftBonus === 0) {
+            return null;
+        }
+
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new EpicenterShift([
+            ($epicenterShiftWithAddition
+                ? $epicenterShiftWithAddition->getValue()
+                : 0) // epicenter can be always shifted, even if formula itself is not
+            + $this->getParameterBonusFromModifiers(ModifierMutableCastingParameterCode::EPICENTER_SHIFT),
+            0
+        ]);
+    }
+
+    /**
      * @return Power|null
      */
     public function getBasePower()
@@ -229,7 +275,7 @@ class Formula extends StrictObject
     /**
      * @return Power|null
      */
-    public function getCurrentPower()
+    public function getPowerWithAddition()
     {
         $basePower = $this->getBasePower();
         if ($basePower === null) {
@@ -245,6 +291,27 @@ class Formula extends StrictObject
     }
 
     /**
+     * Any formula (spell) can get a power, even if was passive and not harming before
+     *
+     * @return IntegerObject|null
+     */
+    public function getCurrentPower()
+    {
+        $powerWithAddition = $this->getPowerWithAddition();
+        $powerBonus = $this->getParameterBonusFromModifiers(ModifierMutableCastingParameterCode::POWER);
+        if (!$powerWithAddition && $powerBonus === 0) {
+            return null;
+        }
+
+        return new IntegerObject(
+            ($powerWithAddition
+                ? $powerWithAddition->getValue()
+                : 0)
+            + $powerBonus
+        );
+    }
+
+    /**
      * @return Attack|null
      */
     public function getBaseAttack()
@@ -255,7 +322,7 @@ class Formula extends StrictObject
     /**
      * @return Attack|null
      */
-    public function getCurrentAttack()
+    public function getAttackWithAddition()
     {
         $baseAttack = $this->getBaseAttack();
         if ($baseAttack === null) {
@@ -271,6 +338,49 @@ class Formula extends StrictObject
     }
 
     /**
+     * Attack can be only increased, not added.
+     *
+     * @return IntegerObject|null
+     */
+    public function getCurrentAttack()
+    {
+        $attackWithAddition = $this->getAttackWithAddition();
+        if (!$attackWithAddition) {
+            return null;
+        }
+
+        return new IntegerObject(
+            $attackWithAddition->getValue()
+            + $this->getParameterBonusFromModifiers(ModifierMutableCastingParameterCode::ATTACK)
+        );
+    }
+
+    private function getParameterBonusFromModifiers(string $parameterName): int
+    {
+        $bonus = 0;
+        foreach ($this->modifiers as $modifier) {
+            if ($modifier->getModifierCode()->getValue() === ModifierCode::GATE) {
+                continue; // gate does not give bonus to a parameter, it is standalone being with its own parameters
+            }
+            if ($parameterName === ModifierMutableCastingParameterCode::POWER
+                && $modifier->getModifierCode()->getValue() === ModifierCode::THUNDER
+            ) {
+                continue; // thunder power means a noise, does not affects formula power
+            }
+            $getParameterWithAddition = 'get' . ucfirst($parameterName) . 'WithAddition';
+            /** like @see Modifier::getAttackWithAddition() */
+            $modifierParameter = $modifier->$getParameterWithAddition();
+            if ($modifierParameter === null) {
+                continue;
+            }
+            /** @var IntegerCastingParameter $modifierParameter */
+            $bonus += $modifierParameter->getValue();
+        }
+
+        return $bonus;
+    }
+
+    /**
      * @return SpellSpeed|null
      */
     public function getBaseSpellSpeed()
@@ -281,7 +391,7 @@ class Formula extends StrictObject
     /**
      * @return SpellSpeed|null
      */
-    public function getCurrentSpellSpeed()
+    public function getSpellSpeedWithAddition()
     {
         $baseSpellSpeed = $this->getBaseSpellSpeed();
         if ($baseSpellSpeed === null) {
@@ -297,6 +407,29 @@ class Formula extends StrictObject
     }
 
     /**
+     * Any formula (spell) can get a speed, even if was static before
+     *
+     * @return SpellSpeed|null
+     */
+    public function getCurrentSpellSpeed()
+    {
+        $spellSpeedWithAddition = $this->getSpellSpeedWithAddition();
+        $spellSpeedBonus = $this->getParameterBonusFromModifiers(ModifierMutableCastingParameterCode::SPELL_SPEED);
+        if (!$spellSpeedWithAddition && $spellSpeedBonus === 0) {
+            return null;
+        }
+
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new SpellSpeed([
+            ($spellSpeedWithAddition
+                ? $spellSpeedWithAddition->getValue()
+                : 0)
+            + $this->getParameterBonusFromModifiers(ModifierMutableCastingParameterCode::SPELL_SPEED),
+            0
+        ]);
+    }
+
+    /**
      * @return DetailLevel|null
      */
     public function getBaseDetailLevel()
@@ -307,7 +440,7 @@ class Formula extends StrictObject
     /**
      * @return DetailLevel|null
      */
-    public function getCurrentDetailLevel()
+    public function getDetailLevelWithAddition()
     {
         $baseDetailLevel = $this->getBaseDetailLevel();
         if ($baseDetailLevel === null) {
@@ -323,6 +456,14 @@ class Formula extends StrictObject
     }
 
     /**
+     * @return DetailLevel|null
+     */
+    public function getCurrentDetailLevel()
+    {
+        return $this->getDetailLevelWithAddition();
+    }
+
+    /**
      * @return Brightness|null
      */
     public function getBaseBrightness()
@@ -333,7 +474,7 @@ class Formula extends StrictObject
     /**
      * @return Brightness|null
      */
-    public function getCurrentBrightness()
+    public function getBrightnessWithAddition()
     {
         $baseBrightness = $this->getBaseBrightness();
         if ($baseBrightness === null) {
@@ -349,6 +490,14 @@ class Formula extends StrictObject
     }
 
     /**
+     * @return Brightness|null
+     */
+    public function getCurrentBrightness()
+    {
+        return $this->getBrightnessWithAddition();
+    }
+
+    /**
      * @return Duration
      */
     public function getBaseDuration(): Duration
@@ -359,7 +508,7 @@ class Formula extends StrictObject
     /**
      * @return Duration
      */
-    public function getCurrentDuration(): Duration
+    public function getDurationWithAddition(): Duration
     {
         $baseDuration = $this->getBaseDuration();
 
@@ -369,6 +518,11 @@ class Formula extends StrictObject
     public function getDurationAddition(): int
     {
         return $this->additions[FormulaMutableCastingParameterCode::DURATION];
+    }
+
+    public function getCurrentDuration(): Duration
+    {
+        return $this->getDurationWithAddition();
     }
 
     /**
@@ -382,7 +536,7 @@ class Formula extends StrictObject
     /**
      * @return SizeChange|null
      */
-    public function getCurrentSizeChange()
+    public function getSizeChangeWithAddition()
     {
         $baseSizeChange = $this->getBaseSizeChange();
         if ($baseSizeChange === null) {
@@ -397,4 +551,11 @@ class Formula extends StrictObject
         return $this->additions[FormulaMutableCastingParameterCode::SIZE_CHANGE];
     }
 
+    /**
+     * @return SizeChange|null
+     */
+    public function getCurrentSizeChange()
+    {
+        return $this->getSizeChangeWithAddition();
+    }
 }

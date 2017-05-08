@@ -104,19 +104,19 @@ class Modifier extends StrictObject
     public function getDifficultyChange(): DifficultyChange
     {
         $parameters = [
-            $this->getCurrentAttack(),
-            $this->getCurrentConditions(),
-            $this->getCurrentEpicenterShift(),
-            $this->getCurrentGrafts(),
-            $this->getCurrentInvisibility(),
-            $this->getCurrentNumberOfSituations(),
-            $this->getCurrentPoints(),
-            $this->getCurrentPower(),
-            $this->getCurrentQuality(),
-            $this->getCurrentRadius(),
-            $this->getCurrentResistance(),
-            $this->getCurrentSpellSpeed(),
-            $this->getCurrentThreshold(),
+            $this->getAttackWithAddition(),
+            $this->getConditionsWithAddition(),
+            $this->getEpicenterShiftWithAddition(),
+            $this->getGraftsWithAddition(),
+            $this->getInvisibilityWithAddition(),
+            $this->getNumberOfSituationsWithAddition(),
+            $this->getPointsWithAddition(),
+            $this->getPowerWithAddition(),
+            $this->getQualityWithAddition(),
+            $this->getRadiusWithAddition(),
+            $this->getResistanceWithAddition(),
+            $this->getSpellSpeedWithAddition(),
+            $this->getThresholdWithAddition(),
         ];
         $parameters = array_filter($parameters, function (IntegerCastingParameter $castingParameter = null) {
             return $castingParameter !== null;
@@ -142,7 +142,7 @@ class Modifier extends StrictObject
     /**
      * @return Radius|null
      */
-    public function getCurrentRadius()
+    public function getRadiusWithAddition()
     {
         $baseRadius = $this->getBaseRadius();
         if ($baseRadius === null) {
@@ -168,7 +168,7 @@ class Modifier extends StrictObject
     /**
      * @return EpicenterShift|null
      */
-    public function getCurrentEpicenterShift()
+    public function getEpicenterShiftWithAddition()
     {
         $baseEpicenterShift = $this->getBaseEpicenterShift();
         if ($baseEpicenterShift === null) {
@@ -194,7 +194,7 @@ class Modifier extends StrictObject
     /**
      * @return Power|null
      */
-    public function getCurrentPower()
+    public function getPowerWithAddition()
     {
         $basePower = $this->getBasePower();
         if ($basePower === null) {
@@ -220,7 +220,7 @@ class Modifier extends StrictObject
     /**
      * @return Attack|null
      */
-    public function getCurrentAttack()
+    public function getAttackWithAddition()
     {
         $baseAttack = $this->getBaseAttack();
         if ($baseAttack === null) {
@@ -246,7 +246,7 @@ class Modifier extends StrictObject
     /**
      * @return Grafts|null
      */
-    public function getCurrentGrafts()
+    public function getGraftsWithAddition()
     {
         $baseGrafts = $this->getBaseGrafts();
         if ($baseGrafts === null) {
@@ -272,7 +272,7 @@ class Modifier extends StrictObject
     /**
      * @return SpellSpeed|null
      */
-    public function getCurrentSpellSpeed()
+    public function getSpellSpeedWithAddition()
     {
         $baseSpellSpeed = $this->getBaseSpellSpeed();
         if ($baseSpellSpeed === null) {
@@ -298,7 +298,7 @@ class Modifier extends StrictObject
     /**
      * @return Invisibility|null
      */
-    public function getCurrentInvisibility()
+    public function getInvisibilityWithAddition()
     {
         $baseInvisibility = $this->getBaseInvisibility();
         if ($baseInvisibility === null) {
@@ -324,7 +324,7 @@ class Modifier extends StrictObject
     /**
      * @return Quality|null
      */
-    public function getCurrentQuality()
+    public function getQualityWithAddition()
     {
         $baseQuality = $this->getBaseQuality();
         if ($baseQuality === null) {
@@ -350,7 +350,7 @@ class Modifier extends StrictObject
     /**
      * @return Conditions|null
      */
-    public function getCurrentConditions()
+    public function getConditionsWithAddition()
     {
         $baseConditions = $this->getBaseConditions();
         if ($baseConditions === null) {
@@ -376,7 +376,7 @@ class Modifier extends StrictObject
     /**
      * @return Resistance|null
      */
-    public function getCurrentResistance()
+    public function getResistanceWithAddition()
     {
         $baseResistance = $this->getBaseResistance();
         if ($baseResistance === null) {
@@ -402,7 +402,7 @@ class Modifier extends StrictObject
     /**
      * @return NumberOfSituations|null
      */
-    public function getCurrentNumberOfSituations()
+    public function getNumberOfSituationsWithAddition()
     {
         $baseNumberOfSituations = $this->getBaseNumberOfSituations();
         if ($baseNumberOfSituations === null) {
@@ -428,7 +428,7 @@ class Modifier extends StrictObject
     /**
      * @return Threshold|null
      */
-    public function getCurrentThreshold()
+    public function getThresholdWithAddition()
     {
         $baseThreshold = $this->getBaseThreshold();
         if ($baseThreshold === null) {
@@ -454,7 +454,7 @@ class Modifier extends StrictObject
     /**
      * @return Points|null
      */
-    public function getCurrentPoints()
+    public function getPointsWithAddition()
     {
         $basePoints = $this->getBasePoints();
         if ($basePoints === null) {
