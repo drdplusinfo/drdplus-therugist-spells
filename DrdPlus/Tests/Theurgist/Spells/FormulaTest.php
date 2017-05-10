@@ -3,16 +3,16 @@ namespace DrdPlus\Tests\Theurgist\Spells;
 
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\FormulaMutableCastingParameterCode;
-use DrdPlus\Theurgist\Spells\CastingParameters\AdditionByDifficulty;
-use DrdPlus\Theurgist\Spells\CastingParameters\DifficultyChange;
-use DrdPlus\Theurgist\Spells\CastingParameters\FormulaDifficulty;
-use DrdPlus\Theurgist\Spells\CastingParameters\FormulaDifficultyAddition;
-use DrdPlus\Theurgist\Spells\CastingParameters\Partials\IntegerCastingParameter;
-use DrdPlus\Theurgist\Spells\CastingParameters\Realm;
-use DrdPlus\Theurgist\Spells\CastingParameters\SpellSpeed;
+use DrdPlus\Theurgist\Spells\SpellParameters\AdditionByDifficulty;
+use DrdPlus\Theurgist\Spells\SpellParameters\DifficultyChange;
+use DrdPlus\Theurgist\Spells\SpellParameters\FormulaDifficulty;
+use DrdPlus\Theurgist\Spells\SpellParameters\Partials\IntegerCastingParameter;
+use DrdPlus\Theurgist\Spells\SpellParameters\Realm;
+use DrdPlus\Theurgist\Spells\SpellParameters\SpellSpeed;
 use DrdPlus\Theurgist\Spells\Formula;
 use DrdPlus\Theurgist\Spells\FormulasTable;
 use DrdPlus\Theurgist\Spells\Modifier;
+use DrdPlus\Theurgist\Spells\SpellTrait;
 use Granam\String\StringTools;
 use Granam\Tests\Tools\TestWithMockery;
 use Mockery\Exception\NoMatchingExpectationException;
@@ -35,7 +35,7 @@ class FormulaTest extends TestWithMockery
         foreach (FormulaCode::getPossibleValues() as $formulaValue) {
             $formulaCode = FormulaCode::getIt($formulaValue);
             $formulasTable = $this->createFormulasTable();
-            $formula = new Formula($formulaCode, $formulasTable, [], []);
+            $formula = new Formula($formulaCode, $formulasTable, [], [], []);
             self::assertSame($formulaCode, $formula->getFormulaCode());
             foreach (FormulaMutableCastingParameterCode::getPossibleValues() as $mutableParameterName) {
                 /** like instance of @see SpellSpeed */
@@ -118,7 +118,7 @@ class FormulaTest extends TestWithMockery
         foreach (FormulaCode::getPossibleValues() as $formulaValue) {
             $formulaCode = FormulaCode::getIt($formulaValue);
             $formulasTable = $this->createFormulasTable();
-            $formula = new Formula($formulaCode, $formulasTable, [], []);
+            $formula = new Formula($formulaCode, $formulasTable, [], [], []);
             self::assertSame($formulaCode, $formula->getFormulaCode());
             foreach (FormulaMutableCastingParameterCode::getPossibleValues() as $mutableParameterName) {
                 if ($mutableParameterName === FormulaMutableCastingParameterCode::DURATION) {
@@ -143,7 +143,7 @@ class FormulaTest extends TestWithMockery
     /**
      * @test
      */
-    public function I_can_create_it_with_change_for_every_formula()
+    public function I_can_create_it_with_addition_for_every_formula()
     {
         $additions = [
             FormulaMutableCastingParameterCode::RADIUS => 1,
@@ -166,7 +166,7 @@ class FormulaTest extends TestWithMockery
                 $this->addBaseParameterGetter($mutableParameterName, $formulaCode, $formulasTable, $baseParameter);
                 $baseParameters[$mutableParameterName] = $baseParameter;
             }
-            $formula = new Formula($formulaCode, $formulasTable, $additions, []);
+            $formula = new Formula($formulaCode, $formulasTable, $additions, [], []);
             self::assertSame($formulaCode, $formula->getFormulaCode());
             foreach (FormulaMutableCastingParameterCode::getPossibleValues() as $mutableParameterName) {
                 $baseParameter = $baseParameters[$mutableParameterName];
@@ -215,10 +215,10 @@ class FormulaTest extends TestWithMockery
                 $this->addBaseParameterGetter($mutableParameterName, $formulaCode, $formulasTable, $baseParameter);
             }
             $this->addFormulaDifficultyGetter($formulasTable, $formulaCode, 0);
-            $formula = new Formula($formulaCode, $formulasTable, [], []);
+            $formula = new Formula($formulaCode, $formulasTable, [], [], []);
             self::assertSame(
                 $formulasTable->getFormulaDifficulty($formulaCode)->createWithChange(0),
-                $formula->getDifficultyOfChanged()
+                $formula->getCurrentDifficulty()
             );
         }
     }
@@ -227,7 +227,7 @@ class FormulaTest extends TestWithMockery
         MockInterface $formulaTable,
         FormulaCode $expectedFormulaCode,
         int $expectedDifficultyChange,
-        $formulaChangedDifficulty = null
+        FormulaDifficulty $formulaChangedDifficulty = null
     )
     {
         $formulaTable->shouldReceive('getFormulaDifficulty')
@@ -255,17 +255,25 @@ class FormulaTest extends TestWithMockery
                 $parameterDifficulties[] = $difficultyChange = random_int(-10, 10);
                 $this->addAdditionByDifficultyGetter($difficultyChange, $changedParameter);
             }
-            $this->addFormulaDifficultyGetter($formulasTable, $formulaCode, 123 + 456 + array_sum($parameterDifficulties));
-            $formula = new Formula($formulaCode, $formulasTable, [], [$this->getModifier(123), $this->getModifier(456)]);
+            $this->addFormulaDifficultyGetter($formulasTable, $formulaCode, 123 + 456 + 789 + 789 + 159 + array_sum($parameterDifficulties));
+            $formula = new Formula(
+                $formulaCode,
+                $formulasTable,
+                [],
+                [$this->getModifier(123), [$this->getModifier(456)]],
+                [$this->getSpellTrait(789), [$this->getSpellTrait(789), [$this->getSpellTrait(159)]]]
+            );
             try {
-                self::assertNotEquals($formulasTable->getFormulaDifficulty($formulaCode), $formula->getDifficultyOfChanged());
+                self::assertNotEquals($formulasTable->getFormulaDifficulty($formulaCode), $formula->getCurrentDifficulty());
                 self::assertEquals(
-                    $formulasTable->getFormulaDifficulty($formulaCode)->createWithChange(123 + 456 + array_sum($parameterDifficulties)),
-                    $formula->getDifficultyOfChanged()
+                    $formulasTable->getFormulaDifficulty($formulaCode)->createWithChange(
+                        123 + 456 + 789 + 789 + 159 + array_sum($parameterDifficulties)
+                    ),
+                    $formula->getCurrentDifficulty()
                 );
             } catch (NoMatchingExpectationException $expectationException) {
                 self::fail(
-                    'Expected difficulty ' . (123 + 456 + array_sum($parameterDifficulties))
+                    'Expected difficulty ' . (123 + 456 + 789 + 789 + 159 + array_sum($parameterDifficulties))
                     . ': ' . $expectationException->getMessage()
                 );
             }
@@ -287,11 +295,27 @@ class FormulaTest extends TestWithMockery
         return $modifier;
     }
 
+
+    /**
+     * @param int $difficultyChangeValue
+     * @return MockInterface|SpellTrait
+     */
+    private function getSpellTrait(int $difficultyChangeValue)
+    {
+        $spellTrait = $this->mockery(SpellTrait::class);
+        $spellTrait->shouldReceive('getDifficultyChange')
+            ->andReturn($difficultyChange = $this->mockery(DifficultyChange::class));
+        $difficultyChange->shouldReceive('getValue')
+            ->andReturn($difficultyChangeValue);
+
+        return $spellTrait;
+    }
+
     private function addAdditionByDifficultyGetter(int $difficultyChange, MockInterface $parameter)
     {
         $parameter->shouldReceive('getAdditionByDifficulty')
             ->andReturn($additionByDifficulty = $this->mockery(AdditionByDifficulty::class));
-        $additionByDifficulty->shouldReceive('getValue')
+        $additionByDifficulty->shouldReceive('getCurrentDifficultyIncrement')
             ->andReturn($difficultyChange);
     }
 
@@ -321,16 +345,14 @@ class FormulaTest extends TestWithMockery
             );
             $this->addCurrentRealmsIncrementGetter($changedDifficulty, 123);
             $this->addRealmGetter($formulasTable, $formulaCode, 123, $finalRealm = $this->mockery(Realm::class));
-            $formula = new Formula($formulaCode, $formulasTable, [], []);
+            $formula = new Formula($formulaCode, $formulasTable, [], [], []);
             self::assertSame($finalRealm, $formula->getRequiredRealm());
         }
     }
 
     private function addCurrentRealmsIncrementGetter(MockInterface $formulaDifficulty, int $currentRealmsIncrement)
     {
-        $formulaDifficulty->shouldReceive('getFormulaDifficultyAddition')
-            ->andReturn($formulaDifficultyAddition = $this->mockery(FormulaDifficultyAddition::class));
-        $formulaDifficultyAddition->shouldReceive('getCurrentRealmsIncrement')
+        $formulaDifficulty->shouldReceive('getCurrentRealmsIncrement')
             ->andReturn($currentRealmsIncrement);
     }
 
@@ -351,7 +373,7 @@ class FormulaTest extends TestWithMockery
 
     /**
      * @test
-     * @expectedException \DrdPlus\Theurgist\Spells\Exceptions\InvalidValueForFormulaParameterAddition
+     * @expectedException \DrdPlus\Theurgist\Spells\Exceptions\InvalidValueForFormulaParameter
      * @expectedExceptionMessageRegExp ~0\.1~
      */
     public function I_can_not_create_it_with_non_integer_addition()
@@ -361,6 +383,7 @@ class FormulaTest extends TestWithMockery
                 FormulaCode::getIt(FormulaCode::PORTAL),
                 $this->createFormulasTable(),
                 [FormulaMutableCastingParameterCode::DURATION => 0.0],
+                [],
                 []
             );
         } catch (\Exception $exception) {
@@ -378,6 +401,7 @@ class FormulaTest extends TestWithMockery
                 FormulaCode::getIt(FormulaCode::PORTAL),
                 $formulasTable,
                 [FormulaMutableCastingParameterCode::DURATION => '5.000'],
+                [],
                 []
             );
         } catch (\Exception $exception) {
@@ -387,6 +411,7 @@ class FormulaTest extends TestWithMockery
             FormulaCode::getIt(FormulaCode::PORTAL),
             $this->createFormulasTable(),
             [FormulaMutableCastingParameterCode::DURATION => 0.1],
+            [],
             []
         );
     }
@@ -410,6 +435,7 @@ class FormulaTest extends TestWithMockery
                 FormulaCode::getIt(FormulaCode::LIGHT),
                 $formulasTable,
                 [FormulaMutableCastingParameterCode::BRIGHTNESS => 4],
+                [],
                 []
             );
         } catch (\Exception $exception) {
@@ -426,6 +452,7 @@ class FormulaTest extends TestWithMockery
             FormulaCode::getIt(FormulaCode::LIGHT),
             $formulasTable,
             [FormulaMutableCastingParameterCode::BRIGHTNESS => 4],
+            [],
             []
         );
     }
@@ -435,9 +462,9 @@ class FormulaTest extends TestWithMockery
      * @expectedException \DrdPlus\Theurgist\Spells\Exceptions\UnknownFormulaParameter
      * @expectedExceptionMessageRegExp ~divine~
      */
-    public function I_can_not_create_it_with_addition_of_unknown_parameter()
+    public function I_can_not_create_it_with_addition_of_unknown_addition()
     {
-        new Formula(FormulaCode::getIt(FormulaCode::PORTAL), $this->createFormulasTable(), ['divine' => 0], []);
+        new Formula(FormulaCode::getIt(FormulaCode::PORTAL), $this->createFormulasTable(), ['divine' => 0], [], []);
     }
 
     /**
@@ -447,7 +474,17 @@ class FormulaTest extends TestWithMockery
      */
     public function I_can_not_create_it_with_invalid_modifier()
     {
-        new Formula(FormulaCode::getIt(FormulaCode::PORTAL), $this->createFormulasTable(), [], [new \DateTime()]);
+        new Formula(FormulaCode::getIt(FormulaCode::PORTAL), $this->createFormulasTable(), [], [new \DateTime()], []);
+    }
+
+    /**
+     * @test
+     * @expectedException \DrdPlus\Theurgist\Spells\Exceptions\InvalidSpellTrait
+     * @expectedExceptionMessageRegExp ~stdClass~
+     */
+    public function I_can_not_create_it_with_invalid_spell_trait()
+    {
+        new Formula(FormulaCode::getIt(FormulaCode::PORTAL), $this->createFormulasTable(), [], [], [new \stdClass()]);
     }
 
 }

@@ -5,7 +5,7 @@ use DrdPlus\Tables\Tables;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\SpellTraitCode;
-use DrdPlus\Theurgist\Spells\CastingParameters\DifficultyChange;
+use DrdPlus\Theurgist\Spells\SpellParameters\DifficultyChange;
 use DrdPlus\Theurgist\Spells\FormulasTable;
 use DrdPlus\Theurgist\Spells\ModifiersTable;
 use DrdPlus\Theurgist\Spells\SpellTraitsTable;
@@ -111,9 +111,9 @@ class SpellTraitsTableTest extends AbstractTheurgistTableTest
         $matchingModifierValues = [];
         $modifiersTable = new ModifiersTable(Tables::getIt());
         foreach (ModifierCode::getPossibleValues() as $modifierValue) {
-            $spellTraits = $modifiersTable->getSpellTraits(ModifierCode::getIt($modifierValue));
-            foreach ($spellTraits as $spellTrait) {
-                if ($spellTrait->getSpellTraitCode()->getValue() === $spellTraitValue) {
+            $spellTraitCodes = $modifiersTable->getSpellTraitCodes(ModifierCode::getIt($modifierValue));
+            foreach ($spellTraitCodes as $spellTraitCode) {
+                if ($spellTraitCode->getValue() === $spellTraitValue) {
                     $matchingModifierValues[] = $modifierValue;
                     continue;
                 }
@@ -203,9 +203,9 @@ class SpellTraitsTableTest extends AbstractTheurgistTableTest
             $this->createSpellTraitsTableShell()
         );
         foreach (FormulaCode::getPossibleValues() as $formulaValue) {
-            $spellTraits = $formulasTable->getSpellTraits(FormulaCode::getIt($formulaValue));
-            foreach ($spellTraits as $spellTrait) {
-                if ($spellTrait->getSpellTraitCode()->getValue() === $spellTraitValue) {
+            $spellTraitCodes = $formulasTable->getSpellTraitCodes(FormulaCode::getIt($formulaValue));
+            foreach ($spellTraitCodes as $spellTrait) {
+                if ($spellTrait->getValue() === $spellTraitValue) {
                     $matchingFormulaValues[] = $formulaValue;
                     continue;
                 }

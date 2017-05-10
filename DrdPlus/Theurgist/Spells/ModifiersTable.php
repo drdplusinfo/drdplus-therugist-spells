@@ -8,26 +8,24 @@ use DrdPlus\Theurgist\Codes\FormCode;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ProfileCode;
-use DrdPlus\Theurgist\Spells\CastingParameters\Affection;
-use DrdPlus\Theurgist\Spells\CastingParameters\Attack;
-use DrdPlus\Theurgist\Spells\CastingParameters\CastingRounds;
-use DrdPlus\Theurgist\Spells\CastingParameters\Conditions;
-use DrdPlus\Theurgist\Spells\CastingParameters\DifficultyChange;
-use DrdPlus\Theurgist\Spells\CastingParameters\Grafts;
-use DrdPlus\Theurgist\Spells\CastingParameters\Invisibility;
-use DrdPlus\Theurgist\Spells\CastingParameters\Points;
-use DrdPlus\Theurgist\Spells\CastingParameters\Power;
-use DrdPlus\Theurgist\Spells\CastingParameters\PropertyChange;
-use DrdPlus\Theurgist\Spells\CastingParameters\Quality;
-use DrdPlus\Theurgist\Spells\CastingParameters\Radius;
-use DrdPlus\Theurgist\Spells\CastingParameters\Realm;
-use DrdPlus\Theurgist\Spells\CastingParameters\Resistance;
-use DrdPlus\Theurgist\Spells\CastingParameters\NumberOfSituations;
-use DrdPlus\Theurgist\Spells\CastingParameters\EpicenterShift;
-use DrdPlus\Theurgist\Spells\CastingParameters\SpellSpeed;
-use DrdPlus\Theurgist\Spells\CastingParameters\SpellTrait;
-use DrdPlus\Theurgist\Spells\CastingParameters\Threshold;
-use Granam\Integer\IntegerObject;
+use DrdPlus\Theurgist\Codes\SpellTraitCode;
+use DrdPlus\Theurgist\Spells\SpellParameters\RealmsAffection;
+use DrdPlus\Theurgist\Spells\SpellParameters\Attack;
+use DrdPlus\Theurgist\Spells\SpellParameters\CastingRounds;
+use DrdPlus\Theurgist\Spells\SpellParameters\Conditions;
+use DrdPlus\Theurgist\Spells\SpellParameters\DifficultyChange;
+use DrdPlus\Theurgist\Spells\SpellParameters\Grafts;
+use DrdPlus\Theurgist\Spells\SpellParameters\Invisibility;
+use DrdPlus\Theurgist\Spells\SpellParameters\Points;
+use DrdPlus\Theurgist\Spells\SpellParameters\Power;
+use DrdPlus\Theurgist\Spells\SpellParameters\Quality;
+use DrdPlus\Theurgist\Spells\SpellParameters\Radius;
+use DrdPlus\Theurgist\Spells\SpellParameters\Realm;
+use DrdPlus\Theurgist\Spells\SpellParameters\Resistance;
+use DrdPlus\Theurgist\Spells\SpellParameters\NumberOfSituations;
+use DrdPlus\Theurgist\Spells\SpellParameters\EpicenterShift;
+use DrdPlus\Theurgist\Spells\SpellParameters\SpellSpeed;
+use DrdPlus\Theurgist\Spells\SpellParameters\Threshold;
 
 class ModifiersTable extends AbstractFileTable
 {
@@ -55,7 +53,7 @@ class ModifiersTable extends AbstractFileTable
     }
 
     const REALM = 'realm';
-    const AFFECTION = 'affection';
+    const REALMS_AFFECTION = 'realms_affection';
     const AFFECTION_TYPE = 'affection_type';
     const CASTING_ROUNDS = 'casting_rounds';
     const DIFFICULTY_CHANGE = 'difficulty_change';
@@ -73,7 +71,7 @@ class ModifiersTable extends AbstractFileTable
     const NUMBER_OF_SITUATIONS = 'number_of_situations';
     const THRESHOLD = 'threshold';
     const FORMS = 'forms';
-    const TRAITS = 'traits';
+    const SPELL_TRAITS = 'spell_traits';
     const PROFILES = 'profiles';
     const FORMULAS = 'formulas';
     const PARENT_MODIFIERS = 'parent_modifiers';
@@ -83,7 +81,7 @@ class ModifiersTable extends AbstractFileTable
     {
         return [
             self::REALM => self::POSITIVE_INTEGER,
-            self::AFFECTION => self::ARRAY,
+            self::REALMS_AFFECTION => self::ARRAY,
             self::CASTING_ROUNDS => self::ARRAY,
             self::DIFFICULTY_CHANGE => self::POSITIVE_INTEGER,
             self::RADIUS => self::ARRAY,
@@ -100,7 +98,7 @@ class ModifiersTable extends AbstractFileTable
             self::NUMBER_OF_SITUATIONS => self::ARRAY,
             self::THRESHOLD => self::ARRAY,
             self::FORMS => self::ARRAY,
-            self::TRAITS => self::ARRAY,
+            self::SPELL_TRAITS => self::ARRAY,
             self::PROFILES => self::ARRAY,
             self::FORMULAS => self::ARRAY,
             self::PARENT_MODIFIERS => self::ARRAY,
@@ -128,89 +126,19 @@ class ModifiersTable extends AbstractFileTable
     }
 
     /**
-     * @param array|ModifierCode[] $modifierCodes
-     * @return Realm
-     */
-    public function getHighestRequiredRealm(array $modifierCodes): Realm
-    {
-        $modifierCodes = $this->toFlatArray($modifierCodes);
-        if (count($modifierCodes) === 0) {
-            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-            return new Realm(0);
-        }
-        $realms = array_map(
-            function ($modifierCodesOrCode) {
-                return $this->getRealm($modifierCodesOrCode);
-            },
-            $this->toFlatArray($modifierCodes)
-        );
-        $highestRealm = current($realms);
-        /** @var Realm $realm */
-        foreach ($realms as $realm) {
-            if ($realm->getValue() > $highestRealm->getValue()) {
-                $highestRealm = $realm;
-            }
-        }
-
-        return $highestRealm;
-    }
-
-    /**
      * @param ModifierCode $modifierCode
-     * @return Affection|null
+     * @return RealmsAffection|null
      */
-    public function getAffection(ModifierCode $modifierCode)
+    public function getRealmsAffection(ModifierCode $modifierCode)
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        $affectionValues = $this->getValue($modifierCode, self::AFFECTION);
+        $affectionValues = $this->getValue($modifierCode, self::REALMS_AFFECTION);
         if (count($affectionValues) === 0) {
             return null;
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new Affection($affectionValues);
-    }
-
-    /**
-     * @param array|ModifierCode[] $modifierCodes
-     * @return array|Affection[]
-     */
-    public function getAffectionsOfModifiers(array $modifierCodes): array
-    {
-        if (count($modifierCodes) === 0) {
-            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-            return [];
-        }
-        $affections = array_filter(
-            array_map(
-                function ($modifierCodesOrCode) {
-                    return $this->getAffection($modifierCodesOrCode);
-                },
-                $this->toFlatArray($modifierCodes)
-            ),
-            function (Affection $affection = null) {
-                return $affection !== null;
-            }
-        );
-
-        $summedAffections = [];
-        /** @var Affection $affection */
-        foreach ($affections as $affection) {
-            $affectionPeriodValue = $affection->getAffectionPeriod()->getValue();
-            if (!array_key_exists($affectionPeriodValue, $summedAffections)) {
-                $summedAffections[$affectionPeriodValue] = $affection;
-                continue;
-            }
-            /** @var Affection $summedAffection */
-            $summedAffection = $summedAffections[$affectionPeriodValue];
-            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-            $summedAffections[$affectionPeriodValue] = new Affection([
-                $summedAffection->getValue() + $affection->getValue(),
-                $affectionPeriodValue,
-            ]);
-        }
-
-        return $summedAffections;
+        return new RealmsAffection($affectionValues);
     }
 
     /**
@@ -224,21 +152,6 @@ class ModifiersTable extends AbstractFileTable
     }
 
     /**
-     * @param array $modifierCodes
-     * @return CastingRounds
-     */
-    public function sumCastingRoundsChange(array $modifierCodes): CastingRounds
-    {
-        $castingSum = 0;
-        foreach ($this->toFlatArray($modifierCodes) as $modifierCode) {
-            $castingSum += $this->getCastingRounds($modifierCode)->getValue();
-        }
-
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new CastingRounds([$castingSum, 0 /* no additions by realm */]);
-    }
-
-    /**
      * @param ModifierCode $modifierCode
      * @return DifficultyChange
      */
@@ -246,22 +159,6 @@ class ModifiersTable extends AbstractFileTable
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new DifficultyChange($this->getValue($modifierCode, self::DIFFICULTY_CHANGE));
-    }
-
-    /**
-     * @param array|ModifierCode[] $modifierCodes
-     * @return DifficultyChange
-     */
-    public function sumDifficultyChanges(array $modifierCodes): DifficultyChange
-    {
-        return new DifficultyChange(
-            array_sum(
-                array_map(function ($modifierCodesOrCode) {
-                    /** @var ModifierCode $modifierCodesOrCode */
-                    return $this->getDifficultyChange($modifierCodesOrCode)->getValue();
-                }, $this->toFlatArray($modifierCodes))
-            )
-        );
     }
 
     /**
@@ -281,25 +178,6 @@ class ModifiersTable extends AbstractFileTable
     }
 
     /**
-     * @param array|ModifierCode[] $modifierCodes
-     * @return IntegerObject
-     */
-    public function sumRadiusChange(array $modifierCodes): IntegerObject
-    {
-        $radiusValue = 0;
-        foreach ($modifierCodes as $modifierCode) {
-            $radius = $this->getRadius($modifierCode);
-            if (!$radius) {
-                continue;
-            }
-            $radiusValue += $radius->getValue();
-        }
-
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new IntegerObject($radiusValue);
-    }
-
-    /**
      * @param ModifierCode $modifierCode
      * @return EpicenterShift|null
      */
@@ -313,45 +191,6 @@ class ModifiersTable extends AbstractFileTable
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new EpicenterShift($shiftValues, $this->tables->getDistanceTable());
-    }
-
-    /**
-     * Transposition can shift epicenter.
-     *
-     * @param array|ModifierCode[] $modifierCodes
-     * @return bool
-     */
-    public function isEpicenterShifted(array $modifierCodes): bool
-    {
-        foreach ($this->toFlatArray($modifierCodes) as $modifierCode) {
-            $shift = $this->getEpicenterShift($modifierCode);
-            if ($shift) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Transposition can shift epicenter.
-     *
-     * @param array|ModifierCode[] $modifierCodes
-     * @return IntegerObject
-     */
-    public function sumEpicenterShiftChange(array $modifierCodes): IntegerObject
-    {
-        $shiftSum = 0;
-        foreach ($this->toFlatArray($modifierCodes) as $modifierCode) {
-            $shift = $this->getEpicenterShift($modifierCode);
-            if (!$shift) {
-                continue;
-            }
-            $shiftSum += $shift->getValue();
-        }
-
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new IntegerObject($shiftSum);
     }
 
     /**
@@ -371,24 +210,6 @@ class ModifiersTable extends AbstractFileTable
     }
 
     /**
-     * @param array|ModifierCode[] $modifierCodes
-     * @return IntegerObject
-     */
-    public function sumPowerChanges(array $modifierCodes): IntegerObject
-    {
-        $powerValue = 0;
-        foreach ($modifierCodes as $modifierCode) {
-            $power = $this->getPower($modifierCode);
-            if (!$power) {
-                continue;
-            }
-            $powerValue += $power->getValue();
-        }
-
-        return new IntegerObject($powerValue);
-    }
-
-    /**
      * @param ModifierCode $modifierCode
      * @return Attack|null
      */
@@ -402,27 +223,6 @@ class ModifiersTable extends AbstractFileTable
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new Attack($attackValues);
-    }
-
-    /**
-     * @param array|Modifier[] $modifiers
-     * @return PropertyChange
-     */
-    public function sumAttackChange(array $modifiers): PropertyChange
-    {
-        $attackSum = 0;
-        $difficultySum = 0;
-        /** @var Modifier $modifier */
-        foreach ($this->toFlatArray($modifiers) as $modifier) {
-            $attack = $modifier->getAttackWithAddition();
-            if (!$attack) {
-                continue;
-            }
-            $attackSum += $attack->getValue();
-            $difficultySum += $attack->getAdditionByDifficulty()->getCurrentDifficultyIncrement();
-        }
-
-        return new PropertyChange($attackSum, $difficultySum);
     }
 
     /**
@@ -455,25 +255,6 @@ class ModifiersTable extends AbstractFileTable
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new SpellSpeed($speedValues, $this->tables->getSpeedTable());
-    }
-
-    /**
-     * @param array|ModifierCode[] $modifierCodes
-     * @return IntegerObject
-     */
-    public function sumSpellSpeedChange(array $modifierCodes): IntegerObject
-    {
-        $speedSum = 0;
-        foreach ($this->toFlatArray($modifierCodes) as $modifierCode) {
-            $speed = $this->getSpellSpeed($modifierCode);
-            if (!$speed) {
-                continue;
-            }
-            $speedSum += $speed->getValue();
-        }
-
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new IntegerObject($speedSum);
     }
 
     /**
@@ -605,17 +386,17 @@ class ModifiersTable extends AbstractFileTable
 
     /**
      * @param ModifierCode $modifierCode
-     * @return array|SpellTrait[]
+     * @return array|SpellTraitCode[]
      */
-    public function getSpellTraits(ModifierCode $modifierCode): array
+    public function getSpellTraitCodes(ModifierCode $modifierCode): array
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return array_map(
-            function (string $spellTraitAnnotation) {
+            function (string $spellTraitValue) {
                 /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-                return new SpellTrait($spellTraitAnnotation);
+                return SpellTraitCode::getIt($spellTraitValue);
             },
-            $this->getValue($modifierCode, self::TRAITS)
+            $this->getValue($modifierCode, self::SPELL_TRAITS)
         );
     }
 
@@ -644,7 +425,7 @@ class ModifiersTable extends AbstractFileTable
      * @return array|FormulaCode[]
      * @throws \DrdPlus\Theurgist\Spells\Exceptions\UnknownModifierToGetFormulasFor
      */
-    public function getFormulas(ModifierCode $modifierCode): array
+    public function getFormulaCodes(ModifierCode $modifierCode): array
     {
         try {
             /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
@@ -664,7 +445,7 @@ class ModifiersTable extends AbstractFileTable
      * @return array|ModifierCode[]
      * @throws \DrdPlus\Theurgist\Spells\Exceptions\UnknownModifierToGetParentModifiersFor
      */
-    public function getParentModifiers(ModifierCode $modifierCode): array
+    public function getParentModifierCodes(ModifierCode $modifierCode): array
     {
         try {
             /** @noinspection ExceptionsAnnotatingAndHandlingInspection */

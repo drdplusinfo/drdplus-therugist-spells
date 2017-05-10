@@ -1,8 +1,6 @@
 <?php
 namespace DrdPlus\Theurgist\Spells;
 
-use DrdPlus\Codes\TimeUnitCode;
-use DrdPlus\Tables\Measurements\Time\Time;
 use DrdPlus\Tables\Partials\AbstractFileTable;
 use DrdPlus\Tables\Partials\Exceptions\RequiredRowNotFound;
 use DrdPlus\Tables\Tables;
@@ -11,21 +9,20 @@ use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ProfileCode;
 use DrdPlus\Theurgist\Codes\SpellTraitCode;
-use DrdPlus\Theurgist\Spells\CastingParameters\Affection;
-use DrdPlus\Theurgist\Spells\CastingParameters\Attack;
-use DrdPlus\Theurgist\Spells\CastingParameters\Brightness;
-use DrdPlus\Theurgist\Spells\CastingParameters\Evocation;
-use DrdPlus\Theurgist\Spells\CastingParameters\DetailLevel;
-use DrdPlus\Theurgist\Spells\CastingParameters\FormulaDifficulty;
-use DrdPlus\Theurgist\Spells\CastingParameters\Duration;
-use DrdPlus\Theurgist\Spells\CastingParameters\EpicenterShift;
-use DrdPlus\Theurgist\Spells\CastingParameters\Power;
-use DrdPlus\Theurgist\Spells\CastingParameters\Radius;
-use DrdPlus\Theurgist\Spells\CastingParameters\Realm;
-use DrdPlus\Theurgist\Spells\CastingParameters\SizeChange;
-use DrdPlus\Theurgist\Spells\CastingParameters\SpellSpeed;
-use DrdPlus\Theurgist\Spells\CastingParameters\SpellTrait;
-use Granam\Integer\IntegerObject;
+use DrdPlus\Theurgist\Spells\SpellParameters\CastingRounds;
+use DrdPlus\Theurgist\Spells\SpellParameters\RealmsAffection;
+use DrdPlus\Theurgist\Spells\SpellParameters\Attack;
+use DrdPlus\Theurgist\Spells\SpellParameters\Brightness;
+use DrdPlus\Theurgist\Spells\SpellParameters\Evocation;
+use DrdPlus\Theurgist\Spells\SpellParameters\DetailLevel;
+use DrdPlus\Theurgist\Spells\SpellParameters\FormulaDifficulty;
+use DrdPlus\Theurgist\Spells\SpellParameters\Duration;
+use DrdPlus\Theurgist\Spells\SpellParameters\EpicenterShift;
+use DrdPlus\Theurgist\Spells\SpellParameters\Power;
+use DrdPlus\Theurgist\Spells\SpellParameters\Radius;
+use DrdPlus\Theurgist\Spells\SpellParameters\Realm;
+use DrdPlus\Theurgist\Spells\SpellParameters\SizeChange;
+use DrdPlus\Theurgist\Spells\SpellParameters\SpellSpeed;
 
 class FormulasTable extends AbstractFileTable
 {
@@ -33,25 +30,13 @@ class FormulasTable extends AbstractFileTable
      * @var Tables
      */
     private $tables;
-    /**
-     * @var ModifiersTable
-     */
-    private $modifiersTable;
-    /**
-     * @var SpellTraitsTable
-     */
-    private $spellTraitsTable;
 
     /**
      * @param Tables $tables
-     * @param ModifiersTable $modifiersTable
-     * @param SpellTraitsTable $spellTraitsTable
      */
-    public function __construct(Tables $tables, ModifiersTable $modifiersTable, SpellTraitsTable $spellTraitsTable)
+    public function __construct(Tables $tables)
     {
         $this->tables = $tables;
-        $this->modifiersTable = $modifiersTable;
-        $this->spellTraitsTable = $spellTraitsTable;
     }
 
     protected function getDataFileName(): string
@@ -60,7 +45,7 @@ class FormulasTable extends AbstractFileTable
     }
 
     const REALM = 'realm';
-    const AFFECTION = 'affection';
+    const REALMS_AFFECTION = 'realms_affection';
     const EVOCATION = 'evocation';
     const FORMULA_DIFFICULTY = 'formula_difficulty';
     const RADIUS = 'radius';
@@ -73,7 +58,7 @@ class FormulasTable extends AbstractFileTable
     const SPELL_SPEED = 'spell_speed';
     const EPICENTER_SHIFT = 'epicenter_shift';
     const FORMS = 'forms';
-    const TRAITS = 'traits';
+    const SPELL_TRAITS = 'spell_traits';
     const PROFILES = 'profiles';
     const MODIFIERS = 'modifiers';
 
@@ -81,7 +66,7 @@ class FormulasTable extends AbstractFileTable
     {
         return [
             self::REALM => self::POSITIVE_INTEGER,
-            self::AFFECTION => self::ARRAY,
+            self::REALMS_AFFECTION => self::ARRAY,
             self::EVOCATION => self::ARRAY,
             self::FORMULA_DIFFICULTY => self::ARRAY,
             self::RADIUS => self::ARRAY,
@@ -94,7 +79,7 @@ class FormulasTable extends AbstractFileTable
             self::SPELL_SPEED => self::ARRAY,
             self::EPICENTER_SHIFT => self::ARRAY,
             self::FORMS => self::ARRAY,
-            self::TRAITS => self::ARRAY,
+            self::SPELL_TRAITS => self::ARRAY,
             self::PROFILES => self::ARRAY,
             self::MODIFIERS => self::ARRAY,
         ];
@@ -121,84 +106,12 @@ class FormulasTable extends AbstractFileTable
 
     /**
      * @param FormulaCode $formulaCode
-     * @param array|ModifierCode[] $modifierCodes
-     * @param array|SpellTraitCode[] $spellTraitCodes
-     * @return Realm
+     * @return RealmsAffection
      */
-    public function getRealmOfModified(/** @noinspection PhpUnusedParameterInspection to keep same interface with others */
-        FormulaCode $formulaCode,
-        array $modifierCodes,
-        array $spellTraitCodes
-    ): Realm
-    {
-        $basicFormulaDifficulty = $this->getFormulaDifficulty($formulaCode);
-        $maximalDifficultyOfBasicFormula = $basicFormulaDifficulty->getMaximal();
-        $formulaBasicRealm = $this->getRealm($formulaCode);
-        $difficultyOfModifiedValue = $this->getFormulaDifficultyOfModified(
-            $formulaCode,
-            $modifierCodes,
-            $spellTraitCodes
-        )->getValue();
-        $highestRequiredRealmByModifiers = $this->modifiersTable->getHighestRequiredRealm($modifierCodes);
-        if ($maximalDifficultyOfBasicFormula >= $difficultyOfModifiedValue
-            && $formulaBasicRealm->getValue() >= $highestRequiredRealmByModifiers->getValue()
-        ) {
-            // formula is able to handle requirements from its lowest possible realm
-            return $formulaBasicRealm;
-        }
-        $missingDifficulty = $difficultyOfModifiedValue - $maximalDifficultyOfBasicFormula;
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        $requiredAdditionByRealms = $basicFormulaDifficulty->getFormulaDifficultyAddition()->add($missingDifficulty);
-        $byDifficultyRequiredRealm = $formulaBasicRealm->add($requiredAdditionByRealms->getCurrentRealmsIncrement());
-        if ($byDifficultyRequiredRealm->getValue() >= $highestRequiredRealmByModifiers->getValue()) {
-            return $byDifficultyRequiredRealm;
-        }
-
-        // handled difficulty was enough, but realm is still required higher by modifiers
-        return $highestRequiredRealmByModifiers;
-    }
-
-    /**
-     * @param FormulaCode $formulaCode
-     * @return Affection
-     */
-    public function getAffection(FormulaCode $formulaCode): Affection
+    public function getRealmsAffection(FormulaCode $formulaCode): RealmsAffection
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new Affection($this->getValue($formulaCode, self::AFFECTION));
-    }
-
-    /**
-     * @param FormulaCode $formulaCode
-     * @param array|ModifierCode[] $modifierCodes
-     * @param array|SpellTraitCode[] $spellTraitCodes
-     * @return array|Affection[]
-     */
-    public function getAffectionsOfModified(/** @noinspection PhpUnusedParameterInspection */
-        FormulaCode $formulaCode,
-        array $modifierCodes,
-        array $spellTraitCodes
-    ): array
-    {
-        $formulaAffection = $this->getAffection($formulaCode);
-        $summedAffections = [$formulaAffection->getAffectionPeriod()->getValue() => $formulaAffection];
-        /** @var Affection $modifiersAffection */
-        foreach ($this->modifiersTable->getAffectionsOfModifiers($modifierCodes) as $modifiersAffection) {
-            $affectionPeriodValue = $modifiersAffection->getAffectionPeriod()->getValue();
-            if (!array_key_exists($affectionPeriodValue, $summedAffections)) {
-                $summedAffections[$affectionPeriodValue] = $modifiersAffection;
-                continue;
-            }
-            /** @var Affection $summedAffection */
-            $summedAffection = $summedAffections[$affectionPeriodValue];
-            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-            $summedAffections[$affectionPeriodValue] = new Affection([
-                $summedAffection->getValue() + $modifiersAffection->getValue(),
-                $affectionPeriodValue,
-            ]);
-        }
-
-        return $summedAffections;
+        return new RealmsAffection($this->getValue($formulaCode, self::REALMS_AFFECTION));
     }
 
     /**
@@ -214,54 +127,17 @@ class FormulasTable extends AbstractFileTable
     }
 
     /**
-     * @param FormulaCode $formulaCode
-     * @param array|ModifierCode[] $modifierCodes
-     * @param array|SpellTraitCode[] $spellTraitCodes
-     * @return Evocation
-     */
-    public function getEvocationOfModified(/** @noinspection PhpUnusedParameterInspection to keep same interface with others */
-        FormulaCode $formulaCode,
-        array $modifierCodes,
-        array $spellTraitCodes
-    ): Evocation
-    {
-        return $this->getEvocation($formulaCode);
-    }
-
-    /**
      * Gives time in fact.
      * Currently every unmodified formula can be casted in one round.
      *
      * @param FormulaCode $formulaCode
-     * @return Time
+     * @return CastingRounds
      */
-    public function getCasting(/** @noinspection PhpUnusedParameterInspection to keep same interface with others */
-        FormulaCode $formulaCode): Time
+    public function getCastingRounds(/** @noinspection PhpUnusedParameterInspection to keep same interface with others */
+        FormulaCode $formulaCode): CastingRounds
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new Time(1, TimeUnitCode::ROUND, $this->tables->getTimeTable());
-    }
-
-    /**
-     * Gives time in fact
-     *
-     * @param FormulaCode $formulaCode
-     * @param array|ModifierCode[] $modifierCodes
-     * @param array|SpellTraitCode[] $spellTraitCodes
-     * @return Time
-     */
-    public function getCastingOfModified(/** @noinspection PhpUnusedParameterInspection to keep same interface with others */
-        FormulaCode $formulaCode,
-        array $modifierCodes,
-        array $spellTraitCodes
-    ): Time
-    {
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        $rounds = $this->getCasting($formulaCode)->getInUnit(TimeUnitCode::ROUND)->getValue()
-            + $this->modifiersTable->sumCastingRoundsChange($modifierCodes)->getValue();
-
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new Time($rounds, TimeUnitCode::ROUND, $this->tables->getTimeTable());
+        return new CastingRounds([1]);
     }
 
     /**
@@ -272,25 +148,6 @@ class FormulasTable extends AbstractFileTable
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new FormulaDifficulty($this->getValue($formulaCode, self::FORMULA_DIFFICULTY));
-    }
-
-    /**
-     * @param FormulaCode $formulaCode
-     * @param array|ModifierCode[] $modifierCodes
-     * @param array|SpellTraitCode[] $spellTraitCodes
-     * @return FormulaDifficulty
-     */
-    public function getFormulaDifficultyOfModified(
-        FormulaCode $formulaCode,
-        array $modifierCodes,
-        array $spellTraitCodes
-    ): FormulaDifficulty
-    { // todo give ModifiedDifficulty object as IntegerObject or something like that
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return $this->getFormulaDifficulty($formulaCode)->createWithChange(
-            + $this->modifiersTable->sumDifficultyChanges($modifierCodes)->getValue()
-            + $this->spellTraitsTable->sumDifficultyChanges($spellTraitCodes)->getValue()
-        );
     }
 
     /**
@@ -311,48 +168,9 @@ class FormulasTable extends AbstractFileTable
 
     /**
      * @param FormulaCode $formulaCode
-     * @param array|ModifierCode[] $modifierCodes
-     * @param array|SpellTraitCode[] $spellTraitCodes
-     * @return Radius|null
-     */
-    public function getRadiusOfModified(/** @noinspection PhpUnusedParameterInspection */
-        FormulaCode $formulaCode,
-        array $modifierCodes,
-        array $spellTraitCodes
-    )
-    {
-        $formulaRadius = $this->getRadius($formulaCode);
-        if (!$formulaRadius) {
-            return null;
-        }
-
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return $formulaRadius->getWithAddition(
-            $this->modifiersTable->sumRadiusChange($modifierCodes)->getValue()
-        );
-    }
-
-    /**
-     * @param FormulaCode $formulaCode
      * @return Duration
      */
     public function getDuration(FormulaCode $formulaCode): Duration
-    {
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new Duration($this->getValue($formulaCode, self::DURATION), $this->tables->getTimeTable());
-    }
-
-    /**
-     * @param FormulaCode $formulaCode
-     * @param array|ModifierCode[] $modifierCodes
-     * @param array|SpellTraitCode[] $spellTraitCodes
-     * @return Duration
-     */
-    public function getDurationOfModified(/** @noinspection PhpUnusedParameterInspection */
-        FormulaCode $formulaCode,
-        array $modifierCodes,
-        array $spellTraitCodes
-    ): Duration
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new Duration($this->getValue($formulaCode, self::DURATION), $this->tables->getTimeTable());
@@ -376,26 +194,6 @@ class FormulasTable extends AbstractFileTable
 
     /**
      * @param FormulaCode $formulaCode
-     * @param array|ModifierCode[] $modifierCodes
-     * @param array|SpellTraitCode[] $spellTraitCodes
-     * @return Power|null
-     */
-    public function getPowerOfModified(/** @noinspection PhpUnusedParameterInspection to keep same interface with others */
-        FormulaCode $formulaCode,
-        array $modifierCodes,
-        array $spellTraitCodes
-    )
-    {
-        $formulaPower = $this->getPower($formulaCode);
-        if (!$formulaPower) {
-            return null;
-        }
-
-        return $formulaPower->getWithAddition($this->modifiersTable->sumPowerChanges($modifierCodes)->getValue());
-    }
-
-    /**
-     * @param FormulaCode $formulaCode
      * @return Attack|null
      */
     public function getAttack(FormulaCode $formulaCode)
@@ -408,30 +206,6 @@ class FormulasTable extends AbstractFileTable
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new Attack($attackValues);
-    }
-
-    /**
-     * @param FormulaCode $formulaCode
-     * @param array|Modifier[] $modifiers
-     * @param array|SpellTraitCode[] $spellTraitCodes
-     * @return IntegerObject|null
-     */
-    public function getAttackOfModified(/** @noinspection PhpUnusedParameterInspection to keep same interface with others */
-        FormulaCode $formulaCode,
-        array $modifiers,
-        array $spellTraitCodes = []
-    )
-    {
-        $formulaAttack = $this->getAttack($formulaCode);
-        if (!$formulaAttack) {
-            return null;
-        }
-
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new IntegerObject(
-            $formulaAttack->getValue()
-            + $this->modifiersTable->sumAttackChange($modifiers)->getValue()
-        );
     }
 
     /**
@@ -452,46 +226,9 @@ class FormulasTable extends AbstractFileTable
 
     /**
      * @param FormulaCode $formulaCode
-     * @param array|ModifierCode[] $modifierCodes
-     * @param array|SpellTraitCode[] $spellTraitCodes
-     * @return SizeChange|null
-     */
-    public function getSizeChangeOfModified(/** @noinspection PhpUnusedParameterInspection to keep same interface with others */
-        FormulaCode $formulaCode,
-        array $modifierCodes,
-        array $spellTraitCodes
-    )
-    {
-        return $this->getSizeChange($formulaCode);
-    }
-
-    /**
-     * @param FormulaCode $formulaCode
      * @return DetailLevel|null
      */
     public function getDetailLevel(FormulaCode $formulaCode)
-    {
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        $detailLevelValues = $this->getValue($formulaCode, self::DETAIL_LEVEL);
-        if (!$detailLevelValues) {
-            return null;
-        }
-
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new DetailLevel($detailLevelValues);
-    }
-
-    /**
-     * @param FormulaCode $formulaCode
-     * @param array|ModifierCode[] $modifierCodes
-     * @param array|SpellTraitCode[] $spellTraitCodes
-     * @return DetailLevel|null
-     */
-    public function getDetailLevelOfModified(/** @noinspection PhpUnusedParameterInspection to keep same interface with others */
-        FormulaCode $formulaCode,
-        array $modifierCodes,
-        array $spellTraitCodes
-    )
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         $detailLevelValues = $this->getValue($formulaCode, self::DETAIL_LEVEL);
@@ -521,22 +258,6 @@ class FormulasTable extends AbstractFileTable
 
     /**
      * @param FormulaCode $formulaCode
-     * @param array|ModifierCode[] $modifierCodes
-     * @param array|SpellTraitCode[] $spellTraitCodes
-     * @return Brightness|null
-     */
-    public function getBrightnessOfModified(/** @noinspection PhpUnusedParameterInspection to keep same interface with others */
-        FormulaCode $formulaCode,
-        array $modifierCodes,
-        array $spellTraitCodes
-    )
-    {
-        // no modifier affects brightness
-        return $this->getBrightness($formulaCode);
-    }
-
-    /**
-     * @param FormulaCode $formulaCode
      * @return SpellSpeed|null
      */
     public function getSpellSpeed(FormulaCode $formulaCode)
@@ -549,27 +270,6 @@ class FormulasTable extends AbstractFileTable
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new SpellSpeed($speedValues, $this->tables->getSpeedTable());
-    }
-
-    /**
-     * @param FormulaCode $formulaCode
-     * @param array|ModifierCode[] $modifierCodes
-     * @param array|SpellTraitCode[] $spellTraitCodes
-     * @return SpellSpeed|null
-     */
-    public function getSpellSpeedOfModified(/** @noinspection PhpUnusedParameterInspection to keep same interface with others */
-        FormulaCode $formulaCode,
-        array $modifierCodes,
-        array $spellTraitCodes
-    )
-    {
-        $formulaSpeed = $this->getSpellSpeed($formulaCode);
-        if (!$formulaSpeed) {
-            return null;
-        }
-
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return $formulaSpeed->getWithAddition($this->modifiersTable->sumSpellSpeedChange($modifierCodes)->getValue());
     }
 
     /**
@@ -589,44 +289,6 @@ class FormulasTable extends AbstractFileTable
     }
 
     /**
-     * Transposition can shift epicenter.
-     *
-     * @param FormulaCode $formulaCode
-     * @param array|ModifierCode[] $modifierCodes
-     * @param array|SpellTraitCode[] $spellTraitCodes
-     * @return EpicenterShift|null
-     */
-    public function getEpicenterShiftOfModified(/** @noinspection PhpUnusedParameterInspection to keep same interface with others */
-        FormulaCode $formulaCode,
-        array $modifierCodes,
-        array $spellTraitCodes
-    )
-    {
-        $formulaEpicenterShift = $this->getEpicenterShift($formulaCode);
-        if (!$formulaEpicenterShift) {
-            $formulaEpicenterShiftValue = 0;
-            if (!$this->modifiersTable->isEpicenterShifted($modifierCodes)) {
-                return null; // no shift at all
-            }
-        } else {
-            $formulaEpicenterShiftValue = $formulaEpicenterShift->getValue();
-        }
-
-        if ($formulaEpicenterShift) {
-            return $formulaEpicenterShift->getWithAddition($this->modifiersTable->sumEpicenterShiftChange($modifierCodes)->getValue());
-        }
-
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new EpicenterShift(
-            [
-                $formulaEpicenterShiftValue + $this->modifiersTable->sumEpicenterShiftChange($modifierCodes)->getValue(),
-                0 // no addition by realm possible for this formula
-            ],
-            $this->tables->getDistanceTable()
-        );
-    }
-
-    /**
      * @param FormulaCode $formulaCode
      * @return array|FormCode[]
      */
@@ -643,17 +305,17 @@ class FormulasTable extends AbstractFileTable
 
     /**
      * @param FormulaCode $formulaCode
-     * @return array|SpellTrait[]
+     * @return array|SpellTraitCode[]
      */
-    public function getSpellTraits(FormulaCode $formulaCode): array
+    public function getSpellTraitCodes(FormulaCode $formulaCode): array
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return array_map(
-            function (string $spellTraitAnnotation) {
+            function (string $spellTraitValue) {
                 /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-                return new SpellTrait($spellTraitAnnotation);
+                return SpellTraitCode::getIt($spellTraitValue);
             },
-            $this->getValue($formulaCode, self::TRAITS)
+            $this->getValue($formulaCode, self::SPELL_TRAITS)
         );
     }
 
@@ -682,7 +344,7 @@ class FormulasTable extends AbstractFileTable
      * @return array|ModifierCode[]
      * @throws \DrdPlus\Theurgist\Spells\Exceptions\UnknownFormulaToGetModifiersFor
      */
-    public function getModifiers(FormulaCode $formulaCode): array
+    public function getModifierCodes(FormulaCode $formulaCode): array
     {
         try {
             /** @noinspection ExceptionsAnnotatingAndHandlingInspection */

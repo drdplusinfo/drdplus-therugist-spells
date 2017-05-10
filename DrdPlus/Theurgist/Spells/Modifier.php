@@ -3,21 +3,24 @@ namespace DrdPlus\Theurgist\Spells;
 
 use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ModifierMutableCastingParameterCode;
-use DrdPlus\Theurgist\Spells\CastingParameters\Attack;
-use DrdPlus\Theurgist\Spells\CastingParameters\Conditions;
-use DrdPlus\Theurgist\Spells\CastingParameters\DifficultyChange;
-use DrdPlus\Theurgist\Spells\CastingParameters\EpicenterShift;
-use DrdPlus\Theurgist\Spells\CastingParameters\Grafts;
-use DrdPlus\Theurgist\Spells\CastingParameters\Invisibility;
-use DrdPlus\Theurgist\Spells\CastingParameters\NumberOfSituations;
-use DrdPlus\Theurgist\Spells\CastingParameters\Partials\IntegerCastingParameter;
-use DrdPlus\Theurgist\Spells\CastingParameters\Points;
-use DrdPlus\Theurgist\Spells\CastingParameters\Power;
-use DrdPlus\Theurgist\Spells\CastingParameters\Quality;
-use DrdPlus\Theurgist\Spells\CastingParameters\Radius;
-use DrdPlus\Theurgist\Spells\CastingParameters\Resistance;
-use DrdPlus\Theurgist\Spells\CastingParameters\SpellSpeed;
-use DrdPlus\Theurgist\Spells\CastingParameters\Threshold;
+use DrdPlus\Theurgist\Spells\SpellParameters\Attack;
+use DrdPlus\Theurgist\Spells\SpellParameters\CastingRounds;
+use DrdPlus\Theurgist\Spells\SpellParameters\Conditions;
+use DrdPlus\Theurgist\Spells\SpellParameters\DifficultyChange;
+use DrdPlus\Theurgist\Spells\SpellParameters\EpicenterShift;
+use DrdPlus\Theurgist\Spells\SpellParameters\Grafts;
+use DrdPlus\Theurgist\Spells\SpellParameters\Invisibility;
+use DrdPlus\Theurgist\Spells\SpellParameters\NumberOfSituations;
+use DrdPlus\Theurgist\Spells\SpellParameters\Partials\IntegerCastingParameter;
+use DrdPlus\Theurgist\Spells\SpellParameters\Points;
+use DrdPlus\Theurgist\Spells\SpellParameters\Power;
+use DrdPlus\Theurgist\Spells\SpellParameters\Quality;
+use DrdPlus\Theurgist\Spells\SpellParameters\Radius;
+use DrdPlus\Theurgist\Spells\SpellParameters\Realm;
+use DrdPlus\Theurgist\Spells\SpellParameters\RealmsAffection;
+use DrdPlus\Theurgist\Spells\SpellParameters\Resistance;
+use DrdPlus\Theurgist\Spells\SpellParameters\SpellSpeed;
+use DrdPlus\Theurgist\Spells\SpellParameters\Threshold;
 use Granam\Integer\Tools\ToInteger;
 use Granam\Strict\Object\StrictObject;
 use Granam\String\StringTools;
@@ -25,72 +28,104 @@ use Granam\Tools\ValueDescriber;
 
 class Modifier extends StrictObject
 {
+    use ToFlatArrayTrait;
+
     /** @var ModifierCode */
     private $modifierCode;
     /** @var ModifiersTable */
     private $modifiersTable;
     /** @var array|int[] */
-    private $additions;
+    private $modifierSpellParameterChanges;
+    /** @var array|SpellTrait[] */
+    private $modifierSpellTraits;
 
     /**
      * @param ModifierCode $modifierCode
      * @param ModifiersTable $modifiersTable
-     * @param array $additions
+     * @param array|int[] $modifierSpellParameterChanges
+     * by @see ModifierMutableCastingParameterCode value indexed its value change
+     * @param array|SpellTrait[] $modifierSpellTraits
      * @throws \DrdPlus\Theurgist\Spells\Exceptions\UselessAdditionForUnusedCastingParameter
      * @throws \DrdPlus\Theurgist\Spells\Exceptions\UnknownModifierParameter
-     * @throws \DrdPlus\Theurgist\Spells\Exceptions\InvalidValueForModifierParameterAddition
+     * @throws \DrdPlus\Theurgist\Spells\Exceptions\InvalidValueForModifierParameter
+     * @throws \DrdPlus\Theurgist\Spells\Exceptions\InvalidSpellTrait
      */
-    public function __construct(ModifierCode $modifierCode, ModifiersTable $modifiersTable, array $additions)
+    public function __construct(
+        ModifierCode $modifierCode,
+        ModifiersTable $modifiersTable,
+        array $modifierSpellParameterChanges,
+        array $modifierSpellTraits
+    )
     {
         $this->modifierCode = $modifierCode;
         $this->modifiersTable = $modifiersTable;
-        $this->additions = $this->sanitizeAdditions($additions);
+        $this->modifierSpellParameterChanges = $this->sanitizeSpellParameterChanges($modifierSpellParameterChanges);
+        $this->modifierSpellTraits = $this->getCheckedSpellTraits($this->toFlatArray($modifierSpellTraits));
     }
 
     /**
-     * @param array $additions
+     * @param array $parametersChange
      * @return array
      * @throws \DrdPlus\Theurgist\Spells\Exceptions\UselessAdditionForUnusedCastingParameter
-     * @throws \DrdPlus\Theurgist\Spells\Exceptions\InvalidValueForModifierParameterAddition
+     * @throws \DrdPlus\Theurgist\Spells\Exceptions\InvalidValueForModifierParameter
      * @throws \DrdPlus\Theurgist\Spells\Exceptions\UnknownModifierParameter
      */
-    private function sanitizeAdditions(array $additions): array
+    private function sanitizeSpellParameterChanges(array $parametersChange): array
     {
         $sanitized = [];
         foreach (ModifierMutableCastingParameterCode::getPossibleValues() as $mutableCastingParameter) {
-            if (!array_key_exists($mutableCastingParameter, $additions)) {
+            if (!array_key_exists($mutableCastingParameter, $parametersChange)) {
                 $sanitized[$mutableCastingParameter] = 0;
                 continue;
             }
             try {
-                $sanitizedValue = ToInteger::toInteger($additions[$mutableCastingParameter]);
-                if ($sanitizedValue !== 0) {
-                    $getBaseParameter = StringTools::assembleGetterForName('base_' . $mutableCastingParameter);
-                    if ($this->$getBaseParameter() === null) {
-                        throw new Exceptions\UselessAdditionForUnusedCastingParameter(
-                            "Casting parameter {$mutableCastingParameter} is not used for modifier {$this->modifierCode}"
-                            . ', so given non-zero addition ' . ValueDescriber::describe($additions[$mutableCastingParameter])
-                            . ' is thrown away'
-                        );
-                    }
-                }
-                $sanitized[$mutableCastingParameter] = $sanitizedValue;
+                $sanitizedValue = ToInteger::toInteger($parametersChange[$mutableCastingParameter]);
             } catch (\Granam\Integer\Tools\Exceptions\Exception $exception) {
-                throw new Exceptions\InvalidValueForModifierParameterAddition(
-                    'Expected integer, got ' . ValueDescriber::describe($additions[$mutableCastingParameter])
+                throw new Exceptions\InvalidValueForModifierParameter(
+                    'Expected integer, got ' . ValueDescriber::describe($parametersChange[$mutableCastingParameter])
                     . ' for ' . $mutableCastingParameter . ": '{$exception->getMessage()}'"
                 );
             }
-            unset($additions[$mutableCastingParameter]);
+            if ($sanitizedValue !== 0) {
+                $getBaseParameter = StringTools::assembleGetterForName('base_' . $mutableCastingParameter);
+                if ($this->$getBaseParameter() === null) {
+                    throw new Exceptions\UselessAdditionForUnusedCastingParameter(
+                        "Casting parameter {$mutableCastingParameter} is not used for modifier {$this->modifierCode}"
+                        . ', so given non-zero addition ' . ValueDescriber::describe($parametersChange[$mutableCastingParameter])
+                        . ' is thrown away'
+                    );
+                }
+            }
+            $sanitized[$mutableCastingParameter] = $sanitizedValue;
+
+            unset($parametersChange[$mutableCastingParameter]);
         }
-        if (count($additions) > 0) { // there are some remains
+        if (count($parametersChange) > 0) { // there are some remains
             throw new Exceptions\UnknownModifierParameter(
-                'Unexpected mutable casting parameter(s) [' . implode(', ', array_keys($additions)) . ']. Expected only '
+                'Unexpected mutable casting parameter(s) [' . implode(', ', array_keys($parametersChange)) . ']. Expected only '
                 . implode(', ', ModifierMutableCastingParameterCode::getPossibleValues())
             );
         }
 
         return $sanitized;
+    }
+
+    /**
+     * @param array $spellTraits
+     * @return array|SpellTrait[]
+     * @throws \DrdPlus\Theurgist\Spells\Exceptions\InvalidSpellTrait
+     */
+    private function getCheckedSpellTraits(array $spellTraits): array
+    {
+        foreach ($spellTraits as $spellTrait) {
+            if (!is_a($spellTrait, SpellTrait::class)) {
+                throw new Exceptions\InvalidSpellTrait(
+                    'Expected instance of ' . Modifier::class . ', got ' . ValueDescriber::describe($spellTrait)
+                );
+            }
+        }
+
+        return $spellTraits;
     }
 
     /**
@@ -101,9 +136,14 @@ class Modifier extends StrictObject
         return $this->modifierCode;
     }
 
+    public function getRequiredRealm(): Realm
+    {
+        return $this->modifiersTable->getRealm($this->getModifierCode());
+    }
+
     public function getDifficultyChange(): DifficultyChange
     {
-        $parameters = [
+        $modifierParameters = [
             $this->getAttackWithAddition(),
             $this->getConditionsWithAddition(),
             $this->getEpicenterShiftWithAddition(),
@@ -118,17 +158,40 @@ class Modifier extends StrictObject
             $this->getSpellSpeedWithAddition(),
             $this->getThresholdWithAddition(),
         ];
-        $parameters = array_filter($parameters, function (IntegerCastingParameter $castingParameter = null) {
-            return $castingParameter !== null;
-        });
+        $modifierParameters = array_filter(
+            $modifierParameters,
+            function (IntegerCastingParameter $modifierParameter = null) {
+                return $modifierParameter !== null;
+            }
+        );
         $parametersDifficultyChangeSum = 0;
         /** @var IntegerCastingParameter $parameter */
-        foreach ($parameters as $parameter) {
-            $parametersDifficultyChangeSum += $parameter->getAdditionByDifficulty()->getValue();
+        foreach ($modifierParameters as $parameter) {
+            $parametersDifficultyChangeSum += $parameter->getAdditionByDifficulty()->getCurrentDifficultyIncrement();
+        }
+        $spellTraitsDifficultyChangeSum = 0;
+        foreach ($this->modifierSpellTraits as $spellTrait) {
+            $spellTraitsDifficultyChangeSum += $spellTrait->getDifficultyChange()->getValue();
         }
         $difficultyChange = $this->modifiersTable->getDifficultyChange($this->getModifierCode());
 
-        return $difficultyChange->add($parametersDifficultyChangeSum);
+        return $difficultyChange->add($parametersDifficultyChangeSum + $spellTraitsDifficultyChangeSum);
+    }
+
+    /**
+     * @return CastingRounds
+     */
+    public function getCastingRounds(): CastingRounds
+    {
+        return $this->modifiersTable->getCastingRounds($this->getModifierCode());
+    }
+
+    /**
+     * @return RealmsAffection
+     */
+    public function getBaseRealmsAffection(): RealmsAffection
+    {
+        return $this->modifiersTable->getRealmsAffection($this->getModifierCode());
     }
 
     /**
@@ -154,7 +217,7 @@ class Modifier extends StrictObject
 
     public function getRadiusAddition(): int
     {
-        return $this->additions[ModifierMutableCastingParameterCode::RADIUS];
+        return $this->modifierSpellParameterChanges[ModifierMutableCastingParameterCode::RADIUS];
     }
 
     /**
@@ -180,7 +243,7 @@ class Modifier extends StrictObject
 
     public function getEpicenterShiftAddition(): int
     {
-        return $this->additions[ModifierMutableCastingParameterCode::EPICENTER_SHIFT];
+        return $this->modifierSpellParameterChanges[ModifierMutableCastingParameterCode::EPICENTER_SHIFT];
     }
 
     /**
@@ -206,7 +269,7 @@ class Modifier extends StrictObject
 
     public function getPowerAddition(): int
     {
-        return $this->additions[ModifierMutableCastingParameterCode::POWER];
+        return $this->modifierSpellParameterChanges[ModifierMutableCastingParameterCode::POWER];
     }
 
     /**
@@ -232,7 +295,7 @@ class Modifier extends StrictObject
 
     public function getAttackAddition(): int
     {
-        return $this->additions[ModifierMutableCastingParameterCode::ATTACK];
+        return $this->modifierSpellParameterChanges[ModifierMutableCastingParameterCode::ATTACK];
     }
 
     /**
@@ -258,7 +321,7 @@ class Modifier extends StrictObject
 
     public function getGraftsAddition(): int
     {
-        return $this->additions[ModifierMutableCastingParameterCode::GRAFTS];
+        return $this->modifierSpellParameterChanges[ModifierMutableCastingParameterCode::GRAFTS];
     }
 
     /**
@@ -284,7 +347,7 @@ class Modifier extends StrictObject
 
     public function getSpellSpeedAddition(): int
     {
-        return $this->additions[ModifierMutableCastingParameterCode::SPELL_SPEED];
+        return $this->modifierSpellParameterChanges[ModifierMutableCastingParameterCode::SPELL_SPEED];
     }
 
     /**
@@ -310,7 +373,7 @@ class Modifier extends StrictObject
 
     public function getInvisibilityAddition(): int
     {
-        return $this->additions[ModifierMutableCastingParameterCode::INVISIBILITY];
+        return $this->modifierSpellParameterChanges[ModifierMutableCastingParameterCode::INVISIBILITY];
     }
 
     /**
@@ -336,7 +399,7 @@ class Modifier extends StrictObject
 
     public function getQualityAddition(): int
     {
-        return $this->additions[ModifierMutableCastingParameterCode::QUALITY];
+        return $this->modifierSpellParameterChanges[ModifierMutableCastingParameterCode::QUALITY];
     }
 
     /**
@@ -362,7 +425,7 @@ class Modifier extends StrictObject
 
     public function getConditionsAddition(): int
     {
-        return $this->additions[ModifierMutableCastingParameterCode::CONDITIONS];
+        return $this->modifierSpellParameterChanges[ModifierMutableCastingParameterCode::CONDITIONS];
     }
 
     /**
@@ -388,7 +451,7 @@ class Modifier extends StrictObject
 
     public function getResistanceAddition(): int
     {
-        return $this->additions[ModifierMutableCastingParameterCode::RESISTANCE];
+        return $this->modifierSpellParameterChanges[ModifierMutableCastingParameterCode::RESISTANCE];
     }
 
     /**
@@ -414,7 +477,7 @@ class Modifier extends StrictObject
 
     public function getNumberOfSituationsAddition(): int
     {
-        return $this->additions[ModifierMutableCastingParameterCode::NUMBER_OF_SITUATIONS];
+        return $this->modifierSpellParameterChanges[ModifierMutableCastingParameterCode::NUMBER_OF_SITUATIONS];
     }
 
     /**
@@ -440,7 +503,7 @@ class Modifier extends StrictObject
 
     public function getThresholdAddition(): int
     {
-        return $this->additions[ModifierMutableCastingParameterCode::THRESHOLD];
+        return $this->modifierSpellParameterChanges[ModifierMutableCastingParameterCode::THRESHOLD];
     }
 
     /**
@@ -466,6 +529,11 @@ class Modifier extends StrictObject
 
     public function getPointsAddition(): int
     {
-        return $this->additions[ModifierMutableCastingParameterCode::POINTS];
+        return $this->modifierSpellParameterChanges[ModifierMutableCastingParameterCode::POINTS];
+    }
+
+    public function __toString()
+    {
+        return (string)$this->getModifierCode()->getValue();
     }
 }

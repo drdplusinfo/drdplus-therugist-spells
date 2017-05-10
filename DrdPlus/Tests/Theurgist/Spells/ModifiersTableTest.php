@@ -1,26 +1,15 @@
 <?php
 namespace DrdPlus\Tests\Theurgist\Spells;
 
-use DrdPlus\Properties\Combat\Attack;
 use DrdPlus\Tables\Tables;
-use DrdPlus\Theurgist\Codes\AffectionPeriodCode;
 use DrdPlus\Theurgist\Codes\FormCode;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ProfileCode;
 use DrdPlus\Theurgist\Codes\SpellTraitCode;
-use DrdPlus\Theurgist\Spells\CastingParameters\AdditionByDifficulty;
-use DrdPlus\Theurgist\Spells\CastingParameters\Affection;
-use DrdPlus\Theurgist\Spells\CastingParameters\CastingRounds;
-use DrdPlus\Theurgist\Spells\CastingParameters\DifficultyChange;
-use DrdPlus\Theurgist\Spells\CastingParameters\PropertyChange;
-use DrdPlus\Theurgist\Spells\CastingParameters\Realm;
-use DrdPlus\Theurgist\Spells\CastingParameters\SpellTrait;
 use DrdPlus\Theurgist\Spells\FormulasTable;
-use DrdPlus\Theurgist\Spells\Modifier;
 use DrdPlus\Theurgist\Spells\ModifiersTable;
 use DrdPlus\Theurgist\Spells\ProfilesTable;
-use Granam\Integer\IntegerObject;
 
 class ModifiersTableTest extends AbstractTheurgistTableTest
 {
@@ -42,7 +31,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
     public function I_can_get_every_optional_parameter()
     {
         /**
-         * @see ModifiersTable::getAffection()
+         * @see ModifiersTable::getRealmsAffection()
          * @see ModifiersTable::getCastingRounds()
          * @see ModifiersTable::getRadius()
          * @see ModifiersTable::getEpicenterShift()
@@ -59,7 +48,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
          * @see ModifiersTable::getThreshold()
          */
         $optionalParameters = [
-            'affection', 'casting_rounds', 'radius', 'epicenter_shift', 'power', 'attack', 'grafts', 'spell_speed', 'points',
+            'realms_affection', 'casting_rounds', 'radius', 'epicenter_shift', 'power', 'attack', 'grafts', 'spell_speed', 'points',
             'invisibility', 'quality', 'conditions', 'resistance', 'number_of_situations', 'threshold',
         ];
         foreach ($optionalParameters as $optionalParameter) {
@@ -123,29 +112,29 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
     /**
      * @test
      */
-    public function I_can_get_spell_traits()
+    public function I_can_get_spell_trait_codes()
     {
         $modifiersTable = new ModifiersTable(Tables::getIt());
         foreach (ModifierCode::getPossibleValues() as $modifierValue) {
-            $spellTraits = $modifiersTable->getSpellTraits(ModifierCode::getIt($modifierValue));
+            $spellTraitCodes = $modifiersTable->getSpellTraitCodes(ModifierCode::getIt($modifierValue));
             /** @var array|string[] $expectedTraitValues */
-            $expectedTraitValues = $this->getValueFromTable($modifiersTable, $modifierValue, 'traits');
-            $expectedSpellTraits = [];
-            foreach ($expectedTraitValues as $expectedTraitValue) {
-                $expectedSpellTraits[] = new SpellTrait($expectedTraitValue);
+            $expectedTraitValues = $this->getValueFromTable($modifiersTable, $modifierValue, 'spell_traits');
+            $expectedSpellTraitCodes = [];
+            foreach ($expectedTraitValues as $expectedSpellTraitValue) {
+                $expectedSpellTraitCodes[] = SpellTraitCode::getIt($expectedSpellTraitValue);
             }
-            self::assertEquals($expectedSpellTraits, $spellTraits);
+            self::assertEquals($expectedSpellTraitCodes, $spellTraitCodes);
 
-            $spellSpellTraitCodeValues = [];
-            foreach ($spellTraits as $spellTrait) {
-                self::assertInstanceOf(SpellTrait::class, $spellTrait);
-                $spellSpellTraitCodeValues[] = $spellTrait->getSpellTraitCode()->getValue();
+            $spellTraitCodeValues = [];
+            foreach ($spellTraitCodes as $spellTraitCode) {
+                self::assertInstanceOf(SpellTraitCode::class, $spellTraitCode);
+                $spellTraitCodeValues[] = $spellTraitCode->getValue();
             }
-            self::assertSame($spellSpellTraitCodeValues, array_unique($spellSpellTraitCodeValues));
-            sort($spellSpellTraitCodeValues);
+            self::assertSame($spellTraitCodeValues, array_unique($spellTraitCodeValues));
+            sort($spellTraitCodeValues);
             $expectedSpellTraitCodeValues = $this->getExpectedSpellTraitCodeValues($modifierValue);
             sort($expectedSpellTraitCodeValues);
-            self::assertEquals($expectedSpellTraitCodeValues, $spellSpellTraitCodeValues, "Expected different traits for '{$modifierValue}'");
+            self::assertEquals($expectedSpellTraitCodeValues, $spellTraitCodeValues, "Expected different traits for '{$modifierValue}'");
         }
     }
 
@@ -188,7 +177,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
     {
         $modifiersTable = new ModifiersTable(Tables::getIt());
         foreach (ModifierCode::getPossibleValues() as $modifierValue) {
-            $formulaCodes = $modifiersTable->getFormulas(ModifierCode::getIt($modifierValue));
+            $formulaCodes = $modifiersTable->getFormulaCodes(ModifierCode::getIt($modifierValue));
             self::assertTrue(is_array($formulaCodes));
             if (in_array($modifierValue, [ModifierCode::STEP_TO_PAST, ModifierCode::STEP_TO_FUTURE], true)) {
                 self::assertEmpty($formulaCodes);
@@ -232,7 +221,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
             $this->createSpellTraitsTableShell()
         );
         foreach (FormulaCode::getPossibleValues() as $formulaValue) {
-            $modifierCodes = $formulasTable->getModifiers(FormulaCode::getIt($formulaValue));
+            $modifierCodes = $formulasTable->getModifierCodes(FormulaCode::getIt($formulaValue));
             foreach ($modifierCodes as $modifierCode) {
                 if ($modifierCode->getValue() === $modifierValue) {
                     $expectedFormulaValues[] = $formulaValue;
@@ -261,7 +250,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_not_get_formulas_to_unknown_modifier()
     {
-        (new ModifiersTable(Tables::getIt()))->getFormulas($this->createModifierCode('black and white'));
+        (new ModifiersTable(Tables::getIt()))->getFormulaCodes($this->createModifierCode('black and white'));
     }
 
     /**
@@ -391,7 +380,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
             $profileValues = $this->getExpectedProfileValues($modifierValue);
             $fromParentToModifierMatchingProfiles = [];
             $modifier = ModifierCode::getIt($modifierValue);
-            $parentModifiers = $modifiersTable->getParentModifiers($modifier);
+            $parentModifiers = $modifiersTable->getParentModifierCodes($modifier);
             foreach ($parentModifiers as $parentModifier) {
                 self::assertContains($modifier, $modifiersTable->getChildModifiers($parentModifier));
                 $parentProfileValues = $this->getExpectedProfileValues($parentModifier->getValue());
@@ -449,7 +438,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
             $modifier = ModifierCode::getIt($modifierValue);
             $childModifiers = $modifiersTable->getChildModifiers($modifier);
             foreach ($childModifiers as $childModifier) {
-                self::assertContains($modifier, $modifiersTable->getParentModifiers($childModifier));
+                self::assertContains($modifier, $modifiersTable->getParentModifierCodes($childModifier));
                 $childProfileValues = $this->getExpectedProfileValues($childModifier->getValue());
                 $matchingProfile = null;
                 foreach ($childProfileValues as $childProfileValue) {
@@ -490,419 +479,6 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
                 'Only mars profiles can be used by child modifiers to connect to parent (and venus on parent side)'
             );
         }
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_sum_difficulty_change()
-    {
-        $modifiersTable = new ModifiersTable(Tables::getIt());
-        $singleModifier = ModifierCode::getIt(ModifierCode::INVISIBILITY);
-        $singleModifierSum = $modifiersTable->getDifficultyChange($singleModifier)->getValue();
-        self::assertNotEquals(0, $singleModifierSum);
-        $difficultyChangeSum = $modifiersTable->sumDifficultyChanges([$singleModifier]);
-        self::assertEquals(new DifficultyChange($singleModifierSum), $difficultyChangeSum);
-
-        $flatArray = [
-            ModifierCode::getIt(ModifierCode::STEP_TO_PAST),
-            ModifierCode::getIt(ModifierCode::BREACH),
-            ModifierCode::getIt(ModifierCode::CAMOUFLAGE),
-            ModifierCode::getIt(ModifierCode::HAMMER),
-        ];
-        $flatArraySum = 0;
-        foreach ($flatArray as $modifierCode) {
-            $flatArraySum += $modifiersTable->getDifficultyChange($modifierCode)->getValue();
-        }
-        self::assertGreaterThan($singleModifierSum, $flatArraySum);
-        self::assertSame($flatArraySum, $modifiersTable->sumDifficultyChanges($flatArray)->getValue());
-
-        $treeArray = $flatArray;
-        $treeArraySum = $flatArraySum;
-        $treeArray[] = [ModifierCode::getIt(ModifierCode::COLOR), ModifierCode::getIt(ModifierCode::EXPLOSION)];
-        $treeArraySum += $modifiersTable->getDifficultyChange(ModifierCode::getIt(ModifierCode::COLOR))->getValue();
-        $treeArraySum += $modifiersTable->getDifficultyChange(ModifierCode::getIt(ModifierCode::EXPLOSION))->getValue();
-        $treeArray[] = [ModifierCode::getIt(ModifierCode::RELEASE), [ModifierCode::getIt(ModifierCode::THUNDER)]];
-        $treeArraySum += $modifiersTable->getDifficultyChange(ModifierCode::getIt(ModifierCode::RELEASE))->getValue();
-        $treeArraySum += $modifiersTable->getDifficultyChange(ModifierCode::getIt(ModifierCode::THUNDER))->getValue();
-        self::assertGreaterThan($flatArraySum, $treeArraySum);
-        self::assertEquals(new DifficultyChange($treeArraySum), $modifiersTable->sumDifficultyChanges($treeArray));
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_get_highest_required_realm()
-    {
-        $modifiersTable = new ModifiersTable(Tables::getIt());
-
-        self::assertEquals(new Realm(0), $modifiersTable->getHighestRequiredRealm([]));
-
-        self::assertEquals(new Realm(0), $modifiersTable->getHighestRequiredRealm([[]]));
-
-        $singleModifier = ModifierCode::getIt(ModifierCode::INVISIBILITY);
-        $singleModifierRealm = $modifiersTable->getRealm($singleModifier);
-        self::assertEquals($singleModifierRealm, $modifiersTable->getHighestRequiredRealm([$singleModifier]));
-
-        $flatArray = [
-            ModifierCode::getIt(ModifierCode::STEP_TO_PAST),
-            ModifierCode::getIt(ModifierCode::BREACH),
-            ModifierCode::getIt(ModifierCode::CAMOUFLAGE),
-            ModifierCode::getIt(ModifierCode::HAMMER),
-        ];
-        /** @var Realm|null $highestFlatRealm */
-        $highestFlatRealm = null;
-        $findHighestRealm = function ($modifierCodesOrCode) use (&$findHighestRealm, $modifiersTable) {
-            if (!is_array($modifierCodesOrCode)) {
-                return $modifiersTable->getRealm($modifierCodesOrCode);
-            }
-            $realms = [];
-            foreach ($modifierCodesOrCode as $modifierCode) {
-                if (is_array($modifierCode)) {
-                    $highestRealm = $findHighestRealm($modifierCode);
-                } else {
-                    $highestRealm = $modifiersTable->getRealm($modifierCode);
-                }
-                $realms[$highestRealm->getValue()] = $highestRealm;
-            }
-
-            return $realms[max(array_keys($realms))];
-        };
-        $highestFlatRealm = $findHighestRealm($flatArray);
-        self::assertEquals($highestFlatRealm, $modifiersTable->getHighestRequiredRealm($flatArray));
-
-        $treeArray = $flatArray;
-        $treeArray[] = [ModifierCode::getIt(ModifierCode::COLOR), ModifierCode::getIt(ModifierCode::EXPLOSION)];
-        $treeArray[] = [ModifierCode::getIt(ModifierCode::RELEASE), [ModifierCode::getIt(ModifierCode::THUNDER)]];
-        $highestTreeRealm = $findHighestRealm($treeArray);
-        self::assertEquals($highestTreeRealm, $modifiersTable->getHighestRequiredRealm($treeArray));
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_get_summary_of_affections()
-    {
-        $modifiersTable = new ModifiersTable(Tables::getIt());
-
-        self::assertEquals([], $modifiersTable->getAffectionsOfModifiers([]));
-
-        self::assertEquals([], $modifiersTable->getAffectionsOfModifiers([ModifierCode::getIt(ModifierCode::THUNDER) /* +0 */]));
-
-        self::assertEquals(
-            [
-                AffectionPeriodCode::DAILY => new Affection([-2, AffectionPeriodCode::DAILY]),
-                AffectionPeriodCode::LIFE => new Affection([-3, AffectionPeriodCode::LIFE]),
-            ],
-            $modifiersTable->getAffectionsOfModifiers([
-                ModifierCode::getIt(ModifierCode::THUNDER), // 0
-                [
-                    [ModifierCode::getIt(ModifierCode::BREACH)], // -2
-                    ModifierCode::getIt(ModifierCode::STEP_TO_PAST) // -3 live
-                ],
-            ])
-        );
-
-        self::assertEquals(
-            [
-                AffectionPeriodCode::DAILY => new Affection([-3, AffectionPeriodCode::DAILY]),
-                AffectionPeriodCode::LIFE => new Affection([-4, AffectionPeriodCode::LIFE]),
-            ],
-            $modifiersTable->getAffectionsOfModifiers([
-                ModifierCode::getIt(ModifierCode::THUNDER), // 0
-                [
-                    ModifierCode::getIt(ModifierCode::BREACH), // -2
-                    ModifierCode::getIt(ModifierCode::GATE), // -1
-                    ModifierCode::getIt(ModifierCode::STEP_TO_PAST), // -3 live
-                    ModifierCode::getIt(ModifierCode::STEP_TO_FUTURE) // -1 live
-                ],
-            ])
-        );
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_get_sum_of_modifiers_radius_change()
-    {
-        $modifiersTable = new ModifiersTable(Tables::getIt());
-
-        self::assertEquals(new IntegerObject(0), $modifiersTable->sumRadiusChange([]));
-
-        self::assertEquals(
-            new IntegerObject(-6),
-            $modifiersTable->sumRadiusChange(
-                [
-                    ModifierCode::getIt(ModifierCode::GATE), // -6
-                    ModifierCode::getIt(ModifierCode::BREACH), // null
-                    ModifierCode::getIt(ModifierCode::EXPLOSION), // 0
-                    ModifierCode::getIt(ModifierCode::TRANSPOSITION), // 0
-                ]
-            )
-        );
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_get_sum_of_modifiers_power_change()
-    {
-        $modifiersTable = new ModifiersTable(Tables::getIt());
-
-        self::assertEquals(new IntegerObject(0), $modifiersTable->sumPowerChanges([]));
-
-        self::assertEquals(
-            new IntegerObject(13),
-            $modifiersTable->sumPowerChanges(
-                [
-                    ModifierCode::getIt(ModifierCode::GATE), // null
-                    ModifierCode::getIt(ModifierCode::EXPLOSION), // +6
-                    ModifierCode::getIt(ModifierCode::FILTER), // null
-                    ModifierCode::getIt(ModifierCode::THUNDER), // +10
-                    ModifierCode::getIt(ModifierCode::INTERACTIVE_ILLUSION), // -3
-                ]
-            )
-        );
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_detect_if_epicenter_has_been_shifted_by_modifiers()
-    {
-        $modifiersTable = new ModifiersTable(Tables::getIt());
-
-        self::assertFalse($modifiersTable->isEpicenterShifted([]));
-
-        self::assertFalse(
-            $modifiersTable->isEpicenterShifted(
-                [
-                    ModifierCode::getIt(ModifierCode::GATE), // null
-                    ModifierCode::getIt(ModifierCode::EXPLOSION), // null
-                    [
-                        ModifierCode::getIt(ModifierCode::FILTER), // null
-                        ModifierCode::getIt(ModifierCode::THUNDER), // null
-                        ModifierCode::getIt(ModifierCode::INTERACTIVE_ILLUSION), // null
-                    ],
-                ]
-            )
-        );
-
-        self::assertTrue(
-            $modifiersTable->isEpicenterShifted(
-                [
-                    [ModifierCode::getIt(ModifierCode::THUNDER), // null
-                        [ModifierCode::getIt(ModifierCode::EXPLOSION), // null
-                            [ModifierCode::getIt(ModifierCode::FILTER), // null
-                                [ModifierCode::getIt(ModifierCode::TRANSPOSITION), // 0
-                                    [ModifierCode::getIt(ModifierCode::BREACH)], // null
-                                ],
-                            ],
-                        ],
-                    ],
-                ]
-            )
-        );
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_get_sum_of_modifiers_epicenter_shift_change()
-    {
-        $modifiersTable = new ModifiersTable(Tables::getIt());
-
-        self::assertEquals(
-            new IntegerObject(0),
-            $modifiersTable->sumEpicenterShiftChange([])
-        );
-
-        self::assertEquals(
-            new IntegerObject(0),
-            $modifiersTable->sumEpicenterShiftChange(
-                [
-                    ModifierCode::getIt(ModifierCode::GATE), // null
-                    ModifierCode::getIt(ModifierCode::EXPLOSION), // null
-                    [
-                        ModifierCode::getIt(ModifierCode::FILTER), // null
-                        ModifierCode::getIt(ModifierCode::THUNDER), // null
-                        ModifierCode::getIt(ModifierCode::INTERACTIVE_ILLUSION), // null
-                    ],
-                ]
-            )
-        );
-
-        self::assertEquals(
-            new IntegerObject(0),
-            $modifiersTable->sumEpicenterShiftChange(
-                [
-                    [ModifierCode::getIt(ModifierCode::TRANSPOSITION), // 0
-                        [ModifierCode::getIt(ModifierCode::EXPLOSION), // null
-                            [ModifierCode::getIt(ModifierCode::FILTER), // null
-                                [ModifierCode::getIt(ModifierCode::TRANSPOSITION), // 0
-                                    [ModifierCode::getIt(ModifierCode::TRANSPOSITION)], // 0
-                                ],
-                            ],
-                        ],
-                    ],
-                ]
-            )
-        );
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_get_sum_of_modifiers_speed_change()
-    {
-        $modifiersTable = new ModifiersTable(Tables::getIt());
-
-        self::assertEquals(
-            new IntegerObject(0),
-            $modifiersTable->sumSpellSpeedChange([])
-        );
-
-        self::assertEquals(
-            new IntegerObject(0),
-            $modifiersTable->sumSpellSpeedChange(
-                [
-                    ModifierCode::getIt(ModifierCode::GATE), // null
-                    ModifierCode::getIt(ModifierCode::EXPLOSION), // null
-                    [
-                        ModifierCode::getIt(ModifierCode::FILTER), // null
-                        ModifierCode::getIt(ModifierCode::THUNDER), // null
-                        ModifierCode::getIt(ModifierCode::INTERACTIVE_ILLUSION), // null
-                    ],
-                ]
-            )
-        );
-
-        self::assertEquals(
-            new IntegerObject(0),
-            $modifiersTable->sumSpellSpeedChange(
-                [
-                    [ModifierCode::getIt(ModifierCode::TRANSPOSITION), // null
-                        [ModifierCode::getIt(ModifierCode::EXPLOSION), // null
-                            [ModifierCode::getIt(ModifierCode::FILTER), // null
-                                [ModifierCode::getIt(ModifierCode::MOVEMENT)], // 0
-                            ],
-                        ],
-                    ],
-                ]
-            )
-        );
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_get_sum_of_modifiers_attack_change()
-    {
-        $modifiersTable = new ModifiersTable(Tables::getIt());
-
-        self::assertEquals(new PropertyChange(0, 0), $modifiersTable->sumAttackChange([]));
-
-        self::assertEquals(
-            new PropertyChange(0, 0),
-            $modifiersTable->sumAttackChange(
-                [
-                    $this->createModifierForAttackChange(0, 0),
-                    [
-                        $this->createModifierForAttackChange(null, 0),
-                        [
-                            $this->createModifierForAttackChange(0, 0),
-                            [$this->createModifierForAttackChange(null, 1)], // should be skipped
-                        ],
-                    ],
-                ]
-            )
-        );
-
-        self::assertEquals(
-            new PropertyChange(108, 12),
-            $modifiersTable->sumAttackChange(
-                $withTranspositions = [
-                    [$this->createModifierForAttackChange(0, 0),
-                        [$this->createModifierForAttackChange(3, 1),
-                            [$this->createModifierForAttackChange(0, 5), // should NOT be skipped
-                                [$this->createModifierForAttackChange(5, 6)],
-                                [
-                                    $this->createModifierForAttackChange(100, 0),
-                                    $this->createModifierForAttackChange(null, 999), // should be skipped
-                                ],
-                            ],
-                        ],
-                    ],
-                ]
-            )
-        );
-    }
-
-    /**
-     * @param int|null $currentAttackValue
-     * @param int $currentDifficultyIncrement
-     * @return \Mockery\MockInterface|Modifier
-     */
-    private function createModifierForAttackChange(int $currentAttackValue = null, int $currentDifficultyIncrement)
-    {
-        $modifier = $this->mockery(Modifier::class);
-        $attack = $currentAttackValue !== null ? $this->mockery(Attack::class) : null;
-        $modifier->shouldReceive('getAttackWithAddition')
-            ->andReturn($currentAttackValue !== null ? $attack : null);
-        if ($attack === null) {
-            return $modifier;
-        }
-        $attack->shouldReceive('getValue')
-            ->andReturn($currentAttackValue);
-        $attack->shouldReceive('getAdditionByDifficulty')
-            ->andReturn($additionByDifficulty = $this->mockery(AdditionByDifficulty::class));
-        $additionByDifficulty->shouldReceive('getCurrentDifficultyIncrement')
-            ->andReturn($currentDifficultyIncrement);
-
-        return $modifier;
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_get_sum_of_casting_time_change()
-    {
-        $modifiersTable = new ModifiersTable(Tables::getIt());
-
-        self::assertEquals(new CastingRounds([0]), $modifiersTable->sumCastingRoundsChange([]));
-
-        self::assertEquals(
-            new CastingRounds([0]),
-            $modifiersTable->sumCastingRoundsChange(
-                [
-                    ModifierCode::getIt(ModifierCode::EXPLOSION), // null
-                    [
-                        ModifierCode::getIt(ModifierCode::FILTER), // null
-                        ModifierCode::getIt(ModifierCode::THUNDER), // null
-                        ModifierCode::getIt(ModifierCode::INTERACTIVE_ILLUSION), // null
-                    ],
-                ]
-            )
-        );
-
-        self::assertEquals(
-            new CastingRounds([4]),
-            $modifiersTable->sumCastingRoundsChange(
-                [
-                    [ModifierCode::getIt(ModifierCode::MOVEMENT), // null
-                        [ModifierCode::getIt(ModifierCode::GATE), // +2 rounds
-                            [ModifierCode::getIt(ModifierCode::FILTER), // null
-                                [ModifierCode::getIt(ModifierCode::TRANSPOSITION)], // null
-                                [
-                                    ModifierCode::getIt(ModifierCode::GATE), // +2 rounds
-                                    ModifierCode::getIt(ModifierCode::TRANSPOSITION), // null
-                                ],
-                            ],
-                        ],
-                    ],
-                ]
-            )
-        );
     }
 
 }

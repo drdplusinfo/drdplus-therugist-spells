@@ -5,7 +5,7 @@ use DrdPlus\Tables\Partials\AbstractTable;
 use DrdPlus\Tables\Table;
 use DrdPlus\Tables\Tables;
 use DrdPlus\Theurgist\Codes\AbstractTheurgistCode;
-use DrdPlus\Theurgist\Spells\CastingParameters\Attack;
+use DrdPlus\Theurgist\Spells\SpellParameters\Attack;
 use DrdPlus\Theurgist\Spells\SpellTraitsTable;
 use DrdPlus\Theurgist\Spells\ModifiersTable;
 use Granam\String\StringTools;

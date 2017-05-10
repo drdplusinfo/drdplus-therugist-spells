@@ -5,8 +5,8 @@ use DrdPlus\Tables\Partials\AbstractFileTable;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\SpellTraitCode;
-use DrdPlus\Theurgist\Spells\CastingParameters\DifficultyChange;
-use DrdPlus\Theurgist\Spells\CastingParameters\Trap;
+use DrdPlus\Theurgist\Spells\SpellParameters\DifficultyChange;
+use DrdPlus\Theurgist\Spells\SpellParameters\Trap;
 
 class SpellTraitsTable extends AbstractFileTable
 {

@@ -4,25 +4,16 @@ namespace DrdPlus\Tests\Theurgist\Spells;
 use DrdPlus\Codes\TimeUnitCode;
 use DrdPlus\Tables\Measurements\Time\Time;
 use DrdPlus\Tables\Tables;
-use DrdPlus\Theurgist\Codes\AffectionPeriodCode;
 use DrdPlus\Theurgist\Codes\FormCode;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ProfileCode;
 use DrdPlus\Theurgist\Codes\SpellTraitCode;
-use DrdPlus\Theurgist\Spells\CastingParameters\Affection;
-use DrdPlus\Theurgist\Spells\CastingParameters\CastingRounds;
-use DrdPlus\Theurgist\Spells\CastingParameters\DifficultyChange;
-use DrdPlus\Theurgist\Spells\CastingParameters\EpicenterShift;
-use DrdPlus\Theurgist\Spells\CastingParameters\PropertyChange;
-use DrdPlus\Theurgist\Spells\CastingParameters\Realm;
-use DrdPlus\Theurgist\Spells\CastingParameters\SpellTrait;
+use DrdPlus\Theurgist\Spells\SpellParameters\CastingRounds;
 use DrdPlus\Theurgist\Spells\SpellTraitsTable;
 use DrdPlus\Theurgist\Spells\FormulasTable;
 use DrdPlus\Theurgist\Spells\ModifiersTable;
 use DrdPlus\Theurgist\Spells\ProfilesTable;
-use Granam\Integer\IntegerObject;
-use Granam\String\StringTools;
 
 class FormulasTableTest extends AbstractTheurgistTableTest
 {
@@ -48,41 +39,14 @@ class FormulasTableTest extends AbstractTheurgistTableTest
     {
         /**
          * @see FormulasTable::getRealm()
-         * @see FormulasTable::getAffection()
+         * @see FormulasTable::getRealmsAffection()
          * @see FormulasTable::getEvocation()
          * @see FormulasTable::getFormulaDifficulty()
          * @see FormulasTable::getDuration()
          */
-        $mandatoryParameters = ['realm', 'affection', 'evocation', 'formula_difficulty', 'duration'];
+        $mandatoryParameters = ['realm', 'realms_affection', 'evocation', 'formula_difficulty', 'duration'];
         foreach ($mandatoryParameters as $mandatoryParameter) {
             $this->I_can_get_mandatory_parameter($mandatoryParameter, FormulaCode::class);
-            $this->I_can_get_modified_mandatory_parameter($mandatoryParameter);
-        }
-    }
-
-    /**
-     * @param string $mandatoryParameterName
-     */
-    private function I_can_get_modified_mandatory_parameter(string $mandatoryParameterName)
-    {
-        if ($mandatoryParameterName === 'affection') {
-            $getMandatoryModifiedParameter = StringTools::assembleGetterForName($mandatoryParameterName . 's_of_modified');
-        } else {
-            $getMandatoryModifiedParameter = StringTools::assembleGetterForName($mandatoryParameterName . '_of_modified');
-        }
-        $parameterClass = $this->assembleParameterClassName($mandatoryParameterName);
-        $formulasTable = new FormulasTable(Tables::getIt(), $this->modifiersTable, $this->spellTraitsTable);
-        foreach (FormulaCode::getPossibleValues() as $formulaName) {
-            $modified = $formulasTable->$getMandatoryModifiedParameter(FormulaCode::getIt($formulaName), [], []);
-            if ($mandatoryParameterName === 'affection') {
-                self::assertInternalType('array', $modified);
-                /** @var array $modified */
-                foreach ($modified as $affection) {
-                    self::assertInstanceOf($parameterClass, $affection);
-                }
-            } else {
-                self::assertInstanceOf($parameterClass, $modified);
-            }
         }
     }
 
@@ -106,72 +70,6 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         ];
         foreach ($optionalParameters as $optionalParameter) {
             $this->I_can_get_optional_parameter($optionalParameter, FormulaCode::class);
-            $this->I_can_get_modified_optional_parameter($optionalParameter);
-        }
-    }
-
-    /**
-     * @param string $optionalParameterName
-     */
-    private function I_can_get_modified_optional_parameter(string $optionalParameterName)
-    {
-        $getOptionalModifiedParameter = StringTools::assembleGetterForName($optionalParameterName . '_of_modified');
-        $getOptionalParameter = StringTools::assembleGetterForName($optionalParameterName);
-        $parameterClass = $this->assembleParameterClassName($optionalParameterName);
-        $formulasTable = new FormulasTable(Tables::getIt(), $this->modifiersTable, $this->spellTraitsTable);
-        foreach (FormulaCode::getPossibleValues() as $formulaName) {
-            $basic = $formulasTable->$getOptionalParameter(FormulaCode::getIt($formulaName));
-            $modified = $formulasTable->$getOptionalModifiedParameter(FormulaCode::getIt($formulaName), [], []);
-            if ($basic === null) {
-                self::assertNull($modified);
-            } else {
-                self::assertInstanceOf($parameterClass, $basic);
-// TODO $modified should be something like ModifiedAttack, not Attack self::assertInstanceOf($parameterClass, $modified);
-            }
-        }
-    }
-
-    /**
-     * @test
-     */
-    public function Every_getter_of_modified_formula_parameter_has_same_interface()
-    {
-        foreach (get_class_methods(FormulasTable::class) as $methodName) {
-            if (strpos($methodName, 'Modified') === false) {
-                continue;
-            }
-            $methodReflection = new \ReflectionMethod(FormulasTable::class, $methodName);
-            $parameters = $methodReflection->getParameters();
-            self::assertCount(
-                3,
-                $parameters,
-                "Expected exactly three parameters for '{$methodName}'"
-                . ', formula code, array of modifier codes and array of spell trait codes'
-            );
-            self::assertNotNull(
-                $parameters[0]->getClass(),
-                "First parameter of '{$methodName}' should be of type formula code class"
-            );
-            self::assertSame(FormulaCode::class, $parameters[0]->getClass()->getName());
-            self::assertSame('formulaCode', $parameters[0]->getName());
-            self::assertTrue(
-                $parameters[1]->isArray(),
-                "Expected array of modifier codes as a second parameter of '{$methodName}', got " . $parameters[1]->getType()
-            );
-            self::assertSame('modifierCodes', $parameters[1]->getName());
-            self::assertTrue(
-                $parameters[2]->isArray(),
-                "Expected array of spell trait codes as a third parameter of '{$methodName}', got " . $parameters[2]->getType()
-            );
-            self::assertSame('spellTraitCodes', $parameters[2]->getName());
-            self::assertContains(<<<PHPDOC
-* @param FormulaCode \$formulaCode
-* @param array|ModifierCode[] \$modifierCodes
-* @param array|SpellTraitCode[] \$spellTraitCodes
-PHPDOC
-                , preg_replace('~ {2,}~', '', $methodReflection->getDocComment()),
-                "Expected different PHPDoc for '{$methodName}'"
-            );
         }
     }
 
@@ -182,12 +80,11 @@ PHPDOC
     {
         $formulasTable = new FormulasTable(Tables::getIt(), $this->modifiersTable, $this->spellTraitsTable);
         foreach (FormulaCode::getPossibleValues() as $formulaValue) {
-            $casting = $formulasTable->getCasting(FormulaCode::getIt($formulaValue));
-            self::assertEquals(new Time(1, TimeUnitCode::ROUND, Tables::getIt()->getTimeTable()), $casting);
-            self::assertSame(
-                1,
-                $casting->getInUnit(TimeUnitCode::ROUND)->getValue(),
-                'Expected single round as casting time for any non-modified formula'
+            $castingRounds = $formulasTable->getCastingRounds(FormulaCode::getIt($formulaValue));
+            self::assertEquals(new CastingRounds([1]), $castingRounds);
+            self::assertEquals(
+                new Time(1, TimeUnitCode::ROUND, Tables::getIt()->getTimeTable()),
+                $castingRounds->getTime(Tables::getIt()->getTimeTable())
             );
         }
     }
@@ -239,29 +136,29 @@ PHPDOC
     /**
      * @test
      */
-    public function I_can_get_spell_traits()
+    public function I_can_get_spell_trait_codes()
     {
         $formulasTable = new FormulasTable(Tables::getIt(), $this->modifiersTable, $this->spellTraitsTable);
         foreach (FormulaCode::getPossibleValues() as $formulaValue) {
-            $spellTraits = $formulasTable->getSpellTraits(FormulaCode::getIt($formulaValue));
+            $spellTraitCodes = $formulasTable->getSpellTraitCodes(FormulaCode::getIt($formulaValue));
             /** @var array|string[] $expectedTraitValues */
-            $expectedTraitValues = $this->getValueFromTable($formulasTable, $formulaValue, 'traits');
-            $expectedSpellTraits = [];
+            $expectedTraitValues = $this->getValueFromTable($formulasTable, $formulaValue, 'spell_traits');
+            $expectedSpellTraitCodes = [];
             foreach ($expectedTraitValues as $expectedTraitValue) {
-                $expectedSpellTraits[] = new SpellTrait($expectedTraitValue);
+                $expectedSpellTraitCodes[] = SpellTraitCode::getIt($expectedTraitValue);
             }
-            self::assertEquals($expectedSpellTraits, $spellTraits);
+            self::assertEquals($expectedSpellTraitCodes, $spellTraitCodes);
 
-            $spellSpellTraitCodeValues = [];
-            foreach ($spellTraits as $spellTrait) {
-                self::assertInstanceOf(SpellTrait::class, $spellTrait);
-                $spellSpellTraitCodeValues[] = $spellTrait->getSpellTraitCode()->getValue();
+            $spellTraitCodeValues = [];
+            foreach ($spellTraitCodes as $spellTraitCode) {
+                self::assertInstanceOf(SpellTraitCode::class, $spellTraitCode);
+                $spellTraitCodeValues[] = $spellTraitCode->getValue();
             }
-            self::assertSame($spellSpellTraitCodeValues, array_unique($spellSpellTraitCodeValues));
-            sort($spellSpellTraitCodeValues);
+            self::assertSame($spellTraitCodeValues, array_unique($spellTraitCodeValues));
+            sort($spellTraitCodeValues);
             $expectedSpellTraitCodeValues = $this->getExpectedSpellTraitCodeValues($formulaValue);
             sort($expectedSpellTraitCodeValues);
-            self::assertEquals($expectedSpellTraitCodeValues, $spellSpellTraitCodeValues, "Expected different traits for '{$formulaValue}'");
+            self::assertEquals($expectedSpellTraitCodeValues, $spellTraitCodeValues, "Expected different traits for '{$formulaValue}'");
         }
     }
 
@@ -295,7 +192,7 @@ PHPDOC
     {
         $formulasTable = new FormulasTable(Tables::getIt(), $this->modifiersTable, $this->spellTraitsTable);
         foreach (FormulaCode::getPossibleValues() as $formulaValue) {
-            $modifierCodes = $formulasTable->getModifiers(FormulaCode::getIt($formulaValue));
+            $modifierCodes = $formulasTable->getModifierCodes(FormulaCode::getIt($formulaValue));
             self::assertTrue(is_array($modifierCodes));
             self::assertNotEmpty($modifierCodes);
             $collectedModifierValues = [];
@@ -362,7 +259,7 @@ PHPDOC
     {
         $modifierValues = [];
         foreach (ModifierCode::getPossibleValues() as $modifierValue) {
-            $formulaCodes = $this->modifiersTable->getFormulas(ModifierCode::getIt($modifierValue));
+            $formulaCodes = $this->modifiersTable->getFormulaCodes(ModifierCode::getIt($modifierValue));
             foreach ($formulaCodes as $formulaCode) {
                 if ($formulaCode->getValue() === $formulaValue) {
                     $modifierValues[] = $modifierValue;
@@ -381,10 +278,10 @@ PHPDOC
     private function getModifiersFromProfilesTable(string $formulaValue): array
     {
         $matchingProfileValues = $this->getProfilesByProfileTable($formulaValue);
-        $t = new ProfilesTable();
+        $profilesTable = new ProfilesTable();
         $matchingModifierValues = [];
         foreach ($matchingProfileValues as $matchingProfileValue) {
-            foreach ($t->getModifiersForProfile(ProfileCode::getIt($matchingProfileValue)) as $modifierCode) {
+            foreach ($profilesTable->getModifiersForProfile(ProfileCode::getIt($matchingProfileValue)) as $modifierCode) {
                 $matchingModifierValues[] = $modifierCode->getValue();
             }
         }
@@ -400,7 +297,7 @@ PHPDOC
     public function I_can_not_get_modifiers_to_unknown_formula()
     {
         (new FormulasTable(Tables::getIt(), $this->modifiersTable, $this->spellTraitsTable))
-            ->getModifiers($this->createFormulaCode('Abraka dabra'));
+            ->getModifierCodes($this->createFormulaCode('Abraka dabra'));
     }
 
     /**
@@ -522,632 +419,5 @@ PHPDOC
     public function I_can_not_get_profiles_to_unknown_formula()
     {
         (new FormulasTable(Tables::getIt(), $this->modifiersTable, $this->spellTraitsTable))->getProfiles($this->createFormulaCode('Charge!'));
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_get_difficulty_of_modified_formula()
-    {
-        $modifiers = ['foo', 'bar'];
-        $spellTraits = ['baz', 'qux'];
-        $formulasTable = new FormulasTable(
-            Tables::getIt(),
-            $this->createModifiersTableForDifficulty($modifiers, 123, 456),
-            $this->createSpellTraitsTableForDifficulty($spellTraits, 789)
-        );
-        $fire = FormulaCode::getIt(FormulaCode::FIRE);
-
-        $difficultyOfModifiedFormula = $formulasTable->getFormulaDifficultyOfModified($fire, $modifiers, $spellTraits);
-        self::assertSame(
-            $formulasTable->getFormulaDifficulty($fire)->getMinimal() + 123 + 789,
-            $difficultyOfModifiedFormula->getValue()
-        );
-    }
-
-    /**
-     * @param array $expectedModifiers
-     * @param int $difficultyChange
-     * @param int $highestRequiredRealm
-     * @return \Mockery\MockInterface|ModifiersTable
-     */
-    private function createModifiersTableForDifficulty(array $expectedModifiers, int $difficultyChange, int $highestRequiredRealm)
-    {
-        $modifiersTable = $this->mockery(ModifiersTable::class);
-        $modifiersTable->shouldReceive('sumDifficultyChanges')
-            ->with($expectedModifiers)
-            ->andReturn(new DifficultyChange($difficultyChange));
-        $modifiersTable->shouldReceive('getHighestRequiredRealm')
-            ->andReturn(new Realm($highestRequiredRealm));
-
-        return $modifiersTable;
-    }
-
-    /**
-     * @param array $expectedSpellTraits
-     * @param int $difficultyChange
-     * @return \Mockery\MockInterface|SpellTraitsTable
-     */
-    private function createSpellTraitsTableForDifficulty(array $expectedSpellTraits, int $difficultyChange)
-    {
-        $spellTraitsTable = $this->mockery(SpellTraitsTable::class);
-        $spellTraitsTable->shouldReceive('sumDifficultyChanges')
-            ->with($expectedSpellTraits)
-            ->andReturn(new DifficultyChange($difficultyChange));
-
-        return $spellTraitsTable;
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_get_minimal_required_realm_of_modified_formula()
-    {
-        $this->I_can_get_minimal_required_realm_of_non_modified_formula();
-
-        $this->I_can_get_minimal_required_realm_of_slightly_modified_formula();
-
-        $this->I_can_get_minimal_required_realm_of_moderate_modified_formula();
-
-        $this->I_can_get_minimal_required_realm_of_heavily_modified_formula();
-    }
-
-    private function I_can_get_minimal_required_realm_of_non_modified_formula()
-    {
-        $formulasTable = new FormulasTable(Tables::getIt(), $this->modifiersTable, $this->spellTraitsTable);
-        $formulaCode = FormulaCode::getIt(FormulaCode::PORTAL);
-        $requiredRealmOfNonModified = $formulasTable->getRealmOfModified($formulaCode, [], []);
-        self::assertEquals($formulasTable->getRealm($formulaCode), $requiredRealmOfNonModified);
-    }
-
-    private function I_can_get_minimal_required_realm_of_slightly_modified_formula()
-    {
-        $formulaCode = FormulaCode::getIt(FormulaCode::BARRIER);
-        $modifiers = ['foo', 'bar', 'baz'];
-        $spellTraits = ['qux', 'FOO'];
-        $formulasTable = new FormulasTable(
-            Tables::getIt(),
-            $this->createModifiersTableForDifficulty(
-                $modifiers,
-                5 /* 3 + 5 = 8, still can be handled by barrier realm 1 */,
-                1 // highest required realm by modifiers
-            ),
-            $this->createSpellTraitsTableForDifficulty($spellTraits, 2 /* 8 + 2 = 10, still can be handled by barrier minimal realm 1 */)
-        );
-        $requiredRealmOfSlightlyModifiedFormula = $formulasTable->getRealmOfModified($formulaCode, $modifiers, $spellTraits);
-        self::assertEquals($formulasTable->getRealm($formulaCode), $requiredRealmOfSlightlyModifiedFormula);
-
-        $formulasTable = new FormulasTable(
-            Tables::getIt(),
-            $this->createModifiersTableForDifficulty(
-                $modifiers,
-                5 /* 3 + 5 = 8, still can be handled by barrier realm 1 */,
-                123 // highest required realm by modifiers
-            ),
-            $this->createSpellTraitsTableForDifficulty($spellTraits, 2 /* 8 + 2 = 10, still can be handled by barrier minimal realm 1 */)
-        );
-        $requiredRealmOnHighModifiersRequirement = $formulasTable->getRealmOfModified($formulaCode, $modifiers, $spellTraits);
-        self::assertInstanceOf(Realm::class, $requiredRealmOnHighModifiersRequirement);
-        self::assertSame(123, $requiredRealmOnHighModifiersRequirement->getValue());
-    }
-
-    private function I_can_get_minimal_required_realm_of_moderate_modified_formula()
-    {
-        $formulaCode = FormulaCode::getIt(FormulaCode::ILLUSION);
-        $modifiers = ['foo', 'bar', 'baz'];
-        $spellTraits = ['qux', 'FooBarBaz'];
-        $formulasTable = new FormulasTable(
-            Tables::getIt(),
-            $this->createModifiersTableForDifficulty(
-                $modifiers,
-                $modifiersDifficultyChangeValue = 6 /* 2 + 6 = 8, still can be handled by illusion minimal realm 1 */,
-                1
-            ),
-            $this->createSpellTraitsTableForDifficulty(
-                $spellTraits,
-                $spellTraitsDifficultyChangeValue = 3 /* 8 + 3 = 11, can be handled by illusion realm 2 */
-            )
-        );
-        $requiredRealmOfModerateModifiedFormula = $formulasTable->getRealmOfModified($formulaCode, $modifiers, $spellTraits);
-        self::assertInstanceOf(Realm::class, $requiredRealmOfModerateModifiedFormula);
-        self::assertGreaterThan(
-            $formulasTable->getRealm($formulaCode)->getValue(),
-            $requiredRealmOfModerateModifiedFormula->getValue()
-        );
-        $basicFormulaRealmValue = $formulasTable->getRealm($formulaCode)->getValue();
-        $portalDifficulty = $formulasTable->getFormulaDifficulty($formulaCode);
-        $unhandledDifficulty = ($modifiersDifficultyChangeValue + $spellTraitsDifficultyChangeValue + $portalDifficulty->getMinimal())
-            - $portalDifficulty->getMaximal();
-        $handledDifficultyPerRealm = $portalDifficulty->getFormulaDifficultyAddition()->getDifficultyAdditionPerRealm();
-        $realmsIncrement = (int)ceil($unhandledDifficulty / $handledDifficultyPerRealm);
-        self::assertSame($basicFormulaRealmValue + $realmsIncrement, $requiredRealmOfModerateModifiedFormula->getValue());
-
-        $formulasTable = new FormulasTable(
-            Tables::getIt(),
-            $this->createModifiersTableForDifficulty(
-                $modifiers,
-                9, /* 2 + 9 = 11, can be handled by illusion realm 2 */
-                456
-            ),
-            $this->createSpellTraitsTableForDifficulty(
-                $spellTraits,
-                15 /* 11 + 15 = 26, can be handled by illusion realm 8 */
-            )
-        );
-        $requiredRealmOfHighModifiersRequirement = $formulasTable->getRealmOfModified($formulaCode, $modifiers, $spellTraits);
-        self::assertSame(456, $requiredRealmOfHighModifiersRequirement->getValue());
-    }
-
-    private function I_can_get_minimal_required_realm_of_heavily_modified_formula()
-    {
-        $formulaCode = FormulaCode::getIt(FormulaCode::DISCHARGE);
-        $modifiers = ['foo', 'BAR'];
-        $spellTraits = ['bAz', 'QUX'];
-        $formulasTable = new FormulasTable(
-            Tables::getIt(),
-            $this->createModifiersTableForDifficulty($modifiers, $modifiersDifficultyChangeValue = 159, 1),
-            $this->createSpellTraitsTableForDifficulty($spellTraits, $spellTraitsDifficultyChangeValue = 234)
-        );
-        $requiredRealmOfHeavilyModifiedFormula = $formulasTable->getRealmOfModified($formulaCode, $modifiers, $spellTraits);
-        self::assertInstanceOf(Realm::class, $requiredRealmOfHeavilyModifiedFormula);
-        self::assertGreaterThan(
-            $formulasTable->getRealm($formulaCode)->getValue(),
-            $requiredRealmOfHeavilyModifiedFormula->getValue()
-        );
-        $basicFormulaRealmValue = $formulasTable->getRealm($formulaCode)->getValue();
-        $portalDifficulty = $formulasTable->getFormulaDifficulty($formulaCode);
-        $unhandledDifficulty = ($modifiersDifficultyChangeValue + $spellTraitsDifficultyChangeValue + $portalDifficulty->getMinimal())
-            - $portalDifficulty->getMaximal();
-        $handledDifficultyPerRealm = $portalDifficulty->getFormulaDifficultyAddition()->getDifficultyAdditionPerRealm();
-        $realmsIncrement = (int)ceil($unhandledDifficulty / $handledDifficultyPerRealm);
-        self::assertSame(
-            $basicFormulaRealmValue + $realmsIncrement,
-            $requiredRealmOfHeavilyModifiedFormula->getValue()
-        );
-
-        $formulasTable = new FormulasTable(
-            Tables::getIt(),
-            $this->createModifiersTableForDifficulty($modifiers, 159, $requiredRealmOfHeavilyModifiedFormula->getValue() + 1),
-            $this->createSpellTraitsTableForDifficulty($spellTraits, 234)
-        );
-        $requiredRealmOfHighModifiersRequirement = $formulasTable->getRealmOfModified($formulaCode, $modifiers, $spellTraits);
-        self::assertSame($requiredRealmOfHeavilyModifiedFormula->getValue() + 1, $requiredRealmOfHighModifiersRequirement->getValue());
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_get_affections_of_modified_formula()
-    {
-        $formulasTable = new FormulasTable(
-            Tables::getIt(),
-            $this->createModifiersTableForAffections([], [[0, AffectionPeriodCode::DAILY]]),
-            $this->createSpellTraitsTableShell()
-        );
-        self::assertEquals(
-            [AffectionPeriodCode::DAILY => new Affection([-1, AffectionPeriodCode::DAILY])],
-            $formulasTable->getAffectionsOfModified(FormulaCode::getIt(FormulaCode::DISCHARGE) /* -1 */, [], [])
-        );
-
-        $expectedModifiers = ['foo', 'bar'];
-        $formulasTable = new FormulasTable(
-            Tables::getIt(),
-            $this->createModifiersTableForAffections($expectedModifiers, [[0, AffectionPeriodCode::DAILY]]),
-            $this->createSpellTraitsTableShell()
-        );
-        self::assertEquals(
-            [AffectionPeriodCode::DAILY => new Affection([-1, AffectionPeriodCode::DAILY])],
-            $formulasTable->getAffectionsOfModified(FormulaCode::getIt(FormulaCode::FLOW_OF_TIME), $expectedModifiers, [])
-        );
-
-        $formulasTable = new FormulasTable(
-            Tables::getIt(),
-            $this->createModifiersTableForAffections(
-                $expectedModifiers,
-                [
-                    [-1, AffectionPeriodCode::DAILY],
-                    [-4, AffectionPeriodCode::DAILY],
-                    [-78, AffectionPeriodCode::DAILY],
-                ]
-            ),
-            $this->createSpellTraitsTableShell()
-        );
-        self::assertEquals(
-            [AffectionPeriodCode::DAILY => new Affection([-84, AffectionPeriodCode::DAILY])],
-            $formulasTable->getAffectionsOfModified(FormulaCode::getIt(FormulaCode::FLOW_OF_TIME), $expectedModifiers, [])
-        );
-
-        $formulasTable = new FormulasTable(
-            Tables::getIt(),
-            $this->createModifiersTableForAffections(
-                $expectedModifiers,
-                [
-                    [-1, AffectionPeriodCode::DAILY],
-                    [-4, AffectionPeriodCode::DAILY],
-                    [-78, AffectionPeriodCode::DAILY],
-                    [-159, AffectionPeriodCode::LIFE],
-                    [-357, AffectionPeriodCode::LIFE],
-                ]
-            ),
-            $this->createSpellTraitsTableShell()
-        );
-        self::assertEquals(
-            [
-                AffectionPeriodCode::DAILY => new Affection([-85, AffectionPeriodCode::DAILY]),
-                AffectionPeriodCode::LIFE => new Affection([-516, AffectionPeriodCode::LIFE]),
-            ],
-            $formulasTable->getAffectionsOfModified(
-                FormulaCode::getIt(FormulaCode::TSUNAMI_FROM_CLAY_AND_STONES), // -2
-                $expectedModifiers,
-                []
-            )
-        );
-    }
-
-    /**
-     * @param array $expectedModifiers
-     * @param array $affectionsOfModifiers
-     * @return \Mockery\MockInterface|ModifiersTable
-     */
-    private function createModifiersTableForAffections(array $expectedModifiers, array $affectionsOfModifiers)
-    {
-        $modifiersTable = $this->mockery(ModifiersTable::class);
-        $modifiersTable->shouldReceive('getAffectionsOfModifiers')
-            ->with($expectedModifiers)
-            ->andReturn(
-                array_map(function (array $affectionParts) {
-                    return new Affection($affectionParts);
-                }, $affectionsOfModifiers)
-            );
-
-        return $modifiersTable;
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_get_radius_of_modified_formula()
-    {
-        $modifiers = ['foo', 'bar'];
-        $formulasTable = new FormulasTable(
-            Tables::getIt(),
-            $this->createModifiersTableForRadius($modifiers, 132456),
-            $this->createSpellTraitsTableShell()
-        );
-        $radiusOfLock = $formulasTable->getRadiusOfModified(
-            FormulaCode::getIt(FormulaCode::LOCK), // no radius (null)
-            $modifiers,
-            ['foo bar', 'bar BAZ']
-        );
-        self::assertNull($radiusOfLock);
-
-        $formulasTable = new FormulasTable(
-            Tables::getIt(),
-            $this->createModifiersTableForRadius($modifiers, 0),
-            $this->createSpellTraitsTableShell()
-        );
-        $discharge = FormulaCode::getIt(FormulaCode::DISCHARGE);
-        $radiusOfDischargeWithoutChange = $formulasTable->getRadiusOfModified(
-            $discharge,
-            $modifiers,
-            ['foo bar', 'bar BAZ']
-        );
-        self::assertEquals(
-            $formulasTable->getRadius($discharge),
-            $radiusOfDischargeWithoutChange
-        );
-
-        $formulasTable = new FormulasTable(
-            Tables::getIt(),
-            $this->createModifiersTableForRadius($modifiers, 789),
-            $this->createSpellTraitsTableShell()
-        );
-        $radiusOfModifiedDischarge = $formulasTable->getRadiusOfModified(
-            $discharge,
-            $modifiers,
-            ['foo bar', 'bar BAZ']
-        );
-        self::assertEquals($formulasTable->getRadius($discharge)->getWithAddition(789), $radiusOfModifiedDischarge);
-    }
-
-    /**
-     * @param array $expectedModifiers
-     * @param int $sumOfRadii
-     * @return \Mockery\MockInterface|ModifiersTable
-     */
-    private function createModifiersTableForRadius(array $expectedModifiers, int $sumOfRadii)
-    {
-        $modifiersTable = $this->mockery(ModifiersTable::class);
-        $modifiersTable->shouldReceive('sumRadiusChange')
-            ->with($expectedModifiers)
-            ->andReturn(new IntegerObject($sumOfRadii));
-
-        return $modifiersTable;
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_get_power_of_modified_formula()
-    {
-        $modifiers = ['foo', 'bar'];
-        $formulasTable = new FormulasTable(
-            Tables::getIt(),
-            $this->createModifiersTableForPower($modifiers, 132456),
-            $this->createSpellTraitsTableShell()
-        );
-        $powerOfDischarge = $formulasTable->getPowerOfModified(
-            FormulaCode::getIt(FormulaCode::DISCHARGE), // null
-            $modifiers,
-            ['foo bar', 'bar BAZ']
-        );
-        self::assertNull($powerOfDischarge);
-
-        $lock = FormulaCode::getIt(FormulaCode::LOCK);
-        $formulasTable = new FormulasTable(
-            Tables::getIt(),
-            $this->createModifiersTableForPower($modifiers, 0),
-            $this->createSpellTraitsTableShell()
-        );
-        $powerOfLockWithoutChange = $formulasTable->getPowerOfModified($lock, $modifiers, ['foo bar', 'bar BAZ']);
-        self::assertEquals($formulasTable->getPower($lock), $powerOfLockWithoutChange);
-
-        $formulasTable = new FormulasTable(
-            Tables::getIt(),
-            $this->createModifiersTableForPower($modifiers, 789),
-            $this->createSpellTraitsTableShell()
-        );
-        $greatMassacre = FormulaCode::getIt(FormulaCode::GREAT_MASSACRE);
-        $powerOfGreatMassacreWithChange = $formulasTable->getPowerOfModified($greatMassacre, $modifiers, ['foo bar', 'bar BAZ']);
-        self::assertEquals($formulasTable->getPower($greatMassacre)->getWithAddition(789), $powerOfGreatMassacreWithChange);
-    }
-
-    /**
-     * @param array $expectedModifiers
-     * @param int $sumOfPower
-     * @return \Mockery\MockInterface|ModifiersTable
-     */
-    private function createModifiersTableForPower(array $expectedModifiers, int $sumOfPower)
-    {
-        $modifiersTable = $this->mockery(ModifiersTable::class);
-        $modifiersTable->shouldReceive('sumPowerChanges')
-            ->with($expectedModifiers)
-            ->andReturn(new IntegerObject($sumOfPower));
-
-        return $modifiersTable;
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_get_epicenter_shift_of_modified_formula()
-    {
-        $modifiers = ['foo', 'bar'];
-        $formulasTable = new FormulasTable(
-            Tables::getIt(),
-            $this->createModifiersTableForEpicenterShift($modifiers, false /* not shifted */, 123456),
-            $this->createSpellTraitsTableShell()
-        );
-        $epicenterShiftOfNotShiftedLock = $formulasTable->getEpicenterShiftOfModified(
-            FormulaCode::getIt(FormulaCode::LOCK), // no epicenter shift (null)
-            $modifiers,
-            ['foo bar', 'bar BAZ']
-        );
-        self::assertNull($epicenterShiftOfNotShiftedLock);
-
-        $formulasTable = new FormulasTable(
-            Tables::getIt(),
-            $this->createModifiersTableForEpicenterShift($modifiers, true /* shifted */, 123456),
-            $this->createSpellTraitsTableShell()
-        );
-        $epicenterShiftOfShiftedLock = $formulasTable->getEpicenterShiftOfModified(
-            FormulaCode::getIt(FormulaCode::LOCK), // no epicenter shift (null)
-            $modifiers,
-            ['foo bar', 'bar BAZ']
-        );
-        self::assertEquals(new EpicenterShift([123456, 0]), $epicenterShiftOfShiftedLock);
-
-        $formulasTable = new FormulasTable(
-            Tables::getIt(),
-            $this->createModifiersTableForEpicenterShift($modifiers, true /* shifted */, 0),
-            $this->createSpellTraitsTableShell()
-        );
-        $greatMassacre = FormulaCode::getIt(FormulaCode::GREAT_MASSACRE);
-        $epicenterShiftOfGreatMassacreWithoutChange = $formulasTable->getEpicenterShiftOfModified(
-            $greatMassacre, // +20
-            $modifiers,
-            ['foo bar', 'bar BAZ']
-        );
-        self::assertEquals($formulasTable->getEpicenterShift($greatMassacre) /* + 0 */, $epicenterShiftOfGreatMassacreWithoutChange);
-
-        $formulasTable = new FormulasTable(
-            Tables::getIt(),
-            $this->createModifiersTableForEpicenterShift($modifiers, true /* shifted */, 789),
-            $this->createSpellTraitsTableShell()
-        );
-        $epicenterShiftOfModifiedGreatMassacre = $formulasTable->getEpicenterShiftOfModified(
-            FormulaCode::getIt(FormulaCode::GREAT_MASSACRE), // +20
-            $modifiers,
-            ['foo bar', 'bar BAZ']
-        );
-        self::assertEquals(
-            $formulasTable->getEpicenterShift($greatMassacre)->getWithAddition(789),
-            $epicenterShiftOfModifiedGreatMassacre
-        );
-    }
-
-    /**
-     * @param array $expectedModifiers
-     * @param int $sumOfShifts
-     * @param bool $epicenterShifted
-     * @return \Mockery\MockInterface|ModifiersTable
-     */
-    private function createModifiersTableForEpicenterShift(
-        array $expectedModifiers,
-        bool $epicenterShifted,
-        int $sumOfShifts
-    )
-    {
-        $modifiersTable = $this->mockery(ModifiersTable::class);
-        $modifiersTable->shouldReceive('sumEpicenterShiftChange')
-            ->with($expectedModifiers)
-            ->andReturn(new IntegerObject($sumOfShifts));
-        $modifiersTable->shouldReceive('isEpicenterShifted')
-            ->andReturn($epicenterShifted);
-
-        return $modifiersTable;
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_get_spell_speed_of_modified_formula()
-    {
-        $modifiers = ['foo', 'bar'];
-        $formulasTable = new FormulasTable(
-            Tables::getIt(),
-            $this->createModifiersTableForSpellSpeed($modifiers, 132456),
-            $this->createSpellTraitsTableShell()
-        );
-        $spellSpeedOfLock = $formulasTable->getSpellSpeedOfModified(
-            FormulaCode::getIt(FormulaCode::LOCK), // no spell speed (null)
-            $modifiers,
-            ['foo bar', 'bar BAZ']
-        );
-        self::assertNull($spellSpeedOfLock);
-
-        $formulasTable = new FormulasTable(
-            Tables::getIt(),
-            $this->createModifiersTableForSpellSpeed($modifiers, 0),
-            $this->createSpellTraitsTableShell()
-        );
-        $tsunami = FormulaCode::getIt(FormulaCode::TSUNAMI_FROM_CLAY_AND_STONES);
-        $spellSpeedOfTsunamiWithoutChange = $formulasTable->getSpellSpeedOfModified(
-            $tsunami, // +0
-            $modifiers,
-            ['foo bar', 'bar BAZ']
-        );
-        self::assertEquals($formulasTable->getSpellSpeed($tsunami) /* + 0 */, $spellSpeedOfTsunamiWithoutChange);
-
-        $formulasTable = new FormulasTable(
-            Tables::getIt(),
-            $this->createModifiersTableForSpellSpeed($modifiers, 789),
-            $this->createSpellTraitsTableShell()
-        );
-        $spellSpeedOfModifiedTsunami = $formulasTable->getSpellSpeedOfModified(
-            $tsunami, // +0
-            $modifiers,
-            ['foo bar', 'bar BAZ']
-        );
-        self::assertEquals($formulasTable->getSpellSpeed($tsunami)->getWithAddition(789), $spellSpeedOfModifiedTsunami);
-    }
-
-    /**
-     * @param array $expectedModifiers
-     * @param int $sumOfSpeedChange
-     * @return \Mockery\MockInterface|ModifiersTable
-     */
-    private function createModifiersTableForSpellSpeed(array $expectedModifiers, int $sumOfSpeedChange)
-    {
-        $modifiersTable = $this->mockery(ModifiersTable::class);
-        $modifiersTable->shouldReceive('sumSpellSpeedChange')
-            ->with($expectedModifiers)
-            ->andReturn(new IntegerObject($sumOfSpeedChange));
-
-        return $modifiersTable;
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_get_attack_of_modified_formula()
-    {
-        $modifiers = ['foo', 'bar'];
-        $formulasTable = new FormulasTable(
-            Tables::getIt(),
-            $this->createModifiersTableForAttack($modifiers, 132456),
-            $this->createSpellTraitsTableShell()
-        );
-        $attackOfLock = $formulasTable->getAttackOfModified(
-            FormulaCode::getIt(FormulaCode::LOCK), // no spell speed (null)
-            $modifiers,
-            ['foo FOO']
-        );
-        self::assertNull($attackOfLock);
-
-        $dischargeCode = FormulaCode::getIt(FormulaCode::DISCHARGE);
-        $dischargeAttack = $formulasTable->getAttack($dischargeCode);
-
-        $formulasTable = new FormulasTable(
-            Tables::getIt(),
-            $this->createModifiersTableForAttack($modifiers, 0),
-            $this->createSpellTraitsTableShell()
-        );
-        self::assertSame(4, $dischargeAttack->getValue());
-        $attackOfDischargeWithoutChange = $formulasTable->getAttackOfModified($dischargeCode, $modifiers, ['foo FOO']);
-        self::assertEquals(new IntegerObject($dischargeAttack->getValue()), $attackOfDischargeWithoutChange);
-
-        $formulasTable = new FormulasTable(
-            Tables::getIt(),
-            $this->createModifiersTableForAttack($modifiers, 789),
-            $this->createSpellTraitsTableShell()
-        );
-        $attackOfModifiedDischarge = $formulasTable->getAttackOfModified($dischargeCode, $modifiers, ['foo FOO']);
-        self::assertEquals(new IntegerObject($dischargeAttack->getWithAddition(789)->getValue()), $attackOfModifiedDischarge);
-    }
-
-    /**
-     * @param array $expectedModifiers
-     * @param int $sumOfAttackChange
-     * @return \Mockery\MockInterface|ModifiersTable
-     */
-    private function createModifiersTableForAttack(array $expectedModifiers, int $sumOfAttackChange)
-    {
-        $modifiersTable = $this->mockery(ModifiersTable::class);
-        $modifiersTable->shouldReceive('sumAttackChange')
-            ->with($expectedModifiers)
-            ->andReturn(new PropertyChange($sumOfAttackChange, 0));
-
-        return $modifiersTable;
-    }
-
-    /**
-     * @test
-     */
-    public function I_can_get_casting_of_modified_formula()
-    {
-        $modifiers = ['foo', 'bar'];
-        $portal = FormulaCode::getIt(FormulaCode::PORTAL);
-
-        $formulasTable = new FormulasTable(
-            Tables::getIt(),
-            $this->createModifiersTableForCasting($modifiers, 0),
-            $this->createSpellTraitsTableShell()
-        );
-        $castingOfPortalWithoutChange = $formulasTable->getCastingOfModified($portal /* 0 */, $modifiers, ['foo bar', 'bar BAZ']);
-        self::assertEquals($formulasTable->getCasting($portal), $castingOfPortalWithoutChange);
-
-        $formulasTable = new FormulasTable(
-            Tables::getIt(),
-            $this->createModifiersTableForCasting($modifiers, 18 /* rounds */),
-            $this->createSpellTraitsTableShell()
-        );
-        $castingOfPortalWithChange = $formulasTable->getCastingOfModified($portal, $modifiers, ['foo bar', 'bar BAZ']);
-        self::assertEquals(new Time(19, TimeUnitCode::ROUND, Tables::getIt()->getTimeTable()), $castingOfPortalWithChange);
-    }
-
-    /**
-     * @param array $expectedModifiers
-     * @param int $sumOfCasting
-     * @return \Mockery\MockInterface|ModifiersTable
-     */
-    private function createModifiersTableForCasting(array $expectedModifiers, int $sumOfCasting)
-    {
-        $modifiersTable = $this->mockery(ModifiersTable::class);
-        $modifiersTable->shouldReceive('sumCastingRoundsChange')
-            ->with($expectedModifiers)
-            ->andReturn(new CastingRounds([$sumOfCasting], Tables::getIt()->getTimeTable()));
-
-        return $modifiersTable;
     }
 }
