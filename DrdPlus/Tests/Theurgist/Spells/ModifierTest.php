@@ -4,9 +4,11 @@ namespace DrdPlus\Tests\Theurgist\Spells;
 use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ModifierMutableCastingParameterCode;
 use DrdPlus\Theurgist\Spells\SpellParameters\AdditionByDifficulty;
+use DrdPlus\Theurgist\Spells\SpellParameters\CastingRounds;
 use DrdPlus\Theurgist\Spells\SpellParameters\DifficultyChange;
 use DrdPlus\Theurgist\Spells\SpellParameters\Partials\IntegerCastingParameter;
 use DrdPlus\Theurgist\Spells\SpellParameters\Realm;
+use DrdPlus\Theurgist\Spells\SpellParameters\RealmsAffection;
 use DrdPlus\Theurgist\Spells\SpellParameters\SpellSpeed;
 use DrdPlus\Theurgist\Spells\Modifier;
 use DrdPlus\Theurgist\Spells\ModifiersTable;
@@ -35,6 +37,7 @@ class ModifierTest extends TestWithMockery
             $modifiersTable = $this->createModifiersTable();
             $modifier = new Modifier($modifierCode, $modifiersTable, [], []);
             self::assertSame($modifierCode, $modifier->getModifierCode());
+            self::assertSame($modifierValue, (string)$modifier);
             foreach (ModifierMutableCastingParameterCode::getPossibleValues() as $mutableParameterName) {
                 /** like instance of @see SpellSpeed */
                 $baseParameter = $this->createExpectedParameter($mutableParameterName);
@@ -147,7 +150,7 @@ class ModifierTest extends TestWithMockery
         foreach (ModifierMutableCastingParameterCode::getPossibleValues() as $index => $parameterValue) {
             $parameterChanges[$parameterValue] = $index + 1; // 1...x
         }
-        $spellTraits = [$this->createSpellTrait(123), $this->createSpellTrait(45)];
+        $spellTraits = [$this->createSpellTraitShell(), $this->createSpellTraitShell()];
         foreach (ModifierCode::getPossibleValues() as $modifierValue) {
             $modifierCode = ModifierCode::getIt($modifierValue);
             $modifiersTable = $this->createModifiersTable();
@@ -189,16 +192,11 @@ class ModifierTest extends TestWithMockery
     }
 
     /**
-     * @param int $difficultyChange
      * @return MockInterface|SpellTrait
      */
-    private function createSpellTrait(int $difficultyChange)
+    private function createSpellTraitShell()
     {
-        $spellTrait = $this->mockery(SpellTrait::class);
-        $spellTrait->shouldReceive('getDifficultyChange')
-            ->andReturn($difficultyChange);
-
-        return $spellTrait;
+        return $this->mockery(SpellTrait::class);
     }
 
     /**
@@ -262,18 +260,60 @@ class ModifierTest extends TestWithMockery
                 $parameterDifficulties[] = $difficultyChange = random_int(-10, 10);
                 $this->addAdditionByDifficultyGetter($difficultyChange, $changedParameter);
             }
-            $difficultyChange = $this->createDifficultyChange(array_sum($parameterDifficulties));
+            $spellTraits = [$this->createSpellTrait(123), [$this->createSpellTrait(456)]];
+            $difficultyChangeValue = 123 + 456 + array_sum($parameterDifficulties);
+            $difficultyChange = $this->createDifficultyChange($difficultyChangeValue);
             $this->addDifficultyChangeGetter($difficultyChange, $modifierCode, $modifiersTable);
-            $modifier = new Modifier($modifierCode, $modifiersTable, [], []);
+            $modifier = new Modifier($modifierCode, $modifiersTable, [], $spellTraits);
             try {
                 self::assertSame($difficultyChange, $modifier->getDifficultyChange());
             } catch (NoMatchingExpectationException $expectationException) {
                 self::fail(
-                    'Expected difficulty sum ' . array_sum($parameterDifficulties) . ' as sum of '
-                    . implode(',', $parameterDifficulties) . ': ' . $expectationException->getMessage()
+                    'Expected difficulty sum ' . $difficultyChangeValue
+                    . ': ' . $expectationException->getMessage()
                 );
             }
         }
+    }
+
+    /**
+     * @param int $difficultyChangeValue
+     * @return MockInterface|SpellTrait
+     */
+    private function createSpellTrait(int $difficultyChangeValue)
+    {
+        $spellTrait = $this->mockery(SpellTrait::class);
+        $spellTrait->shouldReceive('getDifficultyChange')
+            ->andReturn($difficultyChange = $this->mockery(DifficultyChange::class));
+        $difficultyChange->shouldReceive('getValue')
+            ->andReturn($difficultyChangeValue);
+
+        return $spellTrait;
+    }
+
+    private function addAdditionByDifficultyGetter(int $difficultyChange, MockInterface $parameter)
+    {
+        $parameter->shouldReceive('getAdditionByDifficulty')
+            ->andReturn($additionByDifficulty = $this->mockery(AdditionByDifficulty::class));
+        $additionByDifficulty->shouldReceive('getCurrentDifficultyIncrement')
+            ->andReturn($difficultyChange);
+    }
+
+    /**
+     * @test
+     */
+    public function I_can_get_casting_rounds()
+    {
+        $modifier = new Modifier(
+            $modifierCode = ModifierCode::getIt(ModifierCode::COLOR),
+            $modifiersTable = $this->createModifiersTable(),
+            [],
+            []
+        );
+        $modifiersTable->shouldReceive('getCastingRounds')
+            ->with($modifierCode)
+            ->andReturn($castingRounds = $this->mockery(CastingRounds::class));
+        self::assertSame($castingRounds, $modifier->getCastingRounds());
     }
 
     /**
@@ -293,12 +333,21 @@ class ModifierTest extends TestWithMockery
         self::assertSame($realm, $modifier->getRequiredRealm());
     }
 
-    private function addAdditionByDifficultyGetter(int $difficultyChange, MockInterface $parameter)
+    /**
+     * @test
+     */
+    public function I_can_get_realms_affection()
     {
-        $parameter->shouldReceive('getAdditionByDifficulty')
-            ->andReturn($additionByDifficulty = $this->mockery(AdditionByDifficulty::class));
-        $additionByDifficulty->shouldReceive('getCurrentDifficultyIncrement')
-            ->andReturn($difficultyChange);
+        $modifier = new Modifier(
+            $modifierCode = ModifierCode::getIt(ModifierCode::INVISIBILITY),
+            $modifiersTable = $this->createModifiersTable(),
+            [],
+            []
+        );
+        $modifiersTable->shouldReceive('getRealmsAffection')
+            ->with($modifierCode)
+            ->andReturn($realmsAffection = $this->mockery(RealmsAffection::class));
+        self::assertSame($realmsAffection, $modifier->getRealmsAffection());
     }
 
     /**

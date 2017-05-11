@@ -249,7 +249,7 @@ class Formula extends StrictObject
             $baseRealmsAffection->getAffectionPeriod()->getValue() => $baseRealmsAffection->getValue(),
         ];
         foreach ($this->modifiers as $modifier) {
-            $modifierRealmsAffection = $modifier->getBaseRealmsAffection();
+            $modifierRealmsAffection = $modifier->getRealmsAffection();
             $modifierRealmsAffectionPeriod = $modifierRealmsAffection->getAffectionPeriod()->getValue();
             if (!array_key_exists($modifierRealmsAffectionPeriod, $realmsAffectionsSum)) {
                 $realmsAffectionsSum[$modifierRealmsAffectionPeriod] = 0;

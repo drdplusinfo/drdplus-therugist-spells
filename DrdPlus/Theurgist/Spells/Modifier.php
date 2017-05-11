@@ -136,11 +136,6 @@ class Modifier extends StrictObject
         return $this->modifierCode;
     }
 
-    public function getRequiredRealm(): Realm
-    {
-        return $this->modifiersTable->getRealm($this->getModifierCode());
-    }
-
     public function getDifficultyChange(): DifficultyChange
     {
         $modifierParameters = [
@@ -187,9 +182,17 @@ class Modifier extends StrictObject
     }
 
     /**
+     * @return Realm
+     */
+    public function getRequiredRealm(): Realm
+    {
+        return $this->modifiersTable->getRealm($this->getModifierCode());
+    }
+
+    /**
      * @return RealmsAffection
      */
-    public function getBaseRealmsAffection(): RealmsAffection
+    public function getRealmsAffection(): RealmsAffection
     {
         return $this->modifiersTable->getRealmsAffection($this->getModifierCode());
     }
