@@ -104,17 +104,18 @@ class FormulaDifficulty extends StrictObject implements PositiveInteger
     }
 
     /**
-     * How much have to be realms increased to get total difficulty
+     * How much have to be realms increased to manage total difficulty
      *
      * @return int
      */
     public function getCurrentRealmsIncrement(): int
     {
         $currentDifficulty = $this->getValue();
-        if ($currentDifficulty <= $this->getMaximal()) {
+        $maximalDifficulty = $this->getMaximal();
+        if ($currentDifficulty <= $maximalDifficulty) {
             return 0;
         }
-        $additionalDifficulty = $currentDifficulty - $this->getMaximal();
+        $additionalDifficulty = $currentDifficulty - $maximalDifficulty;
         $steps = $additionalDifficulty / $this->getFormulaDifficultyAddition()->getDifficultyAdditionPerRealm();
         $realmsIncrement = $steps * $this->getFormulaDifficultyAddition()->getRealmsChangePerAdditionStep();
 

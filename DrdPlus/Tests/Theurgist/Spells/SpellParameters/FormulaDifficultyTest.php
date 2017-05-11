@@ -118,6 +118,25 @@ PHPDOC
 
     /**
      * @test
+     */
+    public function I_can_get_current_realms_increment()
+    {
+        $formulaDifficulty = new FormulaDifficulty([1, 5, '2=3']);
+        self::assertSame($formulaDifficulty->getValue(), $formulaDifficulty->getMinimal());
+        self::assertSame(0, $formulaDifficulty->getCurrentRealmsIncrement());
+        $maximalDifficulty = $formulaDifficulty->createWithChange(4);
+        self::assertSame(5, $maximalDifficulty->getValue());
+        self::assertSame(0, $maximalDifficulty->getCurrentRealmsIncrement());
+        $higherThanMaximalDifficulty = $formulaDifficulty->createWithChange(5);
+        self::assertSame(6, $higherThanMaximalDifficulty->getValue());
+        self::assertSame(1, $higherThanMaximalDifficulty->getCurrentRealmsIncrement());
+        $damnBigDifficulty = $formulaDifficulty->createWithChange(999);
+        self::assertSame(1000, $damnBigDifficulty->getValue());
+        self::assertSame(664 /* 995 over maximal, 3 realms per 2 points */, $damnBigDifficulty->getCurrentRealmsIncrement());
+    }
+
+    /**
+     * @test
      * @expectedException \DrdPlus\Theurgist\Spells\SpellParameters\Exceptions\InvalidValueForMinimalDifficulty
      * @expectedExceptionMessageRegExp ~-1~
      */
