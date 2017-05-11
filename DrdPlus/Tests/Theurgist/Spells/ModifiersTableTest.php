@@ -481,4 +481,26 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
         }
     }
 
+    /**
+     * @test
+     * @expectedException \DrdPlus\Theurgist\Spells\Exceptions\UnknownModifierToGetParentModifiersFor
+     * @expectedExceptionMessageRegExp ~dancing~
+     */
+    public function I_can_not_get_parent_modifiers_for_unknown_modifier()
+    {
+        $modifiersTable = new ModifiersTable(Tables::getIt());
+        $modifiersTable->getParentModifierCodes($this->createModifierCode('dancing'));
+    }
+
+    /**
+     * @test
+     * @expectedException \DrdPlus\Theurgist\Spells\Exceptions\UnknownModifierToGetChildModifiersFor
+     * @expectedExceptionMessageRegExp ~lazy~
+     */
+    public function I_can_not_get_child_modifiers_for_unknown_modifier()
+    {
+        $modifiersTable = new ModifiersTable(Tables::getIt());
+        $modifiersTable->getChildModifiers($this->createModifierCode('lazy'));
+    }
+
 }
