@@ -6,6 +6,7 @@ use DrdPlus\Theurgist\Codes\ModifierMutableCastingParameterCode;
 use DrdPlus\Theurgist\Spells\SpellParameters\AdditionByDifficulty;
 use DrdPlus\Theurgist\Spells\SpellParameters\DifficultyChange;
 use DrdPlus\Theurgist\Spells\SpellParameters\Partials\IntegerCastingParameter;
+use DrdPlus\Theurgist\Spells\SpellParameters\Realm;
 use DrdPlus\Theurgist\Spells\SpellParameters\SpellSpeed;
 use DrdPlus\Theurgist\Spells\Modifier;
 use DrdPlus\Theurgist\Spells\ModifiersTable;
@@ -275,6 +276,23 @@ class ModifierTest extends TestWithMockery
         }
     }
 
+    /**
+     * @test
+     */
+    public function I_can_get_required_realm_for_modifier()
+    {
+        $modifier = new Modifier(
+            $modifierCode = ModifierCode::getIt(ModifierCode::TRANSPOSITION),
+            $modifiersTable = $this->createModifiersTable(),
+            [],
+            []
+        );
+        $modifiersTable->shouldReceive('getRealm')
+            ->with($modifierCode)
+            ->andReturn($realm = $this->mockery(Realm::class));
+        self::assertSame($realm, $modifier->getRequiredRealm());
+    }
+
     private function addAdditionByDifficultyGetter(int $difficultyChange, MockInterface $parameter)
     {
         $parameter->shouldReceive('getAdditionByDifficulty')
@@ -369,4 +387,13 @@ class ModifierTest extends TestWithMockery
         new Modifier(ModifierCode::getIt(ModifierCode::TRANSPOSITION), $this->createModifiersTable(), ['useless' => 0], []);
     }
 
+    /**
+     * @test
+     * @expectedException \DrdPlus\Theurgist\Spells\Exceptions\InvalidSpellTrait
+     * @expectedExceptionMessageRegExp ~DateTime~
+     */
+    public function I_can_create_it_with_non_spell_trait_as_spell_trait()
+    {
+        new Modifier(ModifierCode::getIt(ModifierCode::TRANSPOSITION), $this->createModifiersTable(), [], [new \DateTime()]);
+    }
 }
