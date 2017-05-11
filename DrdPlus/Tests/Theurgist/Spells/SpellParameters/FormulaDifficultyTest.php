@@ -137,6 +137,18 @@ PHPDOC
 
     /**
      * @test
+     */
+    public function I_get_untouched_instance_as_with_zero_change()
+    {
+        $formulaDifficulty = new FormulaDifficulty([1, 2, '3=4']);
+        $beforeChange = serialize($formulaDifficulty);
+        $withoutChange = $formulaDifficulty->createWithChange(0);
+        self::assertSame($formulaDifficulty, $withoutChange);
+        self::assertSame($beforeChange, serialize($formulaDifficulty));
+    }
+
+    /**
+     * @test
      * @expectedException \DrdPlus\Theurgist\Spells\SpellParameters\Exceptions\InvalidValueForMinimalDifficulty
      * @expectedExceptionMessageRegExp ~-1~
      */
