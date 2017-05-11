@@ -46,7 +46,7 @@ class FormulaTest extends TestWithMockery
                 self::assertSame($baseParameter, $formula->$getBaseParameter());
 
                 /** like @see Formula::getCurrentRadius() */
-                $getParameterWithAddition = StringTools::assembleGetterForName($mutableParameterName. '_with_addition');
+                $getParameterWithAddition = StringTools::assembleGetterForName($mutableParameterName . '_with_addition');
                 $this->addExpectedAdditionSetter(0, $baseParameter, $baseParameter);
                 self::assertSame($baseParameter, $formula->$getParameterWithAddition());
 
@@ -199,6 +199,19 @@ class FormulaTest extends TestWithMockery
     /**
      * @test
      */
+    public function I_can_get_basic_difficulty()
+    {
+        $formulasTable = $this->createFormulasTable();
+        $formula = new Formula(FormulaCode::getIt(FormulaCode::PORTAL), $formulasTable, [], [], []);
+        $formulasTable
+            ->shouldReceive('getFormulaDifficulty')
+            ->andReturn($formulaDifficulty = $this->mockery(FormulaDifficulty::class));
+        self::assertSame($formulaDifficulty, $formula->getBaseDifficulty());
+    }
+
+    /**
+     * @test
+     */
     public function I_get_basic_difficulty_change_without_any_parameter()
     {
         foreach (FormulaCode::getPossibleValues() as $formulaValue) {
@@ -294,7 +307,6 @@ class FormulaTest extends TestWithMockery
 
         return $modifier;
     }
-
 
     /**
      * @param int $difficultyChangeValue

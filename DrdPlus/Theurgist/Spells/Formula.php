@@ -152,6 +152,14 @@ class Formula extends StrictObject
         return $spellTraits;
     }
 
+    /**
+     * @return FormulaDifficulty
+     */
+    public function getBaseDifficulty(): FormulaDifficulty
+    {
+        return $this->formulasTable->getFormulaDifficulty($this->getFormulaCode());
+    }
+
     public function getCurrentDifficulty(): FormulaDifficulty
     {
         $formulaParameters = [
