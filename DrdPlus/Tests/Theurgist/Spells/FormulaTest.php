@@ -4,6 +4,7 @@ namespace DrdPlus\Tests\Theurgist\Spells;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\FormulaMutableCastingParameterCode;
 use DrdPlus\Theurgist\Spells\SpellParameters\AdditionByDifficulty;
+use DrdPlus\Theurgist\Spells\SpellParameters\CastingRounds;
 use DrdPlus\Theurgist\Spells\SpellParameters\DifficultyChange;
 use DrdPlus\Theurgist\Spells\SpellParameters\FormulaDifficulty;
 use DrdPlus\Theurgist\Spells\SpellParameters\Partials\IntegerCastingParameter;
@@ -199,7 +200,7 @@ class FormulaTest extends TestWithMockery
     /**
      * @test
      */
-    public function I_can_get_basic_difficulty()
+    public function I_can_get_base_difficulty()
     {
         $formulasTable = $this->createFormulasTable();
         $formula = new Formula(FormulaCode::getIt(FormulaCode::PORTAL), $formulasTable, [], [], []);
@@ -329,6 +330,64 @@ class FormulaTest extends TestWithMockery
             ->andReturn($additionByDifficulty = $this->mockery(AdditionByDifficulty::class));
         $additionByDifficulty->shouldReceive('getCurrentDifficultyIncrement')
             ->andReturn($difficultyChange);
+    }
+
+    /**
+     * @test
+     */
+    public function I_can_get_base_casting_rounds()
+    {
+        $formulasTable = $this->createFormulasTable();
+        $formula = new Formula(FormulaCode::getIt(FormulaCode::PORTAL), $formulasTable, [], [], []);
+        $formulasTable->shouldReceive('getCastingRounds')
+            ->andReturn($castingRounds = $this->mockery(CastingRounds::class));
+        self::assertSame($castingRounds, $formula->getBaseCastingRounds());
+    }
+
+    /**
+     * @test
+     */
+    public function I_can_get_final_casting_rounds_affected_by_modifiers()
+    {
+        $formulasTable = $this->createFormulasTable();
+        $formula = new Formula(
+            FormulaCode::getIt(FormulaCode::PORTAL),
+            $formulasTable,
+            [],
+            [$this->createModifier(1), [$this->createModifier(2), [$this->createModifier(3), $this->createModifier(4)]]],
+            []
+        );
+        $formulasTable->shouldReceive('getCastingRounds')
+            ->andReturn($this->createCastingRounds(123));
+        $finalCastingRounds = $formula->getCurrentCastingRounds();
+        self::assertInstanceOf(CastingRounds::class, $finalCastingRounds);
+        self::assertSame(123 + 1 + 2 + 3 + 4, $finalCastingRounds->getValue());
+    }
+
+    /**
+     * @param int $castingRoundsValue
+     * @return MockInterface|Modifier
+     */
+    private function createModifier(int $castingRoundsValue)
+    {
+        $modifier = $this->mockery(Modifier::class);
+        $modifier->shouldReceive('getCastingRounds')
+            ->andReturn($this->createCastingRounds($castingRoundsValue));
+
+        return $modifier;
+    }
+
+    /**
+     * @param int $value
+     * @return MockInterface|CastingRounds
+     */
+    private function createCastingRounds(int $value)
+    {
+        $castingRounds = $this->mockery(CastingRounds::class);
+        $castingRounds->shouldReceive('getValue')
+            ->andReturn($value);
+
+        return $castingRounds;
     }
 
     /**
