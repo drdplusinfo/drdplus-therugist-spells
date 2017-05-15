@@ -236,7 +236,7 @@ class Formula extends StrictObject
      *
      * @return array|RealmsAffection[]
      */
-    public function getCurrentAffections(): array
+    public function getCurrentRealmsAffections(): array
     {
         $realmsAffections = [];
         foreach ($this->getRealmsAffectionsSum() as $periodName => $periodSum) {
@@ -254,6 +254,7 @@ class Formula extends StrictObject
     {
         $baseRealmsAffection = $this->getBaseRealmsAffection();
         $realmsAffectionsSum = [
+            // like daily => -2
             $baseRealmsAffection->getAffectionPeriod()->getValue() => $baseRealmsAffection->getValue(),
         ];
         foreach ($this->modifiers as $modifier) {

@@ -1,14 +1,17 @@
 <?php
 namespace DrdPlus\Tests\Theurgist\Spells;
 
+use DrdPlus\Theurgist\Codes\AffectionPeriodCode;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\FormulaMutableCastingParameterCode;
 use DrdPlus\Theurgist\Spells\SpellParameters\AdditionByDifficulty;
 use DrdPlus\Theurgist\Spells\SpellParameters\CastingRounds;
 use DrdPlus\Theurgist\Spells\SpellParameters\DifficultyChange;
+use DrdPlus\Theurgist\Spells\SpellParameters\Evocation;
 use DrdPlus\Theurgist\Spells\SpellParameters\FormulaDifficulty;
 use DrdPlus\Theurgist\Spells\SpellParameters\Partials\IntegerCastingParameter;
 use DrdPlus\Theurgist\Spells\SpellParameters\Realm;
+use DrdPlus\Theurgist\Spells\SpellParameters\RealmsAffection;
 use DrdPlus\Theurgist\Spells\SpellParameters\SpellSpeed;
 use DrdPlus\Theurgist\Spells\Formula;
 use DrdPlus\Theurgist\Spells\FormulasTable;
@@ -274,7 +277,7 @@ class FormulaTest extends TestWithMockery
                 $formulaCode,
                 $formulasTable,
                 [],
-                [$this->getModifier(123), [$this->getModifier(456)]],
+                [$this->createModifierWithDifficulty(123), [$this->createModifierWithDifficulty(456)]],
                 [$this->getSpellTrait(789), [$this->getSpellTrait(789), [$this->getSpellTrait(159)]]]
             );
             try {
@@ -298,7 +301,7 @@ class FormulaTest extends TestWithMockery
      * @param int $difficultyChangeValue
      * @return MockInterface|Modifier
      */
-    private function getModifier(int $difficultyChangeValue)
+    private function createModifierWithDifficulty(int $difficultyChangeValue)
     {
         $modifier = $this->mockery(Modifier::class);
         $modifier->shouldReceive('getDifficultyChange')
@@ -393,32 +396,149 @@ class FormulaTest extends TestWithMockery
     /**
      * @test
      */
+    public function I_can_get_evocation()
+    {
+        $formulasTable = $this->createFormulasTable();
+        $formula = new Formula($formulaCode = FormulaCode::getIt(FormulaCode::DISCHARGE), $formulasTable, [], [], []);
+        $formulasTable->shouldReceive('getEvocation')
+            ->with($formulaCode)
+            ->andReturn($evocation = $this->mockery(Evocation::class));
+        self::assertSame($evocation, $formula->getCurrentEvocation());
+    }
+
+    /**
+     * @test
+     */
+    public function I_can_get_base_realms_affection()
+    {
+        $formulasTable = $this->createFormulasTable();
+        $formula = new Formula($formulaCode = FormulaCode::getIt(FormulaCode::ILLUSION), $formulasTable, [], [], []);
+        $formulasTable->shouldReceive('getRealmsAffection')
+            ->with($formulaCode)
+            ->andReturn($realmsAffection = $this->createRealmsAffection(AffectionPeriodCode::LIFE, -123));
+        self::assertSame($realmsAffection, $formula->getBaseRealmsAffection());
+        self::assertEquals(
+            [AffectionPeriodCode::LIFE => new RealmsAffection([-123, AffectionPeriodCode::LIFE])],
+            $formula->getCurrentRealmsAffections()
+        );
+    }
+
+    /**
+     * @param string $periodName
+     * @param int $formulaAffectionValue
+     * @return MockInterface|RealmsAffection
+     */
+    private function createRealmsAffection(string $periodName, int $formulaAffectionValue)
+    {
+        $realmsAffection = $this->mockery(RealmsAffection::class);
+        $realmsAffection->shouldReceive('getAffectionPeriod')
+            ->andReturn($affectionPeriod = $this->mockery(AffectionPeriodCode::class));
+        $affectionPeriod->shouldReceive('getValue')
+            ->andReturn($periodName);
+        $realmsAffection->shouldReceive('getValue')
+            ->andReturn($formulaAffectionValue);
+
+        return $realmsAffection;
+    }
+
+    /**
+     * @test
+     */
+    public function I_can_get_current_realms_affection()
+    {
+        $formulasTable = $this->createFormulasTable();
+        $formula = new Formula(
+            $formulaCode = FormulaCode::getIt(FormulaCode::ILLUSION),
+            $formulasTable,
+            [],
+            [$this->createModifierWithRealmsAffection(-5, AffectionPeriodCode::DAILY),
+                [
+                    $this->createModifierWithRealmsAffection(-2, AffectionPeriodCode::DAILY),
+                    $this->createModifierWithRealmsAffection(-8, AffectionPeriodCode::MONTHLY),
+                    $this->createModifierWithRealmsAffection(-1, AffectionPeriodCode::YEARLY),
+                ],
+            ],
+            []
+        );
+        $formulasTable->shouldReceive('getRealmsAffection')
+            ->with($formulaCode)
+            ->andReturn($this->createRealmsAffection(AffectionPeriodCode::YEARLY, -11)); // base realm affection
+        $expected = [
+            AffectionPeriodCode::DAILY => new RealmsAffection([-7, AffectionPeriodCode::DAILY]),
+            AffectionPeriodCode::MONTHLY => new RealmsAffection([-8, AffectionPeriodCode::MONTHLY]),
+            AffectionPeriodCode::YEARLY => new RealmsAffection([-12, AffectionPeriodCode::YEARLY]),
+        ];
+        ksort($expected);
+        $current = $formula->getCurrentRealmsAffections();
+        ksort($current);
+        self::assertEquals($expected, $current);
+    }
+
+    /**
+     * @param int $realmsAffectionValue
+     * @param string $affectionPeriodValue
+     * @return MockInterface|Modifier
+     */
+    private function createModifierWithRealmsAffection(int $realmsAffectionValue, string $affectionPeriodValue)
+    {
+        $modifier = $this->mockery(Modifier::class);
+        $modifier->shouldReceive('getRealmsAffection')
+            ->andReturn($realmsAffection = $this->mockery(RealmsAffection::class));
+        $realmsAffection->shouldReceive('getAffectionPeriod')
+            ->andReturn($affectionPeriod = $this->mockery(AffectionPeriodCode::class));
+        $affectionPeriod->shouldReceive('getValue')
+            ->andReturn($affectionPeriodValue);
+        $realmsAffection->shouldReceive('getValue')
+            ->andReturn($realmsAffectionValue);
+
+        return $modifier;
+    }
+
+    /**
+     * @test
+     */
     public function I_get_final_realm()
     {
-        foreach (FormulaCode::getPossibleValues() as $formulaValue) {
-            $formulaCode = FormulaCode::getIt($formulaValue);
-            $formulasTable = $this->createFormulasTable();
-            foreach (FormulaMutableCastingParameterCode::getPossibleValues() as $mutableParameterName) {
-                $baseParameter = null;
-                if ($mutableParameterName === FormulaMutableCastingParameterCode::DURATION) {
-                    // duration can not be null
-                    $baseParameter = $this->createExpectedParameter(FormulaMutableCastingParameterCode::DURATION);
-                    $this->addExpectedAdditionSetter(0, $baseParameter, $baseParameter);
-                    $this->addAdditionByDifficultyGetter(0, $baseParameter);
-                }
-                $this->addBaseParameterGetter($mutableParameterName, $formulaCode, $formulasTable, $baseParameter);
+        $formulaCode = FormulaCode::getIt(FormulaCode::PORTAL);
+        $formulasTable = $this->createFormulasTable();
+        foreach (FormulaMutableCastingParameterCode::getPossibleValues() as $mutableParameterName) {
+            $baseParameter = null;
+            if ($mutableParameterName === FormulaMutableCastingParameterCode::DURATION) {
+                // duration can not be null
+                $baseParameter = $this->createExpectedParameter(FormulaMutableCastingParameterCode::DURATION);
+                $this->addExpectedAdditionSetter(0, $baseParameter, $baseParameter);
+                $this->addAdditionByDifficultyGetter(0, $baseParameter);
             }
-            $this->addFormulaDifficultyGetter(
-                $formulasTable,
-                $formulaCode,
-                0,
-                $changedDifficulty = $this->mockery(FormulaDifficulty::class)
-            );
-            $this->addCurrentRealmsIncrementGetter($changedDifficulty, 123);
-            $this->addRealmGetter($formulasTable, $formulaCode, 123, $finalRealm = $this->mockery(Realm::class));
-            $formula = new Formula($formulaCode, $formulasTable, [], [], []);
-            self::assertSame($finalRealm, $formula->getRequiredRealm());
+            $this->addBaseParameterGetter($mutableParameterName, $formulaCode, $formulasTable, $baseParameter);
         }
+        $this->addFormulaDifficultyGetter(
+            $formulasTable,
+            $formulaCode,
+            0,
+            $changedDifficulty = $this->mockery(FormulaDifficulty::class)
+        );
+        $this->addCurrentRealmsIncrementGetter($changedDifficulty, 123);
+        $this->addRealmGetter($formulasTable, $formulaCode, 123, $formulaRealm = $this->mockery(Realm::class));
+        $formulaWithoutModifiers = new Formula($formulaCode, $formulasTable, [], [], []);
+        self::assertSame($formulaRealm, $formulaWithoutModifiers->getRequiredRealm());
+
+        $lowModifiers = [$this->createModifierWithRequiredRealm(0), $this->createModifierWithRequiredRealm(122)];
+        $formulaWithLowModifiers = new Formula($formulaCode, $formulasTable, [], $lowModifiers, []);
+        $formulaRealm->shouldReceive('getValue')
+            ->andReturn(123);
+        self::assertSame($formulaRealm, $formulaWithLowModifiers->getRequiredRealm());
+
+        $highModifiers = [
+            [$this->createModifierWithRequiredRealm(123)],
+            $this->createModifierWithRequiredRealm(124, $highestRealm = $this->mockery(Realm::class)),
+        ];
+        $formulaWithHighModifiers = new Formula($formulaCode, $formulasTable, [], $highModifiers, []);
+        /**
+         * @var Realm $formulaRealm
+         * @var Realm $highestRealm
+         */
+        self::assertGreaterThan($formulaRealm->getValue(), $highestRealm->getValue());
+        self::assertEquals($highestRealm, $formulaWithHighModifiers->getRequiredRealm());
     }
 
     private function addCurrentRealmsIncrementGetter(MockInterface $formulaDifficulty, int $currentRealmsIncrement)
@@ -440,6 +560,31 @@ class FormulaTest extends TestWithMockery
         $realm->shouldReceive('add')
             ->with($expectedRealmsIncrement)
             ->andReturn($finalRealm);
+    }
+
+    /**
+     * @param int $value
+     * @pram MockInterface|null $realm
+     * @return MockInterface|Modifier
+     */
+    private function createModifierWithRequiredRealm(int $value, MockInterface $realm = null)
+    {
+        $modifier = $this->mockery(Modifier::class);
+        $modifier->shouldReceive('getRequiredRealm')
+            ->andReturn($realm ?? $realm = $this->mockery(Realm::class));
+        $realm->shouldReceive('getValue')
+            ->andReturn($value);
+        $modifier->shouldReceive('getDifficultyChange')
+            ->andReturn($difficultyChange = $this->mockery(DifficultyChange::class));
+        $difficultyChange->shouldReceive('getValue')
+            ->andReturn(0);
+
+        return $modifier;
+    }
+
+    public function I_can_get_current_radius()
+    {
+        // TODO
     }
 
     /**
