@@ -259,6 +259,9 @@ class Formula extends StrictObject
         ];
         foreach ($this->modifiers as $modifier) {
             $modifierRealmsAffection = $modifier->getRealmsAffection();
+            if ($modifierRealmsAffection === null) {
+                continue;
+            }
             $modifierRealmsAffectionPeriod = $modifierRealmsAffection->getAffectionPeriod()->getValue();
             if (!array_key_exists($modifierRealmsAffectionPeriod, $realmsAffectionsSum)) {
                 $realmsAffectionsSum[$modifierRealmsAffectionPeriod] = 0;

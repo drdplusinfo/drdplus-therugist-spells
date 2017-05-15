@@ -455,6 +455,7 @@ class FormulaTest extends TestWithMockery
                 [
                     $this->createModifierWithRealmsAffection(-2, AffectionPeriodCode::DAILY),
                     $this->createModifierWithRealmsAffection(-8, AffectionPeriodCode::MONTHLY),
+                    $this->createModifierWithoutRealmsAffection(),
                     $this->createModifierWithRealmsAffection(-1, AffectionPeriodCode::YEARLY),
                 ],
             ],
@@ -490,6 +491,18 @@ class FormulaTest extends TestWithMockery
             ->andReturn($affectionPeriodValue);
         $realmsAffection->shouldReceive('getValue')
             ->andReturn($realmsAffectionValue);
+
+        return $modifier;
+    }
+
+    /**
+     * @return MockInterface|Modifier
+     */
+    private function createModifierWithoutRealmsAffection()
+    {
+        $modifier = $this->mockery(Modifier::class);
+        $modifier->shouldReceive('getRealmsAffection')
+            ->andReturn(null);
 
         return $modifier;
     }
