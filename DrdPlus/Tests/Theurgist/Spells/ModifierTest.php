@@ -1,6 +1,7 @@
 <?php
 namespace DrdPlus\Tests\Theurgist\Spells;
 
+use DrdPlus\Tables\Tables;
 use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ModifierMutableCastingParameterCode;
 use DrdPlus\Theurgist\Spells\SpellParameters\AdditionByDifficulty;
@@ -8,7 +9,6 @@ use DrdPlus\Theurgist\Spells\SpellParameters\CastingRounds;
 use DrdPlus\Theurgist\Spells\SpellParameters\DifficultyChange;
 use DrdPlus\Theurgist\Spells\SpellParameters\Partials\IntegerCastingParameter;
 use DrdPlus\Theurgist\Spells\SpellParameters\Realm;
-use DrdPlus\Theurgist\Spells\SpellParameters\RealmsAffection;
 use DrdPlus\Theurgist\Spells\SpellParameters\SpellSpeed;
 use DrdPlus\Theurgist\Spells\Modifier;
 use DrdPlus\Theurgist\Spells\ModifiersTable;
@@ -338,16 +338,19 @@ class ModifierTest extends TestWithMockery
      */
     public function I_can_get_realms_affection()
     {
-        $modifier = new Modifier(
-            $modifierCode = ModifierCode::getIt(ModifierCode::INVISIBILITY),
-            $modifiersTable = $this->createModifiersTable(),
-            [],
-            []
-        );
-        $modifiersTable->shouldReceive('getRealmsAffection')
-            ->with($modifierCode)
-            ->andReturn($realmsAffection = $this->mockery(RealmsAffection::class));
-        self::assertSame($realmsAffection, $modifier->getRealmsAffection());
+        $modifiersTable = new ModifiersTable(Tables::getIt());
+        foreach (ModifierCode::getPossibleValues() as $modifierValue) {
+            $modifier = new Modifier(
+                $modifierCode = ModifierCode::getIt($modifierValue),
+                $modifiersTable,
+                [],
+                []
+            );
+            self::assertEquals(
+                $modifiersTable->getRealmsAffection($modifierCode),
+                $modifier->getRealmsAffection()
+            );
+        }
     }
 
     /**

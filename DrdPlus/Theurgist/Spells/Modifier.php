@@ -190,9 +190,9 @@ class Modifier extends StrictObject
     }
 
     /**
-     * @return RealmsAffection
+     * @return RealmsAffection|null
      */
-    public function getRealmsAffection(): RealmsAffection
+    public function getRealmsAffection()
     {
         return $this->modifiersTable->getRealmsAffection($this->getModifierCode());
     }
