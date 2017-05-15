@@ -499,7 +499,7 @@ class Formula extends StrictObject
             ) {
                 continue; // thunder power means a noise, does not affects formula power
             }
-            $getParameterWithAddition = 'get' . ucfirst($parameterName) . 'WithAddition';
+            $getParameterWithAddition = StringTools::assembleGetterForName($parameterName . 'WithAddition');
             /** like @see Modifier::getAttackWithAddition() */
             $parameter = $modifier->$getParameterWithAddition();
             if ($parameter === null) {
