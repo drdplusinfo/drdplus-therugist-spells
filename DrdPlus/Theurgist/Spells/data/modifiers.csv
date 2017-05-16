@@ -1,7 +1,7 @@
 modifier,realm,realms_affection,casting_rounds,difficulty_change,radius,epicenter_shift,power,attack,grafts,spell_speed,points,invisibility,quality,conditions,resistance,number_of_situations,threshold,forms,spell_traits,profiles,formulas,parent_modifiers,child_modifiers
 color,1,,0,1,,,,,,,,,,,,,,,,look_mars;spark_mars,barrier;smoke;fire;light;discharge,gate;explosion,
 gate,4,-1,2,2,-6;3,,,,,,,,,,,,0;-1,direct;planar;tangible;visible,bidirectional,gate_mars;spark_venus;breach_venus;watcher_venus;time_venus;release_venus,portal,,color;watcher;invisibility;movement;step_to_future;step_to_past;transposition;release
-explosion,2,,0,3,0;2=3,,6;1=0,,,,,,0;2,,,,,,,look_venus;fire_mars,fire,,color;invisibility
+explosion,2,,0,3,0;2=3,,6;0=0,,,,,,0;2,,,,,,,look_venus;fire_mars,fire,,color;invisibility
 filter,1,,0,2,,,,,,,,,,,,,,,,barrier_mars,barrier,,
 watcher,1,,0,3,,,,,,,,,,1;3=1,,,,,,watcher_mars,illusion;lock,gate;hammer,
 thunder,1,,0,1,,,10;5,,,,,,,,,,,indirect;volume;intangible;invisible,,discharge_mars,discharge,,

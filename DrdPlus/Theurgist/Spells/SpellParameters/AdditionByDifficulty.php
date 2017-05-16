@@ -141,6 +141,10 @@ class AdditionByDifficulty extends StrictObject implements IntegerInterface
      */
     public function getCurrentDifficultyIncrement(): int
     {
+        if ($this->getAdditionStep() === 0) { // this addition ha no steps, so can not be changed
+            return 0;
+        }
+
         return ceil($this->getCurrentAddition() / $this->getAdditionStep() * $this->getDifficultyOfAdditionStep());
     }
 
@@ -158,12 +162,19 @@ class AdditionByDifficulty extends StrictObject implements IntegerInterface
      * @param int|float|NumberInterface $value
      * @return AdditionByDifficulty
      * @throws \DrdPlus\Theurgist\Spells\SpellParameters\Exceptions\InvalidFormatOfAdditionByDifficultyValue
+     * @throws \DrdPlus\Theurgist\Spells\SpellParameters\Exceptions\AdditionByDifficultyWithoutStepsCanNotBeChanged
      */
     public function add($value): AdditionByDifficulty
     {
         $value = $this->sanitizeAddition($value);
         if ($value === 0) {
             return $this;
+        }
+
+        if ($this->getAdditionStep() === 0) {
+            throw new Exceptions\AdditionByDifficultyWithoutStepsCanNotBeChanged(
+                'With zero step can not be an addition changed by ' . ValueDescriber::describe($value)
+            );
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
@@ -177,12 +188,18 @@ class AdditionByDifficulty extends StrictObject implements IntegerInterface
      * @param int|float|NumberInterface $value
      * @return AdditionByDifficulty
      * @throws \DrdPlus\Theurgist\Spells\SpellParameters\Exceptions\InvalidFormatOfAdditionByDifficultyValue
+     * @throws \DrdPlus\Theurgist\Spells\SpellParameters\Exceptions\AdditionByDifficultyWithoutStepsCanNotBeChanged
      */
     public function sub($value): AdditionByDifficulty
     {
         $value = $this->sanitizeAddition($value);
         if ($value === 0) {
             return $this;
+        }
+        if ($this->getAdditionStep() === 0) {
+            throw new Exceptions\AdditionByDifficultyWithoutStepsCanNotBeChanged(
+                'With zero step can not be an addition changed by ' . ValueDescriber::describe($value)
+            );
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */

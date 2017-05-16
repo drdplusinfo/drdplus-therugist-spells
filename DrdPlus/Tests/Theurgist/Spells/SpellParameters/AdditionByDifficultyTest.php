@@ -90,6 +90,47 @@ class AdditionByDifficultyTest extends TestWithMockery
 
     /**
      * @test
+     */
+    public function I_will_get_zero_as_difficulty_increment_of_unchangeable()
+    {
+        $additionByDifficulty = new AdditionByDifficulty('15=0');
+        self::assertSame(0, $additionByDifficulty->getCurrentDifficultyIncrement());
+    }
+
+    /**
+     * @test
+     * @expectedException \DrdPlus\Theurgist\Spells\SpellParameters\Exceptions\AdditionByDifficultyWithoutStepsCanNotBeChanged
+     * @expectedExceptionMessageRegExp ~7~
+     */
+    public function I_can_not_change_it_by_add_when_no_step()
+    {
+        try {
+            $additionByDifficulty = new AdditionByDifficulty('1=0');
+            $additionByDifficulty->add(0);
+        } catch (\Exception $exception) {
+            self::fail('No exception expected so far: ' . $exception->getMessage());
+        }
+        $additionByDifficulty->add(7);
+    }
+
+    /**
+     * @test
+     * @expectedException \DrdPlus\Theurgist\Spells\SpellParameters\Exceptions\AdditionByDifficultyWithoutStepsCanNotBeChanged
+     * @expectedExceptionMessageRegExp ~9~
+     */
+    public function I_can_not_change_it_by_sub_when_no_step()
+    {
+        try {
+            $additionByDifficulty = new AdditionByDifficulty('999=0');
+            $additionByDifficulty->sub(0);
+        } catch (\Exception $exception) {
+            self::fail('No exception expected so far: ' . $exception->getMessage());
+        }
+        $additionByDifficulty->sub(9);
+    }
+
+    /**
+     * @test
      * @expectedException \DrdPlus\Theurgist\Spells\SpellParameters\Exceptions\InvalidFormatOfAdditionByDifficultyNotation
      */
     public function I_can_not_create_it_without_value()
