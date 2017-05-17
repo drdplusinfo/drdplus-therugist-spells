@@ -2,7 +2,7 @@
 namespace DrdPlus\Theurgist\Spells;
 
 use DrdPlus\Theurgist\Codes\ModifierCode;
-use DrdPlus\Theurgist\Codes\ModifierMutableCastingParameterCode;
+use DrdPlus\Theurgist\Codes\ModifierMutableSpellParameterCode;
 use DrdPlus\Theurgist\Spells\SpellParameters\Attack;
 use DrdPlus\Theurgist\Spells\SpellParameters\CastingRounds;
 use DrdPlus\Theurgist\Spells\SpellParameters\Conditions;
@@ -43,7 +43,7 @@ class Modifier extends StrictObject
      * @param ModifierCode $modifierCode
      * @param ModifiersTable $modifiersTable
      * @param array|int[] $modifierSpellParameterChanges
-     * by @see ModifierMutableCastingParameterCode value indexed its value change
+     * by @see ModifierMutableSpellParameterCode value indexed its value change
      * @param array|SpellTrait[] $modifierSpellTraits
      * @throws \DrdPlus\Theurgist\Spells\Exceptions\UselessAdditionForUnusedCastingParameter
      * @throws \DrdPlus\Theurgist\Spells\Exceptions\UnknownModifierParameter
@@ -73,7 +73,7 @@ class Modifier extends StrictObject
     private function sanitizeSpellParameterChanges(array $parametersChange): array
     {
         $sanitized = [];
-        foreach (ModifierMutableCastingParameterCode::getPossibleValues() as $mutableCastingParameter) {
+        foreach (ModifierMutableSpellParameterCode::getPossibleValues() as $mutableCastingParameter) {
             if (!array_key_exists($mutableCastingParameter, $parametersChange)) {
                 $sanitized[$mutableCastingParameter] = 0;
                 continue;
@@ -103,7 +103,7 @@ class Modifier extends StrictObject
         if (count($parametersChange) > 0) { // there are some remains
             throw new Exceptions\UnknownModifierParameter(
                 'Unexpected mutable casting parameter(s) [' . implode(', ', array_keys($parametersChange)) . ']. Expected only '
-                . implode(', ', ModifierMutableCastingParameterCode::getPossibleValues())
+                . implode(', ', ModifierMutableSpellParameterCode::getPossibleValues())
             );
         }
 
@@ -220,7 +220,7 @@ class Modifier extends StrictObject
 
     public function getRadiusAddition(): int
     {
-        return $this->modifierSpellParameterChanges[ModifierMutableCastingParameterCode::RADIUS];
+        return $this->modifierSpellParameterChanges[ModifierMutableSpellParameterCode::RADIUS];
     }
 
     /**
@@ -246,7 +246,7 @@ class Modifier extends StrictObject
 
     public function getEpicenterShiftAddition(): int
     {
-        return $this->modifierSpellParameterChanges[ModifierMutableCastingParameterCode::EPICENTER_SHIFT];
+        return $this->modifierSpellParameterChanges[ModifierMutableSpellParameterCode::EPICENTER_SHIFT];
     }
 
     /**
@@ -272,7 +272,7 @@ class Modifier extends StrictObject
 
     public function getPowerAddition(): int
     {
-        return $this->modifierSpellParameterChanges[ModifierMutableCastingParameterCode::POWER];
+        return $this->modifierSpellParameterChanges[ModifierMutableSpellParameterCode::POWER];
     }
 
     /**
@@ -298,7 +298,7 @@ class Modifier extends StrictObject
 
     public function getAttackAddition(): int
     {
-        return $this->modifierSpellParameterChanges[ModifierMutableCastingParameterCode::ATTACK];
+        return $this->modifierSpellParameterChanges[ModifierMutableSpellParameterCode::ATTACK];
     }
 
     /**
@@ -324,7 +324,7 @@ class Modifier extends StrictObject
 
     public function getGraftsAddition(): int
     {
-        return $this->modifierSpellParameterChanges[ModifierMutableCastingParameterCode::GRAFTS];
+        return $this->modifierSpellParameterChanges[ModifierMutableSpellParameterCode::GRAFTS];
     }
 
     /**
@@ -350,7 +350,7 @@ class Modifier extends StrictObject
 
     public function getSpellSpeedAddition(): int
     {
-        return $this->modifierSpellParameterChanges[ModifierMutableCastingParameterCode::SPELL_SPEED];
+        return $this->modifierSpellParameterChanges[ModifierMutableSpellParameterCode::SPELL_SPEED];
     }
 
     /**
@@ -376,7 +376,7 @@ class Modifier extends StrictObject
 
     public function getInvisibilityAddition(): int
     {
-        return $this->modifierSpellParameterChanges[ModifierMutableCastingParameterCode::INVISIBILITY];
+        return $this->modifierSpellParameterChanges[ModifierMutableSpellParameterCode::INVISIBILITY];
     }
 
     /**
@@ -402,7 +402,7 @@ class Modifier extends StrictObject
 
     public function getQualityAddition(): int
     {
-        return $this->modifierSpellParameterChanges[ModifierMutableCastingParameterCode::QUALITY];
+        return $this->modifierSpellParameterChanges[ModifierMutableSpellParameterCode::QUALITY];
     }
 
     /**
@@ -428,7 +428,7 @@ class Modifier extends StrictObject
 
     public function getConditionsAddition(): int
     {
-        return $this->modifierSpellParameterChanges[ModifierMutableCastingParameterCode::CONDITIONS];
+        return $this->modifierSpellParameterChanges[ModifierMutableSpellParameterCode::CONDITIONS];
     }
 
     /**
@@ -454,7 +454,7 @@ class Modifier extends StrictObject
 
     public function getResistanceAddition(): int
     {
-        return $this->modifierSpellParameterChanges[ModifierMutableCastingParameterCode::RESISTANCE];
+        return $this->modifierSpellParameterChanges[ModifierMutableSpellParameterCode::RESISTANCE];
     }
 
     /**
@@ -480,7 +480,7 @@ class Modifier extends StrictObject
 
     public function getNumberOfSituationsAddition(): int
     {
-        return $this->modifierSpellParameterChanges[ModifierMutableCastingParameterCode::NUMBER_OF_SITUATIONS];
+        return $this->modifierSpellParameterChanges[ModifierMutableSpellParameterCode::NUMBER_OF_SITUATIONS];
     }
 
     /**
@@ -506,7 +506,7 @@ class Modifier extends StrictObject
 
     public function getThresholdAddition(): int
     {
-        return $this->modifierSpellParameterChanges[ModifierMutableCastingParameterCode::THRESHOLD];
+        return $this->modifierSpellParameterChanges[ModifierMutableSpellParameterCode::THRESHOLD];
     }
 
     /**
@@ -532,7 +532,7 @@ class Modifier extends StrictObject
 
     public function getPointsAddition(): int
     {
-        return $this->modifierSpellParameterChanges[ModifierMutableCastingParameterCode::POINTS];
+        return $this->modifierSpellParameterChanges[ModifierMutableSpellParameterCode::POINTS];
     }
 
     public function __toString()

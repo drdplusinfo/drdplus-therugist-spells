@@ -2,9 +2,9 @@
 namespace DrdPlus\Theurgist\Spells;
 
 use DrdPlus\Theurgist\Codes\FormulaCode;
-use DrdPlus\Theurgist\Codes\FormulaMutableCastingParameterCode;
+use DrdPlus\Theurgist\Codes\FormulaMutableSpellParameterCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
-use DrdPlus\Theurgist\Codes\ModifierMutableCastingParameterCode;
+use DrdPlus\Theurgist\Codes\ModifierMutableSpellParameterCode;
 use DrdPlus\Theurgist\Spells\SpellParameters\Evocation;
 use DrdPlus\Theurgist\Spells\SpellParameters\RealmsAffection;
 use DrdPlus\Theurgist\Spells\SpellParameters\Attack;
@@ -44,8 +44,8 @@ class Formula extends StrictObject
     /**
      * @param FormulaCode $formulaCode
      * @param FormulasTable $formulasTable
-     * @param array $formulaSpellParameterChanges
-     * by @see FormulaMutableCastingParameterCode value indexed its value change
+     * @param array $formulaSpellParameterValues Current values of spell parameters (changes will be calculated from them)
+     * by @see FormulaMutableSpellParameterCode value indexed its value change
      * @param array|Modifier[] $modifiers
      * @param array|SpellTrait[] $formulaSpellTraits
      * @throws \DrdPlus\Theurgist\Spells\Exceptions\UselessAdditionForUnusedCastingParameter
@@ -57,63 +57,66 @@ class Formula extends StrictObject
     public function __construct(
         FormulaCode $formulaCode,
         FormulasTable $formulasTable,
-        array $formulaSpellParameterChanges,
+        array $formulaSpellParameterValues,
         array $modifiers,
         array $formulaSpellTraits
     )
     {
         $this->formulaCode = $formulaCode;
         $this->formulasTable = $formulasTable;
-        $this->formulaSpellParameterChanges = $this->sanitizeSpellParameterChanges($formulaSpellParameterChanges);
+        // gets spell parameter changes as delta of current values and default values
+        $this->formulaSpellParameterChanges = $this->sanitizeSpellParameterChanges($formulaSpellParameterValues);
         $this->modifiers = $this->getCheckedModifiers($this->toFlatArray($modifiers));
         $this->formulaSpellTraits = $this->getCheckedSpellTraits($this->toFlatArray($formulaSpellTraits));
     }
 
     /**
-     * @param array $additions
+     * @param array $spellParameterValues
      * @return array
      * @throws \DrdPlus\Theurgist\Spells\Exceptions\UselessAdditionForUnusedCastingParameter
      * @throws \DrdPlus\Theurgist\Spells\Exceptions\InvalidValueForFormulaParameter
      * @throws \DrdPlus\Theurgist\Spells\Exceptions\UnknownFormulaParameter
      */
-    private function sanitizeSpellParameterChanges(array $additions): array
+    private function sanitizeSpellParameterChanges(array $spellParameterValues): array
     {
-        $sanitized = [];
-        foreach (FormulaMutableCastingParameterCode::getPossibleValues() as $mutableSpellParameter) {
-            if (!array_key_exists($mutableSpellParameter, $additions)) {
-                $sanitized[$mutableSpellParameter] = 0;
+        $sanitizedChanges = [];
+        foreach (FormulaMutableSpellParameterCode::getPossibleValues() as $mutableSpellParameter) {
+            if (!array_key_exists($mutableSpellParameter, $spellParameterValues)) {
+                $sanitizedChanges[$mutableSpellParameter] = 0;
                 continue;
             }
             try {
-                $sanitizedValue = ToInteger::toInteger($additions[$mutableSpellParameter]);
+                $sanitizedValue = ToInteger::toInteger($spellParameterValues[$mutableSpellParameter]);
             } catch (\Granam\Integer\Tools\Exceptions\Exception $exception) {
                 throw new Exceptions\InvalidValueForFormulaParameter(
-                    'Expected integer, got ' . ValueDescriber::describe($additions[$mutableSpellParameter])
+                    'Expected integer, got ' . ValueDescriber::describe($spellParameterValues[$mutableSpellParameter])
                     . ' for ' . $mutableSpellParameter . ": '{$exception->getMessage()}'"
                 );
             }
-            if ($sanitizedValue !== 0) {
-                $getBaseParameter = StringTools::assembleGetterForName('base_' . $mutableSpellParameter);
-                if ($this->$getBaseParameter() === null) {
-                    throw new Exceptions\UselessAdditionForUnusedCastingParameter(
-                        "Casting parameter {$mutableSpellParameter} is not used for formula {$this->formulaCode}"
-                        . ', so given non-zero addition ' . ValueDescriber::describe($additions[$mutableSpellParameter])
-                        . ' is thrown away'
-                    );
-                }
+            /** like @see getBaseAttack */
+            $getBaseParameter = StringTools::assembleGetterForName('base_' . $mutableSpellParameter);
+            /** @var IntegerCastingParameter $baseParameter */
+            $baseParameter = $this->$getBaseParameter();
+            if ($baseParameter === null) {
+                throw new Exceptions\UselessAdditionForUnusedCastingParameter(
+                    "Casting parameter {$mutableSpellParameter} is not used for formula {$this->formulaCode}"
+                    . ', so given non-zero addition ' . ValueDescriber::describe($spellParameterValues[$mutableSpellParameter])
+                    . ' is thrown away'
+                );
             }
-            $sanitized[$mutableSpellParameter] = $sanitizedValue;
+            $parameterChange = $sanitizedValue - $baseParameter->getDefaultValue();
+            $sanitizedChanges[$mutableSpellParameter] = $parameterChange;
 
-            unset($additions[$mutableSpellParameter]);
+            unset($spellParameterValues[$mutableSpellParameter]);
         }
-        if (count($additions) > 0) { // there are some remains
+        if (count($spellParameterValues) > 0) { // there are some remains
             throw new Exceptions\UnknownFormulaParameter(
-                'Unexpected mutable casting parameter(s) [' . implode(', ', array_keys($additions)) . ']. Expected only '
-                . implode(', ', FormulaMutableCastingParameterCode::getPossibleValues())
+                'Unexpected mutable casting parameter(s) [' . implode(', ', array_keys($spellParameterValues)) . ']. Expected only '
+                . implode(', ', FormulaMutableSpellParameterCode::getPossibleValues())
             );
         }
 
-        return $sanitized;
+        return $sanitizedChanges;
     }
 
     /**
@@ -320,7 +323,7 @@ class Formula extends StrictObject
 
     public function getRadiusAddition(): int
     {
-        return $this->formulaSpellParameterChanges[FormulaMutableCastingParameterCode::RADIUS];
+        return $this->formulaSpellParameterChanges[FormulaMutableSpellParameterCode::RADIUS];
     }
 
     /**
@@ -338,7 +341,7 @@ class Formula extends StrictObject
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new Radius([
             $radiusWithAddition->getValue()
-            + (int)$this->getParameterBonusFromModifiers(ModifierMutableCastingParameterCode::RADIUS),
+            + (int)$this->getParameterBonusFromModifiers(ModifierMutableSpellParameterCode::RADIUS),
             0,
         ]);
     }
@@ -366,7 +369,7 @@ class Formula extends StrictObject
 
     public function getEpicenterShiftAddition(): int
     {
-        return $this->formulaSpellParameterChanges[FormulaMutableCastingParameterCode::EPICENTER_SHIFT];
+        return $this->formulaSpellParameterChanges[FormulaMutableSpellParameterCode::EPICENTER_SHIFT];
     }
 
     /**
@@ -377,7 +380,7 @@ class Formula extends StrictObject
     public function getCurrentEpicenterShift()
     {
         $epicenterShiftWithAddition = $this->getEpicenterShiftWithAddition();
-        $epicenterShiftBonus = $this->getParameterBonusFromModifiers(ModifierMutableCastingParameterCode::EPICENTER_SHIFT);
+        $epicenterShiftBonus = $this->getParameterBonusFromModifiers(ModifierMutableSpellParameterCode::EPICENTER_SHIFT);
         if (!$epicenterShiftWithAddition && $epicenterShiftBonus === false) {
             return null;
         }
@@ -415,7 +418,7 @@ class Formula extends StrictObject
 
     public function getPowerAddition(): int
     {
-        return $this->formulaSpellParameterChanges[FormulaMutableCastingParameterCode::POWER];
+        return $this->formulaSpellParameterChanges[FormulaMutableSpellParameterCode::POWER];
     }
 
     /**
@@ -426,7 +429,7 @@ class Formula extends StrictObject
     public function getCurrentPower()
     {
         $powerWithAddition = $this->getPowerWithAddition();
-        $powerBonus = $this->getParameterBonusFromModifiers(ModifierMutableCastingParameterCode::POWER);
+        $powerBonus = $this->getParameterBonusFromModifiers(ModifierMutableSpellParameterCode::POWER);
         if (!$powerWithAddition && $powerBonus === false) {
             return null;
         }
@@ -462,7 +465,7 @@ class Formula extends StrictObject
 
     public function getAttackAddition(): int
     {
-        return $this->formulaSpellParameterChanges[FormulaMutableCastingParameterCode::ATTACK];
+        return $this->formulaSpellParameterChanges[FormulaMutableSpellParameterCode::ATTACK];
     }
 
     /**
@@ -479,7 +482,7 @@ class Formula extends StrictObject
 
         return new IntegerObject(
             $attackWithAddition->getValue()
-            + (int)$this->getParameterBonusFromModifiers(ModifierMutableCastingParameterCode::ATTACK)
+            + (int)$this->getParameterBonusFromModifiers(ModifierMutableSpellParameterCode::ATTACK)
         );
     }
 
@@ -494,7 +497,7 @@ class Formula extends StrictObject
             if ($modifier->getModifierCode()->getValue() === ModifierCode::GATE) {
                 continue; // gate does not give bonus to a parameter, it is standalone being with its own parameters
             }
-            if ($parameterName === ModifierMutableCastingParameterCode::POWER
+            if ($parameterName === ModifierMutableSpellParameterCode::POWER
                 && $modifier->getModifierCode()->getValue() === ModifierCode::THUNDER
             ) {
                 continue; // thunder power means a noise, does not affects formula power
@@ -538,7 +541,7 @@ class Formula extends StrictObject
 
     public function getSpellSpeedAddition(): int
     {
-        return $this->formulaSpellParameterChanges[FormulaMutableCastingParameterCode::SPELL_SPEED];
+        return $this->formulaSpellParameterChanges[FormulaMutableSpellParameterCode::SPELL_SPEED];
     }
 
     /**
@@ -549,7 +552,7 @@ class Formula extends StrictObject
     public function getCurrentSpellSpeed()
     {
         $spellSpeedWithAddition = $this->getSpellSpeedWithAddition();
-        $spellSpeedBonus = $this->getParameterBonusFromModifiers(ModifierMutableCastingParameterCode::SPELL_SPEED);
+        $spellSpeedBonus = $this->getParameterBonusFromModifiers(ModifierMutableSpellParameterCode::SPELL_SPEED);
         if (!$spellSpeedWithAddition && $spellSpeedBonus === false) {
             return null;
         }
@@ -587,7 +590,7 @@ class Formula extends StrictObject
 
     public function getDetailLevelAddition(): int
     {
-        return $this->formulaSpellParameterChanges[FormulaMutableCastingParameterCode::DETAIL_LEVEL];
+        return $this->formulaSpellParameterChanges[FormulaMutableSpellParameterCode::DETAIL_LEVEL];
     }
 
     /**
@@ -621,7 +624,7 @@ class Formula extends StrictObject
 
     public function getBrightnessAddition(): int
     {
-        return $this->formulaSpellParameterChanges[FormulaMutableCastingParameterCode::BRIGHTNESS];
+        return $this->formulaSpellParameterChanges[FormulaMutableSpellParameterCode::BRIGHTNESS];
     }
 
     /**
@@ -652,7 +655,7 @@ class Formula extends StrictObject
 
     public function getDurationAddition(): int
     {
-        return $this->formulaSpellParameterChanges[FormulaMutableCastingParameterCode::DURATION];
+        return $this->formulaSpellParameterChanges[FormulaMutableSpellParameterCode::DURATION];
     }
 
     public function getCurrentDuration(): Duration
@@ -683,7 +686,7 @@ class Formula extends StrictObject
 
     public function getSizeChangeAddition(): int
     {
-        return $this->formulaSpellParameterChanges[FormulaMutableCastingParameterCode::SIZE_CHANGE];
+        return $this->formulaSpellParameterChanges[FormulaMutableSpellParameterCode::SIZE_CHANGE];
     }
 
     /**
