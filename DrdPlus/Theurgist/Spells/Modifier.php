@@ -143,7 +143,7 @@ class Modifier extends StrictObject
     {
         $modifierParameters = [
             $this->getAttackWithAddition(),
-            $this->getConditionsWithAddition(),
+            $this->getNumberOfConditionsWithAddition(),
             $this->getEpicenterShiftWithAddition(),
             $this->getGraftsWithAddition(),
             $this->getInvisibilityWithAddition(),
@@ -411,7 +411,7 @@ class Modifier extends StrictObject
     /**
      * @return NumberOfConditions|null
      */
-    public function getBaseConditions()
+    public function getBaseNumberOfConditions()
     {
         return $this->modifiersTable->getNumberOfConditions($this->modifierCode);
     }
@@ -419,17 +419,17 @@ class Modifier extends StrictObject
     /**
      * @return NumberOfConditions|null
      */
-    public function getConditionsWithAddition()
+    public function getNumberOfConditionsWithAddition()
     {
-        $baseConditions = $this->getBaseConditions();
+        $baseConditions = $this->getBaseNumberOfConditions();
         if ($baseConditions === null) {
             return null;
         }
 
-        return $baseConditions->getWithAddition($this->getConditionsAddition());
+        return $baseConditions->getWithAddition($this->getNumberOfConditionsAddition());
     }
 
-    public function getConditionsAddition(): int
+    public function getNumberOfConditionsAddition(): int
     {
         return $this->modifierSpellParameterChanges[ModifierMutableSpellParameterCode::CONDITIONS];
     }
