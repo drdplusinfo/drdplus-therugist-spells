@@ -2,10 +2,13 @@
 namespace DrdPlus\Tests\Theurgist\Spells;
 
 use DrdPlus\Theurgist\Codes\SpellTraitCode;
+use DrdPlus\Theurgist\Spells\SpellParameters\AdditionByDifficulty;
+use DrdPlus\Theurgist\Spells\SpellParameters\DifficultyChange;
 use DrdPlus\Theurgist\Spells\SpellParameters\Trap;
 use DrdPlus\Theurgist\Spells\SpellTrait;
 use DrdPlus\Theurgist\Spells\SpellTraitsTable;
 use Granam\Tests\Tools\TestWithMockery;
+use Mockery\MockInterface;
 
 class SpellTraitTest extends TestWithMockery
 {
@@ -54,10 +57,10 @@ class SpellTraitTest extends TestWithMockery
 
     /**
      * @param SpellTraitCode $spellTraitCode
-     * @param $trap
+     * @param Trap $trap
      * @return \Mockery\MockInterface|SpellTraitsTable
      */
-    private function createSpellTraitsTable(SpellTraitCode $spellTraitCode, $trap)
+    private function createSpellTraitsTable(SpellTraitCode $spellTraitCode, Trap $trap = null)
     {
         $spellTraitsTable = $this->mockery(SpellTraitsTable::class);
         $spellTraitsTable->shouldReceive('getTrap')
@@ -88,5 +91,48 @@ class SpellTraitTest extends TestWithMockery
     private function createTrapShell()
     {
         return $this->mockery(Trap::class);
+    }
+
+    /**
+     * @test
+     */
+    public function I_can_get_difficulty_change_with_trap_reflected()
+    {
+        $spellTraitCode = SpellTraitCode::getIt(SpellTraitCode::INVISIBLE);
+        $spellTraitsTable = $this->createSpellTraitsTable(
+            $spellTraitCode,
+            null // no trap
+        );
+        $spellTraitWithoutTrapChange = new SpellTrait($spellTraitCode, $spellTraitsTable, 0);
+        $this->addDifficultyChangeGetter($spellTraitsTable, $spellTraitCode, $difficultyChange = new DifficultyChange(345));
+        self::assertSame($difficultyChange, $spellTraitWithoutTrapChange->getDifficultyChange());
+
+        $spellTraitsTable = $this->createSpellTraitsTable(
+            $spellTraitCode,
+            $trap = $this->createTrap(123, $currentTrap = $this->createTrap(0))
+        );
+        $spellTraitWithTrapChange = new SpellTrait($spellTraitCode, $spellTraitsTable, 123);
+        $this->addDifficultyChangeGetter($spellTraitsTable, $spellTraitCode, $difficultyChange = new DifficultyChange(567));
+        $this->addAdditionByDifficultyGetter($currentTrap, 789);
+        self::assertEquals($difficultyChange->add(789), $spellTraitWithTrapChange->getDifficultyChange());
+    }
+
+    private function addDifficultyChangeGetter(
+        MockInterface $spellTraitsTable,
+        SpellTraitCode $expectedSpellTraitCode,
+        DifficultyChange $difficultyChange
+    )
+    {
+        $spellTraitsTable->shouldReceive('getDifficultyChange')
+            ->with($expectedSpellTraitCode)
+            ->andReturn($difficultyChange);
+    }
+
+    private function addAdditionByDifficultyGetter(MockInterface $trap, int $currentDifficultyIncrement)
+    {
+        $trap->shouldReceive('getAdditionByDifficulty')
+            ->andReturn($additionByDifficulty = $this->mockery(AdditionByDifficulty::class));
+        $additionByDifficulty->shouldReceive('getCurrentDifficultyIncrement')
+            ->andReturn($currentDifficultyIncrement);
     }
 }

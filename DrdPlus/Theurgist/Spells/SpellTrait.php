@@ -33,7 +33,13 @@ class SpellTrait extends StrictObject
 
     public function getDifficultyChange(): DifficultyChange
     {
-        return $this->spellTraitsTable->getDifficultyChange($this->getSpellTraitCode());
+        $difficultyChange = $this->spellTraitsTable->getDifficultyChange($this->getSpellTraitCode());
+        $trap = $this->getCurrentTrap();
+        if (!$trap) {
+            return $difficultyChange;
+        }
+
+        return $difficultyChange->add($trap->getAdditionByDifficulty()->getCurrentDifficultyIncrement());
     }
 
     /**
