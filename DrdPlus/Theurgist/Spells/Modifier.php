@@ -5,7 +5,7 @@ use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ModifierMutableSpellParameterCode;
 use DrdPlus\Theurgist\Spells\SpellParameters\Attack;
 use DrdPlus\Theurgist\Spells\SpellParameters\CastingRounds;
-use DrdPlus\Theurgist\Spells\SpellParameters\Conditions;
+use DrdPlus\Theurgist\Spells\SpellParameters\NumberOfConditions;
 use DrdPlus\Theurgist\Spells\SpellParameters\DifficultyChange;
 use DrdPlus\Theurgist\Spells\SpellParameters\EpicenterShift;
 use DrdPlus\Theurgist\Spells\SpellParameters\Grafts;
@@ -409,15 +409,15 @@ class Modifier extends StrictObject
     }
 
     /**
-     * @return Conditions|null
+     * @return NumberOfConditions|null
      */
     public function getBaseConditions()
     {
-        return $this->modifiersTable->getConditions($this->modifierCode);
+        return $this->modifiersTable->getNumberOfConditions($this->modifierCode);
     }
 
     /**
-     * @return Conditions|null
+     * @return NumberOfConditions|null
      */
     public function getConditionsWithAddition()
     {

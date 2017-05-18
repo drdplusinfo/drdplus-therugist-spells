@@ -12,7 +12,7 @@ use DrdPlus\Theurgist\Codes\SpellTraitCode;
 use DrdPlus\Theurgist\Spells\SpellParameters\RealmsAffection;
 use DrdPlus\Theurgist\Spells\SpellParameters\Attack;
 use DrdPlus\Theurgist\Spells\SpellParameters\CastingRounds;
-use DrdPlus\Theurgist\Spells\SpellParameters\Conditions;
+use DrdPlus\Theurgist\Spells\SpellParameters\NumberOfConditions;
 use DrdPlus\Theurgist\Spells\SpellParameters\DifficultyChange;
 use DrdPlus\Theurgist\Spells\SpellParameters\Grafts;
 use DrdPlus\Theurgist\Spells\SpellParameters\Invisibility;
@@ -66,7 +66,7 @@ class ModifiersTable extends AbstractFileTable
     const POINTS = 'points';
     const INVISIBILITY = 'invisibility';
     const QUALITY = 'quality';
-    const CONDITIONS = 'conditions';
+    const NUMBER_OF_CONDITIONS = 'number_of_conditions';
     const RESISTANCE = 'resistance';
     const NUMBER_OF_SITUATIONS = 'number_of_situations';
     const THRESHOLD = 'threshold';
@@ -93,7 +93,7 @@ class ModifiersTable extends AbstractFileTable
             self::POINTS => self::ARRAY,
             self::INVISIBILITY => self::ARRAY,
             self::QUALITY => self::ARRAY,
-            self::CONDITIONS => self::ARRAY,
+            self::NUMBER_OF_CONDITIONS => self::ARRAY,
             self::RESISTANCE => self::ARRAY,
             self::NUMBER_OF_SITUATIONS => self::ARRAY,
             self::THRESHOLD => self::ARRAY,
@@ -307,18 +307,18 @@ class ModifiersTable extends AbstractFileTable
 
     /**
      * @param ModifierCode $modifierCode
-     * @return Conditions|null
+     * @return NumberOfConditions|null
      */
-    public function getConditions(ModifierCode $modifierCode)
+    public function getNumberOfConditions(ModifierCode $modifierCode)
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        $conditionsValues = $this->getValue($modifierCode, self::CONDITIONS);
+        $conditionsValues = $this->getValue($modifierCode, self::NUMBER_OF_CONDITIONS);
         if (!$conditionsValues) {
             return null;
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new Conditions($conditionsValues);
+        return new NumberOfConditions($conditionsValues);
     }
 
     /**
