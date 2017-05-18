@@ -42,10 +42,10 @@ class Modifier extends StrictObject
     /**
      * @param ModifierCode $modifierCode
      * @param ModifiersTable $modifiersTable
-     * @param array|int[] $modifierSpellParameterChanges
+     * @param array|int[] $modifierSpellParameterValues spell parameters current values (delta will be calculated from them)
      * by @see ModifierMutableSpellParameterCode value indexed its value change
      * @param array|SpellTrait[] $modifierSpellTraits
-     * @throws \DrdPlus\Theurgist\Spells\Exceptions\UselessSpellParameterValueForUnusedCastingParameter
+     * @throws \DrdPlus\Theurgist\Spells\Exceptions\UselessValueForUnusedSpellParameter
      * @throws \DrdPlus\Theurgist\Spells\Exceptions\UnknownModifierParameter
      * @throws \DrdPlus\Theurgist\Spells\Exceptions\InvalidValueForModifierParameter
      * @throws \DrdPlus\Theurgist\Spells\Exceptions\InvalidSpellTrait
@@ -53,56 +53,59 @@ class Modifier extends StrictObject
     public function __construct(
         ModifierCode $modifierCode,
         ModifiersTable $modifiersTable,
-        array $modifierSpellParameterChanges,
+        array $modifierSpellParameterValues,
         array $modifierSpellTraits
     )
     {
         $this->modifierCode = $modifierCode;
         $this->modifiersTable = $modifiersTable;
-        $this->modifierSpellParameterChanges = $this->sanitizeSpellParameterChanges($modifierSpellParameterChanges);
+        $this->modifierSpellParameterChanges = $this->sanitizeSpellParameterChanges($modifierSpellParameterValues);
         $this->modifierSpellTraits = $this->getCheckedSpellTraits($this->toFlatArray($modifierSpellTraits));
     }
 
     /**
-     * @param array $parametersChange
+     * @param array $spellParameterValues
      * @return array
-     * @throws \DrdPlus\Theurgist\Spells\Exceptions\UselessSpellParameterValueForUnusedCastingParameter
+     * @throws \DrdPlus\Theurgist\Spells\Exceptions\UselessValueForUnusedSpellParameter
      * @throws \DrdPlus\Theurgist\Spells\Exceptions\InvalidValueForModifierParameter
      * @throws \DrdPlus\Theurgist\Spells\Exceptions\UnknownModifierParameter
      */
-    private function sanitizeSpellParameterChanges(array $parametersChange): array
+    private function sanitizeSpellParameterChanges(array $spellParameterValues): array
     {
         $sanitized = [];
-        foreach (ModifierMutableSpellParameterCode::getPossibleValues() as $mutableCastingParameter) {
-            if (!array_key_exists($mutableCastingParameter, $parametersChange)) {
-                $sanitized[$mutableCastingParameter] = 0;
+        foreach (ModifierMutableSpellParameterCode::getPossibleValues() as $mutableSpellParameter) {
+            if (!array_key_exists($mutableSpellParameter, $spellParameterValues)) {
+                $sanitized[$mutableSpellParameter] = 0; // no change
                 continue;
             }
             try {
-                $sanitizedValue = ToInteger::toInteger($parametersChange[$mutableCastingParameter]);
+                $sanitizedValue = ToInteger::toInteger($spellParameterValues[$mutableSpellParameter]);
             } catch (\Granam\Integer\Tools\Exceptions\Exception $exception) {
                 throw new Exceptions\InvalidValueForModifierParameter(
-                    'Expected integer, got ' . ValueDescriber::describe($parametersChange[$mutableCastingParameter])
-                    . ' for ' . $mutableCastingParameter . ": '{$exception->getMessage()}'"
+                    'Expected integer, got ' . ValueDescriber::describe($spellParameterValues[$mutableSpellParameter])
+                    . ' for ' . $mutableSpellParameter . ": '{$exception->getMessage()}'"
                 );
             }
-            if ($sanitizedValue !== 0) {
-                $getBaseParameter = StringTools::assembleGetterForName('base_' . $mutableCastingParameter);
-                if ($this->$getBaseParameter() === null) {
-                    throw new Exceptions\UselessSpellParameterValueForUnusedCastingParameter(
-                        "Casting parameter {$mutableCastingParameter} is not used for modifier {$this->modifierCode}"
-                        . ', so given non-zero addition ' . ValueDescriber::describe($parametersChange[$mutableCastingParameter])
-                        . ' is thrown away'
-                    );
-                }
+            /** like @see getBaseAttack */
+            $getBaseParameter = StringTools::assembleGetterForName('base_' . $mutableSpellParameter);
+            /** @var IntegerCastingParameter $baseParameter */
+            $baseParameter = $this->$getBaseParameter();
+            if ($baseParameter === null) {
+                throw new Exceptions\UselessValueForUnusedSpellParameter(
+                    "Casting parameter {$mutableSpellParameter} is not used for modifier {$this->modifierCode}"
+                    . ', so given spell parameter value ' . ValueDescriber::describe($spellParameterValues[$mutableSpellParameter])
+                    . ' is thrown away'
+                );
             }
-            $sanitized[$mutableCastingParameter] = $sanitizedValue;
+            $parameterChange = $sanitizedValue - $baseParameter->getDefaultValue();
+            $sanitizedChanges[$mutableSpellParameter] = $parameterChange;
+            $sanitized[$mutableSpellParameter] = $sanitizedValue;
 
-            unset($parametersChange[$mutableCastingParameter]);
+            unset($spellParameterValues[$mutableSpellParameter]);
         }
-        if (count($parametersChange) > 0) { // there are some remains
+        if (count($spellParameterValues) > 0) { // there are some remains
             throw new Exceptions\UnknownModifierParameter(
-                'Unexpected mutable casting parameter(s) [' . implode(', ', array_keys($parametersChange)) . ']. Expected only '
+                'Unexpected mutable spell parameter(s) [' . implode(', ', array_keys($spellParameterValues)) . ']. Expected only '
                 . implode(', ', ModifierMutableSpellParameterCode::getPossibleValues())
             );
         }
