@@ -72,10 +72,10 @@ class Modifier extends StrictObject
      */
     private function sanitizeSpellParameterChanges(array $spellParameterValues): array
     {
-        $sanitized = [];
+        $sanitizedChanges = [];
         foreach (ModifierMutableSpellParameterCode::getPossibleValues() as $mutableSpellParameter) {
             if (!array_key_exists($mutableSpellParameter, $spellParameterValues)) {
-                $sanitized[$mutableSpellParameter] = 0; // no change
+                $sanitizedChanges[$mutableSpellParameter] = 0; // no change
                 continue;
             }
             try {
@@ -99,7 +99,6 @@ class Modifier extends StrictObject
             }
             $parameterChange = $sanitizedValue - $baseParameter->getDefaultValue();
             $sanitizedChanges[$mutableSpellParameter] = $parameterChange;
-            $sanitized[$mutableSpellParameter] = $sanitizedValue;
 
             unset($spellParameterValues[$mutableSpellParameter]);
         }
@@ -110,7 +109,7 @@ class Modifier extends StrictObject
             );
         }
 
-        return $sanitized;
+        return $sanitizedChanges;
     }
 
     /**
