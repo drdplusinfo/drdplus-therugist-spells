@@ -45,7 +45,7 @@ class Modifier extends StrictObject
      * @param array|int[] $modifierSpellParameterChanges
      * by @see ModifierMutableSpellParameterCode value indexed its value change
      * @param array|SpellTrait[] $modifierSpellTraits
-     * @throws \DrdPlus\Theurgist\Spells\Exceptions\UselessAdditionForUnusedCastingParameter
+     * @throws \DrdPlus\Theurgist\Spells\Exceptions\UselessSpellParameterValueForUnusedCastingParameter
      * @throws \DrdPlus\Theurgist\Spells\Exceptions\UnknownModifierParameter
      * @throws \DrdPlus\Theurgist\Spells\Exceptions\InvalidValueForModifierParameter
      * @throws \DrdPlus\Theurgist\Spells\Exceptions\InvalidSpellTrait
@@ -66,7 +66,7 @@ class Modifier extends StrictObject
     /**
      * @param array $parametersChange
      * @return array
-     * @throws \DrdPlus\Theurgist\Spells\Exceptions\UselessAdditionForUnusedCastingParameter
+     * @throws \DrdPlus\Theurgist\Spells\Exceptions\UselessSpellParameterValueForUnusedCastingParameter
      * @throws \DrdPlus\Theurgist\Spells\Exceptions\InvalidValueForModifierParameter
      * @throws \DrdPlus\Theurgist\Spells\Exceptions\UnknownModifierParameter
      */
@@ -89,7 +89,7 @@ class Modifier extends StrictObject
             if ($sanitizedValue !== 0) {
                 $getBaseParameter = StringTools::assembleGetterForName('base_' . $mutableCastingParameter);
                 if ($this->$getBaseParameter() === null) {
-                    throw new Exceptions\UselessAdditionForUnusedCastingParameter(
+                    throw new Exceptions\UselessSpellParameterValueForUnusedCastingParameter(
                         "Casting parameter {$mutableCastingParameter} is not used for modifier {$this->modifierCode}"
                         . ', so given non-zero addition ' . ValueDescriber::describe($parametersChange[$mutableCastingParameter])
                         . ' is thrown away'

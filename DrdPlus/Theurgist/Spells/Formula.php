@@ -48,7 +48,7 @@ class Formula extends StrictObject
      * by @see FormulaMutableSpellParameterCode value indexed its value change
      * @param array|Modifier[] $modifiers
      * @param array|SpellTrait[] $formulaSpellTraits
-     * @throws \DrdPlus\Theurgist\Spells\Exceptions\UselessAdditionForUnusedCastingParameter
+     * @throws \DrdPlus\Theurgist\Spells\Exceptions\UselessSpellParameterValueForUnusedCastingParameter
      * @throws \DrdPlus\Theurgist\Spells\Exceptions\UnknownFormulaParameter
      * @throws \DrdPlus\Theurgist\Spells\Exceptions\InvalidValueForFormulaParameter
      * @throws \DrdPlus\Theurgist\Spells\Exceptions\InvalidModifier
@@ -73,7 +73,7 @@ class Formula extends StrictObject
     /**
      * @param array $spellParameterValues
      * @return array
-     * @throws \DrdPlus\Theurgist\Spells\Exceptions\UselessAdditionForUnusedCastingParameter
+     * @throws \DrdPlus\Theurgist\Spells\Exceptions\UselessSpellParameterValueForUnusedCastingParameter
      * @throws \DrdPlus\Theurgist\Spells\Exceptions\InvalidValueForFormulaParameter
      * @throws \DrdPlus\Theurgist\Spells\Exceptions\UnknownFormulaParameter
      */
@@ -98,7 +98,7 @@ class Formula extends StrictObject
             /** @var IntegerCastingParameter $baseParameter */
             $baseParameter = $this->$getBaseParameter();
             if ($baseParameter === null) {
-                throw new Exceptions\UselessAdditionForUnusedCastingParameter(
+                throw new Exceptions\UselessSpellParameterValueForUnusedCastingParameter(
                     "Casting parameter {$mutableSpellParameter} is not used for formula {$this->formulaCode}"
                     . ', so given non-zero addition ' . ValueDescriber::describe($spellParameterValues[$mutableSpellParameter])
                     . ' is thrown away'

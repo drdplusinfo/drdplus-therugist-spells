@@ -665,7 +665,7 @@ class FormulaTest extends TestWithMockery
 
     /**
      * @test
-     * @expectedException \DrdPlus\Theurgist\Spells\Exceptions\UselessAdditionForUnusedCastingParameter
+     * @expectedException \DrdPlus\Theurgist\Spells\Exceptions\UselessSpellParameterValueForUnusedCastingParameter
      * @expectedExceptionMessageRegExp ~4~
      */
     public function I_can_not_add_non_zero_addition_to_unused_parameter()

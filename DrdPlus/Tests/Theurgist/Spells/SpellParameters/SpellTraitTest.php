@@ -47,7 +47,7 @@ class SpellTraitTest extends TestWithMockery
 
             $spellTraitsTable = $this->createSpellTraitsTable(
                 $spellTraitCode,
-                $baseTrap = $this->createTrap(10, $changedTrap = $this->createTrapShell())
+                $baseTrap = $this->createTrap(2 /* 10 - 8 */, 8, $changedTrap = $this->createTrapShell())
             );
             $spellTraitWithTrapChange = new SpellTrait($spellTraitCode, $spellTraitsTable, 10);
             self::assertSame($baseTrap, $spellTraitWithTrapChange->getBaseTrap());
@@ -72,12 +72,15 @@ class SpellTraitTest extends TestWithMockery
 
     /**
      * @param int $expectedTrapChange
-     * @param Trap $changedTrap
+     * @param int $trapDefaultValue
+     * @param Trap|null $changedTrap
      * @return \Mockery\MockInterface|Trap
      */
-    private function createTrap(int $expectedTrapChange, Trap $changedTrap = null)
+    private function createTrap(int $expectedTrapChange, int $trapDefaultValue = 0, Trap $changedTrap = null)
     {
         $trap = $this->mockery(Trap::class);
+        $trap->shouldReceive('getDefaultValue')
+            ->andReturn($trapDefaultValue);
         $trap->shouldReceive('getWithAddition')
             ->with($expectedTrapChange)
             ->andReturn($changedTrap ?? $trap);
@@ -103,15 +106,15 @@ class SpellTraitTest extends TestWithMockery
             $spellTraitCode,
             null // no trap
         );
-        $spellTraitWithoutTrapChange = new SpellTrait($spellTraitCode, $spellTraitsTable, 0);
+        $spellTraitWithoutTrapChange = new SpellTrait($spellTraitCode, $spellTraitsTable);
         $this->addDifficultyChangeGetter($spellTraitsTable, $spellTraitCode, $difficultyChange = new DifficultyChange(345));
         self::assertSame($difficultyChange, $spellTraitWithoutTrapChange->getDifficultyChange());
 
         $spellTraitsTable = $this->createSpellTraitsTable(
             $spellTraitCode,
-            $trap = $this->createTrap(123, $currentTrap = $this->createTrap(0))
+            $trap = $this->createTrap(111 /* 345 - 234 */, 234, $currentTrap = $this->createTrap(0))
         );
-        $spellTraitWithTrapChange = new SpellTrait($spellTraitCode, $spellTraitsTable, 123);
+        $spellTraitWithTrapChange = new SpellTrait($spellTraitCode, $spellTraitsTable, 345);
         $this->addDifficultyChangeGetter($spellTraitsTable, $spellTraitCode, $difficultyChange = new DifficultyChange(567));
         $this->addAdditionByDifficultyGetter($currentTrap, 789);
         self::assertEquals($difficultyChange->add(789), $spellTraitWithTrapChange->getDifficultyChange());

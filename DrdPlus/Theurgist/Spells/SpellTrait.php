@@ -5,6 +5,7 @@ use DrdPlus\Theurgist\Codes\SpellTraitCode;
 use DrdPlus\Theurgist\Spells\SpellParameters\DifficultyChange;
 use DrdPlus\Theurgist\Spells\SpellParameters\Trap;
 use Granam\Strict\Object\StrictObject;
+use Granam\Tools\ValueDescriber;
 
 class SpellTrait extends StrictObject
 {
@@ -18,17 +19,39 @@ class SpellTrait extends StrictObject
     /**
      * @param SpellTraitCode $spellTraitCode
      * @param SpellTraitsTable $spellTraitsTable
-     * @param int $spellTraitTrapPropertyChange
+     * @param int|null $spellTraitTrapPropertyValue current trap value (change will be calculated from that and default trap value)
+     * @throws \DrdPlus\Theurgist\Spells\Exceptions\CanNotChangeNotExistingTrap
      */
     public function __construct(
         SpellTraitCode $spellTraitCode,
         SpellTraitsTable $spellTraitsTable,
-        int $spellTraitTrapPropertyChange = 0
+        int $spellTraitTrapPropertyValue = null
     )
     {
         $this->spellTraitCode = $spellTraitCode;
         $this->spellTraitsTable = $spellTraitsTable;
-        $this->trapPropertyChange = $spellTraitTrapPropertyChange;
+        $this->trapPropertyChange = $this->sanitizeSpellTraitTrapPropertyChange($spellTraitTrapPropertyValue);
+    }
+
+    /**
+     * @param int|null $spellTraitTrapPropertyValue
+     * @return int
+     * @throws \DrdPlus\Theurgist\Spells\Exceptions\CanNotChangeNotExistingTrap
+     */
+    private function sanitizeSpellTraitTrapPropertyChange(int $spellTraitTrapPropertyValue = null): int
+    {
+        if ($spellTraitTrapPropertyValue === null) {
+            return 0; // no change
+        }
+        $baseTrap = $this->getBaseTrap();
+        if (!$baseTrap) {
+            throw new Exceptions\CanNotChangeNotExistingTrap(
+                "Spell trait {$this->getSpellTraitCode()} does not have a trap. Got trap change "
+                . ValueDescriber::describe($spellTraitTrapPropertyValue)
+            );
+        }
+
+        return $spellTraitTrapPropertyValue - $baseTrap->getDefaultValue();
     }
 
     public function getDifficultyChange(): DifficultyChange
