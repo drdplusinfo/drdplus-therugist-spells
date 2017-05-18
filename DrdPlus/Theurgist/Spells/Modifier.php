@@ -431,7 +431,7 @@ class Modifier extends StrictObject
 
     public function getNumberOfConditionsAddition(): int
     {
-        return $this->modifierSpellParameterChanges[ModifierMutableSpellParameterCode::CONDITIONS];
+        return $this->modifierSpellParameterChanges[ModifierMutableSpellParameterCode::NUMBER_OF_CONDITIONS];
     }
 
     /**
