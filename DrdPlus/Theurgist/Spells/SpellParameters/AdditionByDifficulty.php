@@ -15,7 +15,7 @@ class AdditionByDifficulty extends StrictObject implements IntegerInterface
     /**
      * @var int
      */
-    private $difficultyOfAdditionStep;
+    private $difficultyPerAdditionStep;
     /**
      * @var int
      */
@@ -36,10 +36,10 @@ class AdditionByDifficulty extends StrictObject implements IntegerInterface
     {
         $parts = $this->parseParts($additionByDifficultyNotation);
         if (count($parts) === 1 && array_keys($parts) === [0]) {
-            $this->difficultyOfAdditionStep = 1;
+            $this->difficultyPerAdditionStep = 1;
             $this->additionStep = $this->sanitizeAddition($parts[0]);
         } else if (count($parts) === 2 && array_keys($parts) === [0, 1]) {
-            $this->difficultyOfAdditionStep = $this->sanitizeDifficulty($parts[0]);
+            $this->difficultyPerAdditionStep = $this->sanitizeDifficulty($parts[0]);
             $this->additionStep = $this->sanitizeAddition($parts[1]);
         } else {
             throw new Exceptions\InvalidFormatOfAdditionByDifficultyNotation(
@@ -109,13 +109,13 @@ class AdditionByDifficulty extends StrictObject implements IntegerInterface
      *
      * @return int
      */
-    public function getDifficultyOfAdditionStep(): int
+    public function getDifficultyPerAdditionStep(): int
     {
-        return $this->difficultyOfAdditionStep;
+        return $this->difficultyPerAdditionStep;
     }
 
     /**
-     * Bonus given by increasing difficulty by a point(s), @see getDifficultyOfAdditionStep
+     * Bonus given by increasing difficulty by a point(s), @see getDifficultyPerAdditionStep
      *
      * @return int
      */
@@ -145,7 +145,7 @@ class AdditionByDifficulty extends StrictObject implements IntegerInterface
             return 0;
         }
 
-        return ceil($this->getCurrentAddition() / $this->getAdditionStep() * $this->getDifficultyOfAdditionStep());
+        return ceil($this->getCurrentAddition() / $this->getAdditionStep() * $this->getDifficultyPerAdditionStep());
     }
 
     /**
@@ -214,7 +214,7 @@ class AdditionByDifficulty extends StrictObject implements IntegerInterface
      */
     public function __toString()
     {
-        return "{$this->getValue()} {{$this->getDifficultyOfAdditionStep()}=>{$this->getAdditionStep()}}";
+        return "{$this->getValue()} {{$this->getDifficultyPerAdditionStep()}=>{$this->getAdditionStep()}}";
     }
 
     /**
@@ -222,6 +222,6 @@ class AdditionByDifficulty extends StrictObject implements IntegerInterface
      */
     public function getNotation(): string
     {
-        return "{$this->getDifficultyOfAdditionStep()}={$this->getAdditionStep()}";
+        return "{$this->getDifficultyPerAdditionStep()}={$this->getAdditionStep()}";
     }
 }

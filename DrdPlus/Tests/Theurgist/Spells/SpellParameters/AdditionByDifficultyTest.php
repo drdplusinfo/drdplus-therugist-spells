@@ -13,14 +13,14 @@ class AdditionByDifficultyTest extends TestWithMockery
     {
         $additionByDifficulty = new AdditionByDifficulty('123');
         self::assertSame(123, $additionByDifficulty->getAdditionStep());
-        self::assertSame(1, $additionByDifficulty->getDifficultyOfAdditionStep());
+        self::assertSame(1, $additionByDifficulty->getDifficultyPerAdditionStep());
         self::assertSame(0, $additionByDifficulty->getCurrentAddition());
         self::assertSame(0, $additionByDifficulty->getCurrentDifficultyIncrement());
         self::assertSame('0 {1=>123}', (string)$additionByDifficulty);
 
         $sameAdditionByDifficulty = new AdditionByDifficulty('1=123');
         self::assertSame(123, $sameAdditionByDifficulty->getAdditionStep());
-        self::assertSame(1, $sameAdditionByDifficulty->getDifficultyOfAdditionStep());
+        self::assertSame(1, $sameAdditionByDifficulty->getDifficultyPerAdditionStep());
         self::assertSame(0, $sameAdditionByDifficulty->getCurrentAddition());
         self::assertSame(0, $sameAdditionByDifficulty->getCurrentDifficultyIncrement());
         self::assertSame('0 {1=>123}', (string)$additionByDifficulty);
@@ -33,7 +33,7 @@ class AdditionByDifficultyTest extends TestWithMockery
     {
         $additionByDifficulty = new AdditionByDifficulty('456=789');
         self::assertSame(789, $additionByDifficulty->getAdditionStep());
-        self::assertSame(456, $additionByDifficulty->getDifficultyOfAdditionStep());
+        self::assertSame(456, $additionByDifficulty->getDifficultyPerAdditionStep());
         self::assertSame(0, $additionByDifficulty->getCurrentAddition());
         self::assertSame(0, $additionByDifficulty->getCurrentDifficultyIncrement());
         self::assertSame('0 {456=>789}', (string)$additionByDifficulty);
@@ -46,7 +46,7 @@ class AdditionByDifficultyTest extends TestWithMockery
     {
         $additionByDifficulty = new AdditionByDifficulty('2=3', 7);
         self::assertSame(3, $additionByDifficulty->getAdditionStep());
-        self::assertSame(2, $additionByDifficulty->getDifficultyOfAdditionStep());
+        self::assertSame(2, $additionByDifficulty->getDifficultyPerAdditionStep());
         self::assertSame(7, $additionByDifficulty->getCurrentAddition());
         self::assertSame(5 /* 7 / 3 * 2, round up */, $additionByDifficulty->getCurrentDifficultyIncrement());
         self::assertSame('7 {2=>3}', (string)$additionByDifficulty);
