@@ -4,9 +4,9 @@ namespace DrdPlus\Theurgist\Spells\SpellParameters;
 use DrdPlus\Theurgist\Spells\SpellParameters\Partials\PositiveCastingParameter;
 
 /**
- * @method Points getWithAddition($additionValue)
+ * @method NumberOfWaypoints getWithAddition($additionValue)
  */
-class Points extends PositiveCastingParameter
+class NumberOfWaypoints extends PositiveCastingParameter
 {
 
 }

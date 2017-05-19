@@ -16,7 +16,7 @@ use DrdPlus\Theurgist\Spells\SpellParameters\NumberOfConditions;
 use DrdPlus\Theurgist\Spells\SpellParameters\DifficultyChange;
 use DrdPlus\Theurgist\Spells\SpellParameters\Grafts;
 use DrdPlus\Theurgist\Spells\SpellParameters\Invisibility;
-use DrdPlus\Theurgist\Spells\SpellParameters\Points;
+use DrdPlus\Theurgist\Spells\SpellParameters\NumberOfWaypoints;
 use DrdPlus\Theurgist\Spells\SpellParameters\Power;
 use DrdPlus\Theurgist\Spells\SpellParameters\Quality;
 use DrdPlus\Theurgist\Spells\SpellParameters\Radius;
@@ -63,7 +63,7 @@ class ModifiersTable extends AbstractFileTable
     const ATTACK = 'attack';
     const GRAFTS = 'grafts';
     const SPELL_SPEED = 'spell_speed';
-    const POINTS = 'points';
+    const NUMBER_OF_WAYPOINTS = 'number_of_waypoints';
     const INVISIBILITY = 'invisibility';
     const QUALITY = 'quality';
     const NUMBER_OF_CONDITIONS = 'number_of_conditions';
@@ -90,7 +90,7 @@ class ModifiersTable extends AbstractFileTable
             self::ATTACK => self::ARRAY,
             self::GRAFTS => self::ARRAY,
             self::SPELL_SPEED => self::ARRAY,
-            self::POINTS => self::ARRAY,
+            self::NUMBER_OF_WAYPOINTS => self::ARRAY,
             self::INVISIBILITY => self::ARRAY,
             self::QUALITY => self::ARRAY,
             self::NUMBER_OF_CONDITIONS => self::ARRAY,
@@ -259,18 +259,18 @@ class ModifiersTable extends AbstractFileTable
 
     /**
      * @param ModifierCode $modifierCode
-     * @return Points|null
+     * @return NumberOfWaypoints|null
      */
-    public function getPoints(ModifierCode $modifierCode)
+    public function getNumberOfWaypoints(ModifierCode $modifierCode)
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        $pointsValues = $this->getValue($modifierCode, self::POINTS);
-        if (!$pointsValues) {
+        $numberOfWaypointsValues = $this->getValue($modifierCode, self::NUMBER_OF_WAYPOINTS);
+        if (!$numberOfWaypointsValues) {
             return null;
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new Points($pointsValues);
+        return new NumberOfWaypoints($numberOfWaypointsValues);
     }
 
     /**

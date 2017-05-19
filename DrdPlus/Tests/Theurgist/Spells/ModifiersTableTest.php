@@ -39,7 +39,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
          * @see ModifiersTable::getAttack()
          * @see ModifiersTable::getGrafts()
          * @see ModifiersTable::getSpellSpeed()
-         * @see ModifiersTable::getPoints()
+         * @see ModifiersTable::getNumberOfWaypoints()
          * @see ModifiersTable::getInvisibility()
          * @see ModifiersTable::getQuality()
          * @see ModifiersTable::getNumberOfConditions()
@@ -48,7 +48,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
          * @see ModifiersTable::getThreshold()
          */
         $optionalParameters = [
-            'realms_affection', 'casting_rounds', 'radius', 'epicenter_shift', 'power', 'attack', 'grafts', 'spell_speed', 'points',
+            'realms_affection', 'casting_rounds', 'radius', 'epicenter_shift', 'power', 'attack', 'grafts', 'spell_speed', 'number_of_waypoints',
             'invisibility', 'quality', 'number_of_conditions', 'resistance', 'number_of_situations', 'threshold',
         ];
         foreach ($optionalParameters as $optionalParameter) {

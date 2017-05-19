@@ -12,7 +12,7 @@ use DrdPlus\Theurgist\Spells\SpellParameters\Grafts;
 use DrdPlus\Theurgist\Spells\SpellParameters\Invisibility;
 use DrdPlus\Theurgist\Spells\SpellParameters\NumberOfSituations;
 use DrdPlus\Theurgist\Spells\SpellParameters\Partials\IntegerCastingParameter;
-use DrdPlus\Theurgist\Spells\SpellParameters\Points;
+use DrdPlus\Theurgist\Spells\SpellParameters\NumberOfWaypoints;
 use DrdPlus\Theurgist\Spells\SpellParameters\Power;
 use DrdPlus\Theurgist\Spells\SpellParameters\Quality;
 use DrdPlus\Theurgist\Spells\SpellParameters\Radius;
@@ -147,7 +147,7 @@ class Modifier extends StrictObject
             $this->getGraftsWithAddition(),
             $this->getInvisibilityWithAddition(),
             $this->getNumberOfSituationsWithAddition(),
-            $this->getPointsWithAddition(),
+            $this->getNumberOfWaypointsWithAddition(),
             $this->getPowerWithAddition(),
             $this->getQualityWithAddition(),
             $this->getRadiusWithAddition(),
@@ -512,29 +512,29 @@ class Modifier extends StrictObject
     }
 
     /**
-     * @return Points|null
+     * @return NumberOfWaypoints|null
      */
-    public function getBasePoints()
+    public function getBaseNumberOfWaypoints()
     {
-        return $this->modifiersTable->getPoints($this->modifierCode);
+        return $this->modifiersTable->getNumberOfWaypoints($this->modifierCode);
     }
 
     /**
-     * @return Points|null
+     * @return NumberOfWaypoints|null
      */
-    public function getPointsWithAddition()
+    public function getNumberOfWaypointsWithAddition()
     {
-        $basePoints = $this->getBasePoints();
-        if ($basePoints === null) {
+        $baseNumberOfWaypoints = $this->getBaseNumberOfWaypoints();
+        if ($baseNumberOfWaypoints === null) {
             return null;
         }
 
-        return $basePoints->getWithAddition($this->getPointsAddition());
+        return $baseNumberOfWaypoints->getWithAddition($this->getNumberOfWaypointsAddition());
     }
 
-    public function getPointsAddition(): int
+    public function getNumberOfWaypointsAddition(): int
     {
-        return $this->modifierSpellParameterChanges[ModifierMutableSpellParameterCode::POINTS];
+        return $this->modifierSpellParameterChanges[ModifierMutableSpellParameterCode::NUMBER_OF_WAYPOINTS];
     }
 
     public function __toString()
