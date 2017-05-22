@@ -1,8 +1,10 @@
 <?php
 namespace DrdPlus\Theurgist\Spells;
 
-use DrdPlus\Tables\Measurements\BaseOfWounds\BaseOfWoundsTable;
-use DrdPlus\Tables\Tables;
+use DrdPlus\Codes\DistanceCode;
+use DrdPlus\Tables\Measurements\Distance\Distance;
+use DrdPlus\Tables\Measurements\Distance\DistanceBonus;
+use DrdPlus\Tables\Measurements\Distance\DistanceTable;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\FormulaMutableSpellParameterCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
@@ -36,6 +38,8 @@ class Formula extends StrictObject
     private $formulaCode;
     /** @var FormulasTable */
     private $formulasTable;
+    /** @var DistanceTable */
+    private $distanceTable;
     /** @var int[] */
     private $formulaSpellParameterChanges;
     /** @var Modifier[] */
@@ -46,7 +50,7 @@ class Formula extends StrictObject
     /**
      * @param FormulaCode $formulaCode
      * @param FormulasTable $formulasTable
-     * @param BaseOfWoundsTable $baseOfWoundsTable
+     * @param DistanceTable $distanceTable
      * @param array $formulaSpellParameterValues Current values of spell parameters (changes will be calculated from them)
      * by @see FormulaMutableSpellParameterCode value indexed its value change
      * @param array|Modifier[] $modifiers
@@ -60,7 +64,7 @@ class Formula extends StrictObject
     public function __construct(
         FormulaCode $formulaCode,
         FormulasTable $formulasTable,
-        BaseOfWoundsTable $baseOfWoundsTable,
+        DistanceTable $distanceTable,
         array $formulaSpellParameterValues = [],
         array $modifiers = [],
         array $formulaSpellTraits = []
@@ -68,6 +72,7 @@ class Formula extends StrictObject
     {
         $this->formulaCode = $formulaCode;
         $this->formulasTable = $formulasTable;
+        $this->distanceTable = $distanceTable;
         // gets spell parameter changes as delta of current values and default values
         $this->formulaSpellParameterChanges = $this->sanitizeSpellParameterChanges($formulaSpellParameterValues);
         $this->modifiers = $this->getCheckedModifiers($this->toFlatArray($modifiers));
@@ -408,13 +413,15 @@ class Formula extends StrictObject
         if ($epicenterShiftByModifiers === false) {
             return $epicenterShiftWithAddition;
         }
+        $meters = $epicenterShiftWithAddition->getDistance($this->distanceTable)->getMeters();
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        $shiftValue = Tables::getIt()->getBaseOfWoundsTable()->sumBonuses(
-            [$epicenterShiftWithAddition->getValue(), $epicenterShiftByModifiers]
-        );
+        $meters += (new EpicenterShift([$epicenterShiftByModifiers, 0]))->getDistance($this->distanceTable)->getMeters();
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new EpicenterShift([$shiftValue, 0 /* no added difficulty */]);
+        return new EpicenterShift([
+            (new Distance($meters, DistanceCode::METER, $this->distanceTable))->getBonus(),
+            0 /* no added difficulty */
+        ]);
     }
 
     /**
@@ -539,8 +546,14 @@ class Formula extends StrictObject
 
         // transpositions are chained in sequence and their values (distances) have to be summed, not bonuses
         if (ModifierMutableSpellParameterCode::EPICENTER_SHIFT) {
+            $meters = 0;
+            foreach ($bonusParts as $bonusPart) {
+                /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+                $meters += (new DistanceBonus($bonusPart, $this->distanceTable))->getDistance()->getMeters();
+            }
+
             /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-            return Tables::getIt()->getBaseOfWoundsTable()->sumBonuses($bonusParts);
+            return (new Distance($meters, DistanceCode::METER, $this->distanceTable))->getBonus()->getValue();
         }
 
         return (int)array_sum($bonusParts);

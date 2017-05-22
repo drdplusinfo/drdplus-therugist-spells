@@ -1,7 +1,7 @@
 <?php
 namespace DrdPlus\Tests\Theurgist\Spells;
 
-use DrdPlus\Tables\Measurements\BaseOfWounds\BaseOfWoundsTable;
+use DrdPlus\Tables\Measurements\Distance\DistanceTable;
 use DrdPlus\Theurgist\Codes\AffectionPeriodCode;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\FormulaMutableSpellParameterCode;
@@ -40,7 +40,7 @@ class FormulaTest extends TestWithMockery
         foreach (FormulaCode::getPossibleValues() as $formulaValue) {
             $formulaCode = FormulaCode::getIt($formulaValue);
             $formulasTable = $this->createFormulasTable();
-            $formula = new Formula($formulaCode, $formulasTable, $this->createBaseOfWoundsTable());
+            $formula = new Formula($formulaCode, $formulasTable, $this->createDistanceTable());
             self::assertSame($formulaCode, $formula->getFormulaCode());
             foreach (FormulaMutableSpellParameterCode::getPossibleValues() as $mutableParameterName) {
                 /** like instance of @see SpellSpeed */
@@ -129,7 +129,7 @@ class FormulaTest extends TestWithMockery
         foreach (FormulaCode::getPossibleValues() as $formulaValue) {
             $formulaCode = FormulaCode::getIt($formulaValue);
             $formulasTable = $this->createFormulasTable();
-            $formula = new Formula($formulaCode, $formulasTable, $this->createBaseOfWoundsTable());
+            $formula = new Formula($formulaCode, $formulasTable, $this->createDistanceTable());
             self::assertSame($formulaCode, $formula->getFormulaCode());
             foreach (FormulaMutableSpellParameterCode::getPossibleValues() as $mutableParameterName) {
                 if ($mutableParameterName === FormulaMutableSpellParameterCode::DURATION) {
@@ -180,7 +180,7 @@ class FormulaTest extends TestWithMockery
                 $baseParameters[$mutableParameterName] = $baseParameter;
                 $parameterChanges[$mutableParameterName] = $parameterValues[$mutableParameterName] - $defaultValue;
             }
-            $formula = new Formula($formulaCode, $formulasTable, $this->createBaseOfWoundsTable(), $parameterValues);
+            $formula = new Formula($formulaCode, $formulasTable, $this->createDistanceTable(), $parameterValues);
             self::assertSame($formulaCode, $formula->getFormulaCode());
             foreach (FormulaMutableSpellParameterCode::getPossibleValues() as $mutableParameterName) {
                 $baseParameter = $baseParameters[$mutableParameterName];
@@ -210,11 +210,11 @@ class FormulaTest extends TestWithMockery
     }
 
     /**
-     * @return MockInterface|BaseOfWoundsTable
+     * @return MockInterface|DistanceTable
      */
-    private function createBaseOfWoundsTable()
+    private function createDistanceTable()
     {
-        return $this->mockery(BaseOfWoundsTable::class);
+        return $this->mockery(DistanceTable::class);
     }
 
     /**
@@ -223,7 +223,7 @@ class FormulaTest extends TestWithMockery
     public function I_can_get_base_difficulty()
     {
         $formulasTable = $this->createFormulasTable();
-        $formula = new Formula(FormulaCode::getIt(FormulaCode::PORTAL), $formulasTable, $this->createBaseOfWoundsTable());
+        $formula = new Formula(FormulaCode::getIt(FormulaCode::PORTAL), $formulasTable, $this->createDistanceTable());
         $formulasTable
             ->shouldReceive('getFormulaDifficulty')
             ->andReturn($formulaDifficulty = $this->mockery(FormulaDifficulty::class));
@@ -249,7 +249,7 @@ class FormulaTest extends TestWithMockery
                 $this->addBaseParameterGetter($mutableParameterName, $formulaCode, $formulasTable, $baseParameter);
             }
             $this->addFormulaDifficultyGetter($formulasTable, $formulaCode, 0);
-            $formula = new Formula($formulaCode, $formulasTable, $this->createBaseOfWoundsTable());
+            $formula = new Formula($formulaCode, $formulasTable, $this->createDistanceTable());
             self::assertSame(
                 $formulasTable->getFormulaDifficulty($formulaCode)->createWithChange(0),
                 $formula->getCurrentDifficulty()
@@ -293,7 +293,7 @@ class FormulaTest extends TestWithMockery
             $formula = new Formula(
                 $formulaCode,
                 $formulasTable,
-                $this->createBaseOfWoundsTable(),
+                $this->createDistanceTable(),
                 [],
                 [$this->createModifierWithDifficulty(123), [$this->createModifierWithDifficulty(456)]],
                 [$this->getSpellTrait(789), [$this->getSpellTrait(789), [$this->getSpellTrait(159)]]]
@@ -359,7 +359,7 @@ class FormulaTest extends TestWithMockery
     public function I_can_get_base_casting_rounds()
     {
         $formulasTable = $this->createFormulasTable();
-        $formula = new Formula(FormulaCode::getIt(FormulaCode::PORTAL), $formulasTable, $this->createBaseOfWoundsTable());
+        $formula = new Formula(FormulaCode::getIt(FormulaCode::PORTAL), $formulasTable, $this->createDistanceTable());
         $formulasTable->shouldReceive('getCastingRounds')
             ->andReturn($castingRounds = $this->mockery(CastingRounds::class));
         self::assertSame($castingRounds, $formula->getBaseCastingRounds());
@@ -374,7 +374,7 @@ class FormulaTest extends TestWithMockery
         $formula = new Formula(
             FormulaCode::getIt(FormulaCode::PORTAL),
             $formulasTable,
-            $this->createBaseOfWoundsTable(),
+            $this->createDistanceTable(),
             [$this->createModifier(1), [$this->createModifier(2), [$this->createModifier(3), $this->createModifier(4)]]],
             []
         );
@@ -417,7 +417,7 @@ class FormulaTest extends TestWithMockery
     public function I_can_get_evocation()
     {
         $formulasTable = $this->createFormulasTable();
-        $formula = new Formula($formulaCode = FormulaCode::getIt(FormulaCode::DISCHARGE), $formulasTable, $this->createBaseOfWoundsTable());
+        $formula = new Formula($formulaCode = FormulaCode::getIt(FormulaCode::DISCHARGE), $formulasTable, $this->createDistanceTable());
         $formulasTable->shouldReceive('getEvocation')
             ->with($formulaCode)
             ->andReturn($evocation = $this->mockery(Evocation::class));
@@ -430,7 +430,7 @@ class FormulaTest extends TestWithMockery
     public function I_can_get_base_realms_affection()
     {
         $formulasTable = $this->createFormulasTable();
-        $formula = new Formula($formulaCode = FormulaCode::getIt(FormulaCode::ILLUSION), $formulasTable, $this->createBaseOfWoundsTable());
+        $formula = new Formula($formulaCode = FormulaCode::getIt(FormulaCode::ILLUSION), $formulasTable, $this->createDistanceTable());
         $formulasTable->shouldReceive('getRealmsAffection')
             ->with($formulaCode)
             ->andReturn($realmsAffection = $this->createRealmsAffection(AffectionPeriodCode::LIFE, -123));
@@ -468,7 +468,7 @@ class FormulaTest extends TestWithMockery
         $formula = new Formula(
             $formulaCode = FormulaCode::getIt(FormulaCode::ILLUSION),
             $formulasTable,
-            $this->createBaseOfWoundsTable(),
+            $this->createDistanceTable(),
             [$this->createModifierWithRealmsAffection(-5, AffectionPeriodCode::DAILY),
                 [
                     $this->createModifierWithRealmsAffection(-2, AffectionPeriodCode::DAILY),
@@ -550,11 +550,11 @@ class FormulaTest extends TestWithMockery
         );
         $this->addCurrentRealmsIncrementGetter($changedDifficulty, 123);
         $this->addRealmGetter($formulasTable, $formulaCode, 123, $formulaRealm = $this->mockery(Realm::class));
-        $formulaWithoutModifiers = new Formula($formulaCode, $formulasTable, $this->createBaseOfWoundsTable());
+        $formulaWithoutModifiers = new Formula($formulaCode, $formulasTable, $this->createDistanceTable());
         self::assertSame($formulaRealm, $formulaWithoutModifiers->getRequiredRealm());
 
         $lowModifiers = [$this->createModifierWithRequiredRealm(0), $this->createModifierWithRequiredRealm(122)];
-        $formulaWithLowModifiers = new Formula($formulaCode, $formulasTable, $this->createBaseOfWoundsTable(), [], $lowModifiers, []);
+        $formulaWithLowModifiers = new Formula($formulaCode, $formulasTable, $this->createDistanceTable(), [], $lowModifiers, []);
         $formulaRealm->shouldReceive('getValue')
             ->andReturn(123);
         self::assertSame($formulaRealm, $formulaWithLowModifiers->getRequiredRealm());
@@ -563,7 +563,7 @@ class FormulaTest extends TestWithMockery
             [$this->createModifierWithRequiredRealm(123)],
             $this->createModifierWithRequiredRealm(124, $highestRealm = $this->mockery(Realm::class)),
         ];
-        $formulaWithHighModifiers = new Formula($formulaCode, $formulasTable, $this->createBaseOfWoundsTable(), [], $highModifiers, []);
+        $formulaWithHighModifiers = new Formula($formulaCode, $formulasTable, $this->createDistanceTable(), [], $highModifiers, []);
         /**
          * @var Realm $formulaRealm
          * @var Realm $highestRealm
@@ -636,7 +636,7 @@ class FormulaTest extends TestWithMockery
             new Formula(
                 $formulaCode,
                 $formulasTable,
-                $this->createBaseOfWoundsTable(),
+                $this->createDistanceTable(),
                 [FormulaMutableSpellParameterCode::DURATION => 0.0],
                 [],
                 []
@@ -658,7 +658,7 @@ class FormulaTest extends TestWithMockery
             new Formula(
                 $formulaCode,
                 $formulasTable,
-                $this->createBaseOfWoundsTable(),
+                $this->createDistanceTable(),
                 [FormulaMutableSpellParameterCode::DURATION => '5.000'],
                 [],
                 []
@@ -669,7 +669,7 @@ class FormulaTest extends TestWithMockery
         new Formula(
             FormulaCode::getIt(FormulaCode::PORTAL),
             $this->createFormulasTable(),
-            $this->createBaseOfWoundsTable(),
+            $this->createDistanceTable(),
             [FormulaMutableSpellParameterCode::DURATION => 0.1],
             [],
             []
@@ -696,7 +696,7 @@ class FormulaTest extends TestWithMockery
             new Formula(
                 FormulaCode::getIt(FormulaCode::LIGHT),
                 $formulasTable,
-                $this->createBaseOfWoundsTable(),
+                $this->createDistanceTable(),
                 [FormulaMutableSpellParameterCode::BRIGHTNESS => 4],
                 [],
                 []
@@ -714,7 +714,7 @@ class FormulaTest extends TestWithMockery
         new Formula(
             FormulaCode::getIt(FormulaCode::LIGHT),
             $formulasTable,
-            $this->createBaseOfWoundsTable(),
+            $this->createDistanceTable(),
             [FormulaMutableSpellParameterCode::BRIGHTNESS => 4],
             [],
             []
@@ -731,7 +731,7 @@ class FormulaTest extends TestWithMockery
         new Formula(
             FormulaCode::getIt(FormulaCode::PORTAL),
             $this->createFormulasTable(),
-            $this->createBaseOfWoundsTable(),
+            $this->createDistanceTable(),
             ['divine' => 0],
             [],
             []
@@ -748,7 +748,7 @@ class FormulaTest extends TestWithMockery
         new Formula(
             FormulaCode::getIt(FormulaCode::PORTAL),
             $this->createFormulasTable(),
-            $this->createBaseOfWoundsTable(),
+            $this->createDistanceTable(),
             [],
             [new \DateTime()],
             []
@@ -765,7 +765,7 @@ class FormulaTest extends TestWithMockery
         new Formula(
             FormulaCode::getIt(FormulaCode::PORTAL),
             $this->createFormulasTable(),
-            $this->createBaseOfWoundsTable(),
+            $this->createDistanceTable(),
             [],
             [],
             [new \stdClass()]
