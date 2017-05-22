@@ -396,18 +396,21 @@ class Formula extends StrictObject
     public function getCurrentEpicenterShift()
     {
         $epicenterShiftWithAddition = $this->getEpicenterShiftWithAddition();
-        $epicenterShiftBonus = $this->getParameterBonusFromModifiers(ModifierMutableSpellParameterCode::EPICENTER_SHIFT);
+        $epicenterShiftByModifiers = $this->getParameterBonusFromModifiers(ModifierMutableSpellParameterCode::EPICENTER_SHIFT);
         if ($epicenterShiftWithAddition === null) {
-            if ($epicenterShiftBonus === false) {
+            if ($epicenterShiftByModifiers === false) {
                 return null;
             }
 
             /** @noinspection ExceptionsAnnotatingAndHandlingInspection epicenter can be always shifted, even if formula itself is not */
-            return new EpicenterShift([$epicenterShiftBonus, 0 /* no added difficulty*/]);
+            return new EpicenterShift([$epicenterShiftByModifiers, 0 /* no added difficulty*/]);
+        }
+        if ($epicenterShiftByModifiers === false) {
+            return $epicenterShiftWithAddition;
         }
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         $shiftValue = Tables::getIt()->getBaseOfWoundsTable()->sumBonuses(
-            [$epicenterShiftWithAddition->getValue(), $epicenterShiftBonus]
+            [$epicenterShiftWithAddition->getValue(), $epicenterShiftByModifiers]
         );
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
