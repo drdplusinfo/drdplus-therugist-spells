@@ -58,19 +58,17 @@ class Trap extends IntegerCastingParameter
     public function getWithAddition($additionValue): Trap
     {
         $additionValue = ToInteger::toInteger($additionValue);
-        if ($additionValue === 0) {
+        if ($additionValue === $this->getAdditionByDifficulty()->getCurrentAddition()) {
             return $this;
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new static(
-            [
-                $this->getValue(),
-                $this->getAdditionByDifficulty()->getNotation(),
-                $this->getPropertyCode(),
-                $additionValue,
-            ]
-        );
+        return new static([
+            $this->getDefaultValue(),
+            $this->getAdditionByDifficulty()->getNotation(),
+            $this->getPropertyCode(),
+            $additionValue,
+        ]);
     }
 
     /**

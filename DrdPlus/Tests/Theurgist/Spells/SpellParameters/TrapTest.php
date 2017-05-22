@@ -70,6 +70,8 @@ class TrapTest extends IntegerCastingParameterTest
         self::assertSame(456, $increased->getAdditionByDifficulty()->getCurrentAddition());
         self::assertSame($original->getPropertyCode(), $increased->getPropertyCode());
         self::assertNotSame($original, $increased);
+        $increasedBySame = $increased->getWithAddition(456);
+        self::assertSame($increased, $increasedBySame);
 
         $decreased = $original->getWithAddition(-579);
         self::assertSame(-456, $decreased->getValue());
@@ -77,5 +79,7 @@ class TrapTest extends IntegerCastingParameterTest
         self::assertNotSame($original, $increased);
         self::assertSame($original->getPropertyCode(), $decreased->getPropertyCode());
         self::assertSame(-579, $decreased->getAdditionByDifficulty()->getCurrentAddition());
+        $decreasedBySame = $decreased->getWithAddition(-579);
+        self::assertSame($decreased, $decreasedBySame);
     }
 }

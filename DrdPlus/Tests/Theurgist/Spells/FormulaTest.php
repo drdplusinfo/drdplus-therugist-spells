@@ -375,8 +375,8 @@ class FormulaTest extends TestWithMockery
             FormulaCode::getIt(FormulaCode::PORTAL),
             $formulasTable,
             $this->createDistanceTable(),
-            [$this->createModifier(1), [$this->createModifier(2), [$this->createModifier(3), $this->createModifier(4)]]],
-            []
+            [],
+            [$this->createModifier(1), [$this->createModifier(2), [$this->createModifier(3), $this->createModifier(4)]]]
         );
         $formulasTable->shouldReceive('getCastingRounds')
             ->andReturn($this->createCastingRounds(123));
@@ -469,6 +469,7 @@ class FormulaTest extends TestWithMockery
             $formulaCode = FormulaCode::getIt(FormulaCode::ILLUSION),
             $formulasTable,
             $this->createDistanceTable(),
+            [],
             [$this->createModifierWithRealmsAffection(-5, AffectionPeriodCode::DAILY),
                 [
                     $this->createModifierWithRealmsAffection(-2, AffectionPeriodCode::DAILY),
@@ -476,8 +477,7 @@ class FormulaTest extends TestWithMockery
                     $this->createModifierWithoutRealmsAffection(),
                     $this->createModifierWithRealmsAffection(-1, AffectionPeriodCode::YEARLY),
                 ],
-            ],
-            []
+            ]
         );
         $formulasTable->shouldReceive('getRealmsAffection')
             ->with($formulaCode)

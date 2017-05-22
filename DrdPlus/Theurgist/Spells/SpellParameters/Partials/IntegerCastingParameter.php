@@ -88,13 +88,13 @@ abstract class IntegerCastingParameter extends StrictObject implements IntegerIn
     public function getWithAddition($additionValue)
     {
         $additionValue = ToInteger::toInteger($additionValue);
-        if ($additionValue === 0) {
+        if ($additionValue === $this->getAdditionByDifficulty()->getCurrentAddition()) {
             return $this;
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new static(
-            [$this->getValue(), $this->getAdditionByDifficulty()->getNotation(), $additionValue /* current addition */]
+            [$this->getDefaultValue(), $this->getAdditionByDifficulty()->getNotation(), $additionValue /* current addition */]
         );
     }
 }
