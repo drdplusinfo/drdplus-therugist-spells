@@ -22,7 +22,7 @@ abstract class IntegerCastingParameter extends StrictObject implements IntegerIn
     private $additionByDifficulty;
 
     /**
-     * @param array $values
+     * @param array $values 0 => default value and 1 => addition by difficulty notation, 2 => current addition / null
      * @throws \DrdPlus\Theurgist\Spells\SpellParameters\Partials\Exceptions\InvalidValueForIntegerCastingParameter
      * @throws \DrdPlus\Theurgist\Spells\SpellParameters\Partials\Exceptions\MissingValueForFormulaDifficultyAddition
      * @throws \DrdPlus\Theurgist\Spells\SpellParameters\Exceptions\InvalidFormatOfDifficultyIncrement

@@ -1,6 +1,8 @@
 <?php
 namespace DrdPlus\Theurgist\Spells;
 
+use DrdPlus\Tables\Measurements\BaseOfWounds\BaseOfWoundsTable;
+use DrdPlus\Tables\Tables;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\FormulaMutableSpellParameterCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
@@ -44,6 +46,7 @@ class Formula extends StrictObject
     /**
      * @param FormulaCode $formulaCode
      * @param FormulasTable $formulasTable
+     * @param BaseOfWoundsTable $baseOfWoundsTable
      * @param array $formulaSpellParameterValues Current values of spell parameters (changes will be calculated from them)
      * by @see FormulaMutableSpellParameterCode value indexed its value change
      * @param array|Modifier[] $modifiers
@@ -57,9 +60,10 @@ class Formula extends StrictObject
     public function __construct(
         FormulaCode $formulaCode,
         FormulasTable $formulasTable,
-        array $formulaSpellParameterValues,
-        array $modifiers,
-        array $formulaSpellTraits
+        BaseOfWoundsTable $baseOfWoundsTable,
+        array $formulaSpellParameterValues = [],
+        array $modifiers = [],
+        array $formulaSpellTraits = []
     )
     {
         $this->formulaCode = $formulaCode;
@@ -224,6 +228,11 @@ class Formula extends StrictObject
         return new CastingRounds([$castingRoundsSum]);
     }
 
+    /**
+     * Evocation time is not affected by any modifier or trait.
+     *
+     * @return Evocation
+     */
     public function getCurrentEvocation(): Evocation
     {
         return $this->formulasTable->getEvocation($this->getFormulaCode());
@@ -275,6 +284,11 @@ class Formula extends StrictObject
         return $realmsAffectionsSum;
     }
 
+    /**
+     * Gives the highest required realm (by difficulty, by formula itself or by one of its modifiers)
+     *
+     * @return Realm
+     */
     public function getRequiredRealm(): Realm
     {
         $realmsIncrement = $this->getCurrentDifficulty()->getCurrentRealmsIncrement();
@@ -309,6 +323,8 @@ class Formula extends StrictObject
     }
 
     /**
+     * Formula radius extended by direct formula change
+     *
      * @return Radius|null
      */
     public function getRadiusWithAddition()
@@ -327,7 +343,7 @@ class Formula extends StrictObject
     }
 
     /**
-     * Radius can be only increased, not added
+     * Final radius including direct formula change and all its active traits and modifiers.
      *
      * @return Radius|null
      */
@@ -381,18 +397,21 @@ class Formula extends StrictObject
     {
         $epicenterShiftWithAddition = $this->getEpicenterShiftWithAddition();
         $epicenterShiftBonus = $this->getParameterBonusFromModifiers(ModifierMutableSpellParameterCode::EPICENTER_SHIFT);
-        if (!$epicenterShiftWithAddition && $epicenterShiftBonus === false) {
-            return null;
+        if ($epicenterShiftWithAddition === null) {
+            if ($epicenterShiftBonus === false) {
+                return null;
+            }
+
+            /** @noinspection ExceptionsAnnotatingAndHandlingInspection epicenter can be always shifted, even if formula itself is not */
+            return new EpicenterShift([$epicenterShiftBonus, 0 /* no added difficulty*/]);
         }
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        $shiftValue = Tables::getIt()->getBaseOfWoundsTable()->sumBonuses(
+            [$epicenterShiftWithAddition->getValue(), $epicenterShiftBonus]
+        );
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new EpicenterShift([
-            ($epicenterShiftWithAddition
-                ? $epicenterShiftWithAddition->getValue()
-                : 0) // epicenter can be always shifted, even if formula itself is not
-            + (int)$epicenterShiftBonus,
-            0,
-        ]);
+        return new EpicenterShift([$shiftValue, 0 /* no added difficulty */]);
     }
 
     /**
@@ -513,6 +532,12 @@ class Formula extends StrictObject
         }
         if (count($bonusParts) === 0) {
             return false;
+        }
+
+        // transpositions are chained in sequence and their values (distances) have to be summed, not bonuses
+        if (ModifierMutableSpellParameterCode::EPICENTER_SHIFT) {
+            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+            return Tables::getIt()->getBaseOfWoundsTable()->sumBonuses($bonusParts);
         }
 
         return (int)array_sum($bonusParts);
