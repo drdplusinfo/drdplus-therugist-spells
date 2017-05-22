@@ -1,7 +1,7 @@
 <?php
 namespace DrdPlus\Theurgist\Spells;
 
-use DrdPlus\Codes\DistanceCode;
+use DrdPlus\Codes\DistanceUnitCode;
 use DrdPlus\Tables\Measurements\Distance\Distance;
 use DrdPlus\Tables\Measurements\Distance\DistanceBonus;
 use DrdPlus\Tables\Measurements\Distance\DistanceTable;
@@ -419,7 +419,7 @@ class Formula extends StrictObject
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new EpicenterShift([
-            (new Distance($meters, DistanceCode::METER, $this->distanceTable))->getBonus(),
+            (new Distance($meters, DistanceUnitCode::METER, $this->distanceTable))->getBonus(),
             0 /* no added difficulty */
         ]);
     }
@@ -553,7 +553,7 @@ class Formula extends StrictObject
             }
 
             /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-            return (new Distance($meters, DistanceCode::METER, $this->distanceTable))->getBonus()->getValue();
+            return (new Distance($meters, DistanceUnitCode::METER, $this->distanceTable))->getBonus()->getValue();
         }
 
         return (int)array_sum($bonusParts);
