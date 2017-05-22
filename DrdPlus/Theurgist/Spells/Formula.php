@@ -742,4 +742,15 @@ class Formula extends StrictObject
     {
         return (string)$this->getFormulaCode()->getValue();
     }
+
+    public function isColorized(): bool
+    {
+        foreach ($this->modifiers as $modifier) {
+            if ($modifier->getModifierCode()->getValue() === ModifierCode::COLOR) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

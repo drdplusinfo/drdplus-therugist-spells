@@ -5,6 +5,7 @@ use DrdPlus\Tables\Measurements\Distance\DistanceTable;
 use DrdPlus\Theurgist\Codes\AffectionPeriodCode;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\FormulaMutableSpellParameterCode;
+use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Spells\SpellParameters\AdditionByDifficulty;
 use DrdPlus\Theurgist\Spells\SpellParameters\CastingRounds;
 use DrdPlus\Theurgist\Spells\SpellParameters\DifficultyChange;
@@ -523,6 +524,23 @@ class FormulaTest extends TestWithMockery
             ->andReturn(null);
 
         return $modifier;
+    }
+
+    /**
+     * @test
+     */
+    public function I_ask_it_if_is_colorized()
+    {
+        $formulaCode = FormulaCode::getIt(FormulaCode::PORTAL);
+        $formulasTable = $this->createFormulasTable();
+        $formula = new Formula($formulaCode, $formulasTable, $this->createDistanceTable(), [], [$modifier = $this->createModifier(0)]);
+        $modifier->shouldReceive('getModifierCode')
+            ->andReturn(ModifierCode::getIt(ModifierCode::THUNDER));
+        self::assertFalse($formula->isColorized());
+        $formula = new Formula($formulaCode, $formulasTable, $this->createDistanceTable(), [], [$modifier = $this->createModifier(0)]);
+        $modifier->shouldReceive('getModifierCode')
+            ->andReturn(ModifierCode::getIt(ModifierCode::COLOR));
+        self::assertTrue($formula->isColorized());
     }
 
     /**
