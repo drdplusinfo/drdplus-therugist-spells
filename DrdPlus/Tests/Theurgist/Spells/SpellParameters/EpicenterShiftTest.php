@@ -38,4 +38,14 @@ class EpicenterShiftTest extends CastingParameterTest
         );
         self::assertSame($distance, $shift->getDistance($distanceTable));
     }
+
+    /**
+     * @test
+     * @expectedException \DrdPlus\Theurgist\Spells\SpellParameters\Exceptions\EpicenterShiftDistanceDoesNotMatch
+     * @expectedExceptionMessageRegExp ~0~
+     */
+    public function I_can_not_create_it_with_non_matching_distance()
+    {
+        new EpicenterShift(['40', '332211'], new Distance(1, DistanceUnitCode::METER, new DistanceTable()));
+    }
 }

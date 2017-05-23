@@ -19,14 +19,22 @@ class EpicenterShift extends CastingParameter
     /**
      * @param array $values
      * @param Distance|null $distance to provide more accurate distance
-     * @throws \LogicException
+     * @throws \DrdPlus\Theurgist\Spells\SpellParameters\Exceptions\EpicenterShiftDistanceDoesNotMatch
+     * @throws \DrdPlus\Theurgist\Spells\SpellParameters\Partials\Exceptions\InvalidValueForCastingParameter
+     * @throws \DrdPlus\Theurgist\Spells\SpellParameters\Partials\Exceptions\MissingValueForFormulaDifficultyAddition
+     * @throws \DrdPlus\Theurgist\Spells\SpellParameters\Exceptions\InvalidFormatOfDifficultyIncrement
+     * @throws \DrdPlus\Theurgist\Spells\SpellParameters\Exceptions\InvalidFormatOfAdditionByDifficultyValue
+     * @throws \DrdPlus\Theurgist\Spells\SpellParameters\Exceptions\InvalidFormatOfAdditionByDifficultyNotation
      */
     public function __construct(array $values, Distance $distance = null)
     {
         parent::__construct($values);
         if ($distance !== null) {
             if ($distance->getBonus()->getValue() !== $this->getValue()) {
-                throw new \LogicException();
+                throw new Exceptions\EpicenterShiftDistanceDoesNotMatch(
+                    'Expected distance of epicenter shift with bonus ' . $this->getValue()
+                    . ', got distance with bonus ' . $distance->getBonus()->getValue()
+                );
             }
             $this->distance = $distance;
         }
