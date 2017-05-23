@@ -11,7 +11,7 @@ use DrdPlus\Theurgist\Spells\SpellParameters\EpicenterShift;
 use DrdPlus\Theurgist\Spells\SpellParameters\Grafts;
 use DrdPlus\Theurgist\Spells\SpellParameters\Invisibility;
 use DrdPlus\Theurgist\Spells\SpellParameters\NumberOfSituations;
-use DrdPlus\Theurgist\Spells\SpellParameters\Partials\IntegerCastingParameter;
+use DrdPlus\Theurgist\Spells\SpellParameters\Partials\CastingParameter;
 use DrdPlus\Theurgist\Spells\SpellParameters\NumberOfWaypoints;
 use DrdPlus\Theurgist\Spells\SpellParameters\Power;
 use DrdPlus\Theurgist\Spells\SpellParameters\Quality;
@@ -88,7 +88,7 @@ class Modifier extends StrictObject
             }
             /** like @see getBaseAttack */
             $getBaseParameter = StringTools::assembleGetterForName('base_' . $mutableSpellParameter);
-            /** @var IntegerCastingParameter $baseParameter */
+            /** @var CastingParameter $baseParameter */
             $baseParameter = $this->$getBaseParameter();
             if ($baseParameter === null) {
                 throw new Exceptions\UselessValueForUnusedSpellParameter(
@@ -157,12 +157,12 @@ class Modifier extends StrictObject
         ];
         $modifierParameters = array_filter(
             $modifierParameters,
-            function (IntegerCastingParameter $modifierParameter = null) {
+            function (CastingParameter $modifierParameter = null) {
                 return $modifierParameter !== null;
             }
         );
         $parametersDifficultyChangeSum = 0;
-        /** @var IntegerCastingParameter $parameter */
+        /** @var CastingParameter $parameter */
         foreach ($modifierParameters as $parameter) {
             $parametersDifficultyChangeSum += $parameter->getAdditionByDifficulty()->getCurrentDifficultyIncrement();
         }

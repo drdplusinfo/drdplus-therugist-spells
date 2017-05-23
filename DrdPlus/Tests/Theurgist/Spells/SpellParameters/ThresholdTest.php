@@ -1,9 +1,9 @@
 <?php
 namespace DrdPlus\Tests\Theurgist\Spells\SpellParameters;
 
-use DrdPlus\Tests\Theurgist\Spells\SpellParameters\Partials\IntegerCastingParameterTest;
+use DrdPlus\Tests\Theurgist\Spells\SpellParameters\Partials\CastingParameterTest;
 
-class ThresholdTest extends IntegerCastingParameterTest
+class ThresholdTest extends CastingParameterTest
 {
 
 }

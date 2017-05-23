@@ -3,10 +3,10 @@ namespace DrdPlus\Tests\Theurgist\Spells\SpellParameters;
 
 use DrdPlus\Tables\Measurements\Distance\DistanceBonus;
 use DrdPlus\Tables\Measurements\Distance\DistanceTable;
-use DrdPlus\Tests\Theurgist\Spells\SpellParameters\Partials\IntegerCastingParameterTest;
+use DrdPlus\Tests\Theurgist\Spells\SpellParameters\Partials\CastingParameterTest;
 use DrdPlus\Theurgist\Spells\SpellParameters\EpicenterShift;
 
-class EpicenterShiftTest extends IntegerCastingParameterTest
+class EpicenterShiftTest extends CastingParameterTest
 {
     /**
      * @test

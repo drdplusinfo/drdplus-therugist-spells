@@ -3,10 +3,10 @@ namespace DrdPlus\Tests\Theurgist\Spells\SpellParameters;
 
 use DrdPlus\Tables\Measurements\Distance\DistanceBonus;
 use DrdPlus\Tables\Measurements\Distance\DistanceTable;
-use DrdPlus\Tests\Theurgist\Spells\SpellParameters\Partials\IntegerCastingParameterTest;
+use DrdPlus\Tests\Theurgist\Spells\SpellParameters\Partials\CastingParameterTest;
 use DrdPlus\Theurgist\Spells\SpellParameters\Radius;
 
-class RadiusTest extends IntegerCastingParameterTest
+class RadiusTest extends CastingParameterTest
 {
     /**
      * @test

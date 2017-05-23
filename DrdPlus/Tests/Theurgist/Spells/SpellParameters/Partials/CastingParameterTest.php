@@ -2,12 +2,12 @@
 namespace DrdPlus\Tests\Theurgist\Spells\SpellParameters\Partials;
 
 use DrdPlus\Theurgist\Spells\SpellParameters\AdditionByDifficulty;
-use DrdPlus\Theurgist\Spells\SpellParameters\Partials\IntegerCastingParameter;
+use DrdPlus\Theurgist\Spells\SpellParameters\Partials\CastingParameter;
 use Granam\Tests\Tools\TestWithMockery;
 
-abstract class IntegerCastingParameterTest extends TestWithMockery
+abstract class CastingParameterTest extends TestWithMockery
 {
-    use IntegerCastingParameterSetAdditionTrait;
+    use CastingParameterSetAdditionTrait;
 
     /**
      * @test
@@ -16,8 +16,8 @@ abstract class IntegerCastingParameterTest extends TestWithMockery
      */
     public function I_can_not_create_it_with_invalid_points_to_annotation()
     {
-        $reflectionMethod = new \ReflectionMethod(IntegerCastingParameter::class, '__construct');
-        $reflectionMethod->invoke($this->mockery(IntegerCastingParameter::class), [123]);
+        $reflectionMethod = new \ReflectionMethod(CastingParameter::class, '__construct');
+        $reflectionMethod->invoke($this->mockery(CastingParameter::class), [123]);
     }
 
     /**
@@ -33,7 +33,7 @@ abstract class IntegerCastingParameterTest extends TestWithMockery
     protected function I_can_create_it_negative()
     {
         $sutClass = self::getSutClass();
-        /** @var IntegerCastingParameter $sut */
+        /** @var CastingParameter $sut */
         $sut = new $sutClass(['-456', '4=6']);
         self::assertSame(-456, $sut->getValue());
         self::assertEquals(new AdditionByDifficulty('4=6'), $sut->getAdditionByDifficulty());
@@ -43,7 +43,7 @@ abstract class IntegerCastingParameterTest extends TestWithMockery
     protected function I_can_create_it_with_zero()
     {
         $sutClass = self::getSutClass();
-        /** @var IntegerCastingParameter $sut */
+        /** @var CastingParameter $sut */
         $sut = new $sutClass(['0', '78=321']);
         self::assertSame(0, $sut->getValue());
         self::assertEquals(new AdditionByDifficulty('78=321'), $sut->getAdditionByDifficulty());
@@ -53,7 +53,7 @@ abstract class IntegerCastingParameterTest extends TestWithMockery
     protected function I_can_create_it_positive()
     {
         $sutClass = self::getSutClass();
-        /** @var IntegerCastingParameter $sut */
+        /** @var CastingParameter $sut */
         $sut = new $sutClass(['35689', '332211']);
         self::assertSame(35689, $sut->getValue());
         self::assertEquals(new AdditionByDifficulty('332211'), $sut->getAdditionByDifficulty());
@@ -62,7 +62,7 @@ abstract class IntegerCastingParameterTest extends TestWithMockery
 
     /**
      * @test
-     * @expectedException \DrdPlus\Theurgist\Spells\SpellParameters\Partials\Exceptions\InvalidValueForIntegerCastingParameter
+     * @expectedException \DrdPlus\Theurgist\Spells\SpellParameters\Partials\Exceptions\InvalidValueForCastingParameter
      * @expectedExceptionMessageRegExp ~infinite~
      */
     public function I_can_not_create_it_non_numeric()
@@ -77,7 +77,7 @@ abstract class IntegerCastingParameterTest extends TestWithMockery
     public function I_can_get_its_clone_changed_by_addition()
     {
         $sutClass = self::getSutClass();
-        /** @var IntegerCastingParameter $original */
+        /** @var CastingParameter $original */
         $original = new $sutClass(['123', '456=789']);
         self::assertSame($original, $original->getWithAddition(0));
         $increased = $original->getWithAddition(456);

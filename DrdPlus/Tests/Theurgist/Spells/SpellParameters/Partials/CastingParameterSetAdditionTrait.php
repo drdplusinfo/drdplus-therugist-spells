@@ -5,7 +5,7 @@ namespace DrdPlus\Tests\Theurgist\Spells\SpellParameters\Partials;
  * @method static getSutClass
  * @method static assertSame($expected, $current, $message = '')
  */
-trait IntegerCastingParameterSetAdditionTrait
+trait CastingParameterSetAdditionTrait
 {
 
     /**

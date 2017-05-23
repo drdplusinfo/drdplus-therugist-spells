@@ -2,12 +2,12 @@
 namespace DrdPlus\Theurgist\Spells\SpellParameters;
 
 use DrdPlus\Codes\Properties\PropertyCode;
-use DrdPlus\Theurgist\Spells\SpellParameters\Partials\IntegerCastingParameter;
+use DrdPlus\Theurgist\Spells\SpellParameters\Partials\CastingParameter;
 use Granam\Integer\Tools\ToInteger;
 use Granam\Number\NumberInterface;
 use Granam\Tools\ValueDescriber;
 
-class Trap extends IntegerCastingParameter
+class Trap extends CastingParameter
 {
     /**
      * @var PropertyCode
@@ -16,7 +16,7 @@ class Trap extends IntegerCastingParameter
 
     /**
      * @param array $values [0 => trap value, 1 => trap change by realms, 2=> used property, 3 => current addition]
-     * @throws \DrdPlus\Theurgist\Spells\SpellParameters\Partials\Exceptions\InvalidValueForIntegerCastingParameter
+     * @throws \DrdPlus\Theurgist\Spells\SpellParameters\Partials\Exceptions\InvalidValueForCastingParameter
      * @throws \DrdPlus\Theurgist\Spells\SpellParameters\Partials\Exceptions\MissingValueForFormulaDifficultyAddition
      * @throws \DrdPlus\Theurgist\Spells\SpellParameters\Exceptions\InvalidFormatOfDifficultyIncrement
      * @throws \DrdPlus\Theurgist\Spells\SpellParameters\Exceptions\InvalidFormatOfAdditionByDifficultyValue

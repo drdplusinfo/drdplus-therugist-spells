@@ -2,11 +2,11 @@
 namespace DrdPlus\Tests\Theurgist\Spells\SpellParameters;
 
 use DrdPlus\Codes\Properties\PropertyCode;
-use DrdPlus\Tests\Theurgist\Spells\SpellParameters\Partials\IntegerCastingParameterTest;
+use DrdPlus\Tests\Theurgist\Spells\SpellParameters\Partials\CastingParameterTest;
 use DrdPlus\Theurgist\Spells\SpellParameters\AdditionByDifficulty;
 use DrdPlus\Theurgist\Spells\SpellParameters\Trap;
 
-class TrapTest extends IntegerCastingParameterTest
+class TrapTest extends CastingParameterTest
 {
 
     protected function I_can_create_it_negative()

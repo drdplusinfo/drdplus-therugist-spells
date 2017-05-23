@@ -8,7 +8,7 @@ use Granam\Number\NumberInterface;
 use Granam\Strict\Object\StrictObject;
 use Granam\Tools\ValueDescriber;
 
-abstract class IntegerCastingParameter extends StrictObject implements IntegerInterface
+abstract class CastingParameter extends StrictObject implements IntegerInterface
 {
     use GetParameterNameTrait;
 
@@ -23,7 +23,7 @@ abstract class IntegerCastingParameter extends StrictObject implements IntegerIn
 
     /**
      * @param array $values 0 => default value and 1 => addition by difficulty notation, 2 => current addition / null
-     * @throws \DrdPlus\Theurgist\Spells\SpellParameters\Partials\Exceptions\InvalidValueForIntegerCastingParameter
+     * @throws \DrdPlus\Theurgist\Spells\SpellParameters\Partials\Exceptions\InvalidValueForCastingParameter
      * @throws \DrdPlus\Theurgist\Spells\SpellParameters\Partials\Exceptions\MissingValueForFormulaDifficultyAddition
      * @throws \DrdPlus\Theurgist\Spells\SpellParameters\Exceptions\InvalidFormatOfDifficultyIncrement
      * @throws \DrdPlus\Theurgist\Spells\SpellParameters\Exceptions\InvalidFormatOfAdditionByDifficultyValue
@@ -34,7 +34,7 @@ abstract class IntegerCastingParameter extends StrictObject implements IntegerIn
         try {
             $this->defaultValue = ToInteger::toInteger($values[0] ?? null);
         } catch (\Granam\Integer\Tools\Exceptions\Exception $exception) {
-            throw new Exceptions\InvalidValueForIntegerCastingParameter(
+            throw new Exceptions\InvalidValueForCastingParameter(
                 "Expected integer for {$this->getParameterName()}, got "
                 . (array_key_exists(0, $values) ? ValueDescriber::describe($values[0], true) : 'nothing')
             );
@@ -82,7 +82,7 @@ abstract class IntegerCastingParameter extends StrictObject implements IntegerIn
 
     /**
      * @param int|float|NumberInterface $additionValue
-     * @return IntegerCastingParameter
+     * @return CastingParameter
      * @throws \Granam\Integer\Tools\Exceptions\Exception
      */
     public function getWithAddition($additionValue)

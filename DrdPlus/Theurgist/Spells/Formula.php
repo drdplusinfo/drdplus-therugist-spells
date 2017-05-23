@@ -9,19 +9,19 @@ use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\FormulaMutableSpellParameterCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ModifierMutableSpellParameterCode;
-use DrdPlus\Theurgist\Spells\SpellParameters\Evocation;
-use DrdPlus\Theurgist\Spells\SpellParameters\RealmsAffection;
 use DrdPlus\Theurgist\Spells\SpellParameters\Attack;
 use DrdPlus\Theurgist\Spells\SpellParameters\Brightness;
 use DrdPlus\Theurgist\Spells\SpellParameters\CastingRounds;
 use DrdPlus\Theurgist\Spells\SpellParameters\DetailLevel;
 use DrdPlus\Theurgist\Spells\SpellParameters\Duration;
 use DrdPlus\Theurgist\Spells\SpellParameters\EpicenterShift;
+use DrdPlus\Theurgist\Spells\SpellParameters\Evocation;
 use DrdPlus\Theurgist\Spells\SpellParameters\FormulaDifficulty;
-use DrdPlus\Theurgist\Spells\SpellParameters\Partials\IntegerCastingParameter;
+use DrdPlus\Theurgist\Spells\SpellParameters\Partials\CastingParameter;
 use DrdPlus\Theurgist\Spells\SpellParameters\Power;
 use DrdPlus\Theurgist\Spells\SpellParameters\Radius;
 use DrdPlus\Theurgist\Spells\SpellParameters\Realm;
+use DrdPlus\Theurgist\Spells\SpellParameters\RealmsAffection;
 use DrdPlus\Theurgist\Spells\SpellParameters\SizeChange;
 use DrdPlus\Theurgist\Spells\SpellParameters\SpellSpeed;
 use Granam\Integer\IntegerObject;
@@ -104,7 +104,7 @@ class Formula extends StrictObject
             }
             /** like @see getBaseAttack */
             $getBaseParameter = StringTools::assembleGetterForName('base_' . $mutableSpellParameter);
-            /** @var IntegerCastingParameter $baseParameter */
+            /** @var CastingParameter $baseParameter */
             $baseParameter = $this->$getBaseParameter();
             if ($baseParameter === null) {
                 throw new Exceptions\UselessValueForUnusedSpellParameter(
@@ -187,12 +187,12 @@ class Formula extends StrictObject
         ];
         $formulaParameters = array_filter(
             $formulaParameters,
-            function (IntegerCastingParameter $formulaParameter = null) {
+            function (CastingParameter $formulaParameter = null) {
                 return $formulaParameter !== null;
             }
         );
         $parametersDifficultyChangeSum = 0;
-        /** @var IntegerCastingParameter $formulaParameter */
+        /** @var CastingParameter $formulaParameter */
         foreach ($formulaParameters as $formulaParameter) {
             $parametersDifficultyChangeSum += $formulaParameter->getAdditionByDifficulty()->getCurrentDifficultyIncrement();
         }
@@ -537,7 +537,7 @@ class Formula extends StrictObject
             if ($parameter === null) {
                 continue;
             }
-            /** @var IntegerCastingParameter $parameter */
+            /** @var CastingParameter $parameter */
             $bonusParts[] = $parameter->getValue();
         }
         if (count($bonusParts) === 0) {

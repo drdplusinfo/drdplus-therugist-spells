@@ -1,7 +1,7 @@
 <?php
 namespace DrdPlus\Tests\Theurgist\Spells\SpellParameters\Partials;
 
-abstract class PositiveCastingParameterTest extends IntegerCastingParameterTest
+abstract class PositiveCastingParameterTest extends CastingParameterTest
 {
     protected function I_can_create_it_negative()
     {

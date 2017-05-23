@@ -7,7 +7,7 @@ use DrdPlus\Theurgist\Codes\ModifierMutableSpellParameterCode;
 use DrdPlus\Theurgist\Spells\SpellParameters\AdditionByDifficulty;
 use DrdPlus\Theurgist\Spells\SpellParameters\CastingRounds;
 use DrdPlus\Theurgist\Spells\SpellParameters\DifficultyChange;
-use DrdPlus\Theurgist\Spells\SpellParameters\Partials\IntegerCastingParameter;
+use DrdPlus\Theurgist\Spells\SpellParameters\Partials\CastingParameter;
 use DrdPlus\Theurgist\Spells\SpellParameters\Realm;
 use DrdPlus\Theurgist\Spells\SpellParameters\SpellSpeed;
 use DrdPlus\Theurgist\Spells\Modifier;
@@ -68,13 +68,20 @@ class ModifierTest extends TestWithMockery
 
     /**
      * @param string $parameterName
-     * @return IntegerCastingParameter|\Mockery\MockInterface
+     * @param int $defaultValue
+     * @return CastingParameter|\Mockery\MockInterface
      */
-    private function createExpectedParameter(string $parameterName): IntegerCastingParameter
+    private function createExpectedParameter(string $parameterName, int $defaultValue = null): CastingParameter
     {
         $parameterClass = $this->getParameterClass($parameterName);
 
-        return $this->mockery($parameterClass);
+        $parameter = $this->mockery($parameterClass);
+        if ($defaultValue !== null) {
+            $parameter->shouldReceive('getDefaultValue')
+                ->andReturn($defaultValue);
+        }
+
+        return $parameter;
     }
 
     private function getParameterClass(string $parameterName): string
@@ -91,7 +98,7 @@ class ModifierTest extends TestWithMockery
         string $parameterName,
         ModifierCode $modifierCode,
         MockInterface $modifiersTable,
-        IntegerCastingParameter $value = null
+        CastingParameter $value = null
     )
     {
         $getProperty = StringTools::assembleGetterForName($parameterName);
@@ -103,7 +110,7 @@ class ModifierTest extends TestWithMockery
     private function addExpectedAdditionSetter(
         int $addition,
         \Mockery\MockInterface $parameter,
-        IntegerCastingParameter $modifiedParameter
+        CastingParameter $modifiedParameter
     )
     {
         $parameter->shouldReceive('getWithAddition')
@@ -147,44 +154,45 @@ class ModifierTest extends TestWithMockery
     public function I_can_create_it_with_change_for_every_modifier()
     {
         $parameterChanges = [];
-        foreach (ModifierMutableSpellParameterCode::getPossibleValues() as $index => $parameterValue) {
-            $parameterChanges[$parameterValue] = $index + 1; // 1...x
+        foreach (ModifierMutableSpellParameterCode::getPossibleValues() as $index => $parameterName) {
+            $parameterChanges[$parameterName] = $index + 1; // 1...x
         }
         $spellTraits = [$this->createSpellTraitShell(), $this->createSpellTraitShell()];
         foreach (ModifierCode::getPossibleValues() as $modifierValue) {
             $modifierCode = ModifierCode::getIt($modifierValue);
             $modifiersTable = $this->createModifiersTable();
             $baseParameters = [];
-            foreach (ModifierMutableSpellParameterCode::getPossibleValues() as $mutableParameterName) {
+            foreach (ModifierMutableSpellParameterCode::getPossibleValues() as $parameterName) {
                 /** like instance of @see SpellSpeed */
-                $baseParameter = $this->createExpectedParameter($mutableParameterName);
-                $this->addBaseParameterGetter($mutableParameterName, $modifierCode, $modifiersTable, $baseParameter);
-                $baseParameters[$mutableParameterName] = $baseParameter;
+                $baseParameter = $this->createExpectedParameter($parameterName, -1 /* default value */);
+                $this->addBaseParameterGetter($parameterName, $modifierCode, $modifiersTable, $baseParameter);
+                $baseParameters[$parameterName] = $baseParameter;
             }
             $modifier = new Modifier($modifierCode, $modifiersTable, $parameterChanges, $spellTraits);
             self::assertSame($modifierCode, $modifier->getModifierCode());
-            foreach (ModifierMutableSpellParameterCode::getPossibleValues() as $mutableParameterName) {
-                $baseParameter = $baseParameters[$mutableParameterName];
-                $change = $parameterChanges[$mutableParameterName];
+            foreach (ModifierMutableSpellParameterCode::getPossibleValues() as $parameterName) {
+                $baseParameter = $baseParameters[$parameterName];
+                $change = $parameterChanges[$parameterName] + 1 /* because of difference against default value -1 */
+                ;
                 /** like @see Modifier::getBaseRadius */
-                $getBaseParameter = StringTools::assembleGetterForName('base_' . $mutableParameterName);
+                $getBaseParameter = StringTools::assembleGetterForName('base_' . $parameterName);
                 self::assertSame($baseParameter, $modifier->$getBaseParameter());
                 /** like @see Modifier::getCurrentRadius() */
-                $getCurrentParameter = StringTools::assembleGetterForName($mutableParameterName . '_with_addition');
+                $getParameterWithAddition = StringTools::assembleGetterForName($parameterName . '_with_addition');
                 $this->addExpectedAdditionSetter(
                     $change,
                     $baseParameter,
-                    $changedParameter = $this->createExpectedParameter($mutableParameterName)
+                    $changedParameter = $this->createExpectedParameter($parameterName)
                 );
                 self::assertSame($baseParameter, $modifier->$getBaseParameter());
                 try {
-                    self::assertSame($changedParameter, $modifier->$getCurrentParameter());
+                    self::assertSame($changedParameter, $modifier->$getParameterWithAddition());
                 } catch (NoMatchingExpectationException $expectationException) {
-                    self::fail("Parameter {$mutableParameterName} uses wrong addition: " . $expectationException->getMessage());
+                    self::fail("Parameter {$parameterName} uses wrong addition (expected change {$change}): " . $expectationException->getMessage());
                 }
 
                 /** like @see Modifier::getRadiusAddition */
-                $getParameterAddition = StringTools::assembleGetterForName($mutableParameterName) . 'Addition';
+                $getParameterAddition = StringTools::assembleGetterForName($parameterName) . 'Addition';
                 self::assertNotSame(0, $change);
                 self::assertSame($change, $modifier->$getParameterAddition());
             }
@@ -360,13 +368,15 @@ class ModifierTest extends TestWithMockery
      */
     public function I_can_not_create_it_with_non_integer_addition()
     {
+        $modifiersTable = $this->createModifiersTable();
+        $this->addBaseParameterGetter(
+            $parameterName = ModifierMutableSpellParameterCode::EPICENTER_SHIFT,
+            $code = ModifierCode::getIt(ModifierCode::INVISIBILITY),
+            $modifiersTable,
+            $this->createExpectedParameter($parameterName, 123 /* whatever */)
+        );
         try {
-            new Modifier(
-                ModifierCode::getIt(ModifierCode::INVISIBILITY),
-                $this->createModifiersTable(),
-                [ModifierMutableSpellParameterCode::EPICENTER_SHIFT => 0.0],
-                []
-            );
+            new Modifier($code, $modifiersTable, [$parameterName => 0.0], []);
         } catch (\Exception $exception) {
             self::fail('No exception expected so far: ' . $exception->getMessage() . '; ' . $exception->getTraceAsString());
         }
@@ -376,14 +386,9 @@ class ModifierTest extends TestWithMockery
                 $parameterName = ModifierMutableSpellParameterCode::RADIUS,
                 $code = ModifierCode::getIt(ModifierCode::GATE),
                 $modifiersTable,
-                $this->createExpectedParameter($parameterName)
+                $this->createExpectedParameter($parameterName, 432 /* whatever */)
             );
-            new Modifier(
-                $code,
-                $modifiersTable,
-                [$parameterName => '5.000'],
-                []
-            );
+            new Modifier($code, $modifiersTable, [$parameterName => '5.000'], []);
         } catch (\Exception $exception) {
             self::fail('No exception expected so far: ' . $exception->getMessage() . '; ' . $exception->getTraceAsString());
         }
@@ -408,7 +413,7 @@ class ModifierTest extends TestWithMockery
                 $parameterName = ModifierMutableSpellParameterCode::ATTACK,
                 $modifierCode = ModifierCode::getIt(ModifierCode::INTERACTIVE_ILLUSION),
                 $modifiersTable,
-                $this->createExpectedParameter($parameterName)
+                $this->createExpectedParameter($parameterName, 9 /* whatever */)
             );
             new Modifier(
                 $modifierCode,

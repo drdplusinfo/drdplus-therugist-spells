@@ -5,7 +5,7 @@ use Granam\Integer\PositiveInteger;
 use Granam\Integer\Tools\ToInteger;
 use Granam\Tools\ValueDescriber;
 
-abstract class PositiveCastingParameter extends IntegerCastingParameter implements PositiveInteger
+abstract class PositiveCastingParameter extends CastingParameter implements PositiveInteger
 {
     /**
      * @param array $values

@@ -4,12 +4,12 @@ namespace DrdPlus\Theurgist\Spells\SpellParameters;
 use DrdPlus\Tables\Measurements\Distance\Distance;
 use DrdPlus\Tables\Measurements\Distance\DistanceBonus;
 use DrdPlus\Tables\Measurements\Distance\DistanceTable;
-use DrdPlus\Theurgist\Spells\SpellParameters\Partials\IntegerCastingParameter;
+use DrdPlus\Theurgist\Spells\SpellParameters\Partials\CastingParameter;
 
 /**
  * @method EpicenterShift getWithAddition($additionValue)
  */
-class EpicenterShift extends IntegerCastingParameter
+class EpicenterShift extends CastingParameter
 {
     /**
      * @param DistanceTable $distanceTable

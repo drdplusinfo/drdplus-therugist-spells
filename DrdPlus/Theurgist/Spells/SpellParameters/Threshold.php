@@ -1,12 +1,12 @@
 <?php
 namespace DrdPlus\Theurgist\Spells\SpellParameters;
 
-use DrdPlus\Theurgist\Spells\SpellParameters\Partials\IntegerCastingParameter;
+use DrdPlus\Theurgist\Spells\SpellParameters\Partials\CastingParameter;
 
 /**
  * @method Threshold getWithAddition($additionValue)
  */
-class Threshold extends IntegerCastingParameter
+class Threshold extends CastingParameter
 {
 
 }

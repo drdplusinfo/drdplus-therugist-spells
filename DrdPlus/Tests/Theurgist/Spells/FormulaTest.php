@@ -11,7 +11,7 @@ use DrdPlus\Theurgist\Spells\SpellParameters\CastingRounds;
 use DrdPlus\Theurgist\Spells\SpellParameters\DifficultyChange;
 use DrdPlus\Theurgist\Spells\SpellParameters\Evocation;
 use DrdPlus\Theurgist\Spells\SpellParameters\FormulaDifficulty;
-use DrdPlus\Theurgist\Spells\SpellParameters\Partials\IntegerCastingParameter;
+use DrdPlus\Theurgist\Spells\SpellParameters\Partials\CastingParameter;
 use DrdPlus\Theurgist\Spells\SpellParameters\Realm;
 use DrdPlus\Theurgist\Spells\SpellParameters\RealmsAffection;
 use DrdPlus\Theurgist\Spells\SpellParameters\SpellSpeed;
@@ -73,9 +73,9 @@ class FormulaTest extends TestWithMockery
 
     /**
      * @param string $parameterName
-     * @return IntegerCastingParameter|\Mockery\MockInterface
+     * @return CastingParameter|\Mockery\MockInterface
      */
-    private function createExpectedParameter(string $parameterName): IntegerCastingParameter
+    private function createExpectedParameter(string $parameterName): CastingParameter
     {
         $parameterClass = $this->getParameterClass($parameterName);
 
@@ -96,7 +96,7 @@ class FormulaTest extends TestWithMockery
         string $parameterName,
         FormulaCode $formulaCode,
         MockInterface $formulasTable,
-        IntegerCastingParameter $property = null
+        CastingParameter $property = null
     )
     {
         $getProperty = StringTools::assembleGetterForName($parameterName);
@@ -114,7 +114,7 @@ class FormulaTest extends TestWithMockery
     private function addWithAdditionGetter(
         int $addition,
         \Mockery\MockInterface $parameter,
-        IntegerCastingParameter $modifiedParameter
+        CastingParameter $modifiedParameter
     )
     {
         $parameter->shouldReceive('getWithAddition')
