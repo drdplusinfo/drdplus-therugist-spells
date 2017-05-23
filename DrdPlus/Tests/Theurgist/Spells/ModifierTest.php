@@ -277,7 +277,7 @@ class ModifierTest extends TestWithMockery
                 self::assertSame($difficultyChange, $modifier->getDifficultyChange());
             } catch (NoMatchingExpectationException $expectationException) {
                 self::fail(
-                    'Expected difficulty sum ' . $difficultyChangeValue
+                    'Expected difficulty sum ' . $difficultyChangeValue . ' for ' . $modifierValue
                     . ': ' . $expectationException->getMessage()
                 );
             }

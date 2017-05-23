@@ -8,6 +8,7 @@ use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ProfileCode;
 use DrdPlus\Theurgist\Codes\SpellTraitCode;
+use DrdPlus\Theurgist\Spells\SpellParameters\Noise;
 use DrdPlus\Theurgist\Spells\SpellParameters\RealmsAffection;
 use DrdPlus\Theurgist\Spells\SpellParameters\Attack;
 use DrdPlus\Theurgist\Spells\SpellParameters\CastingRounds;
@@ -46,6 +47,7 @@ class ModifiersTable extends AbstractFileTable
     const RADIUS = 'radius';
     const EPICENTER_SHIFT = 'epicenter_shift';
     const POWER = 'power';
+    const NOISE = 'noise';
     const ATTACK = 'attack';
     const GRAFTS = 'grafts';
     const SPELL_SPEED = 'spell_speed';
@@ -73,6 +75,7 @@ class ModifiersTable extends AbstractFileTable
             self::RADIUS => self::ARRAY,
             self::EPICENTER_SHIFT => self::ARRAY,
             self::POWER => self::ARRAY,
+            self::NOISE => self::ARRAY,
             self::ATTACK => self::ARRAY,
             self::GRAFTS => self::ARRAY,
             self::SPELL_SPEED => self::ARRAY,
@@ -193,6 +196,22 @@ class ModifiersTable extends AbstractFileTable
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new Power($powerValues);
+    }
+
+    /**
+     * @param ModifierCode $modifierCode
+     * @return Noise|null
+     */
+    public function getNoise(ModifierCode $modifierCode)
+    {
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        $noiseValues = $this->getValue($modifierCode, self::NOISE);
+        if (!$noiseValues) {
+            return null;
+        }
+
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new Noise($noiseValues);
     }
 
     /**

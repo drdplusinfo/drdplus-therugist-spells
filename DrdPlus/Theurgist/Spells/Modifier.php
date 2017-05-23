@@ -5,6 +5,7 @@ use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Codes\ModifierMutableSpellParameterCode;
 use DrdPlus\Theurgist\Spells\SpellParameters\Attack;
 use DrdPlus\Theurgist\Spells\SpellParameters\CastingRounds;
+use DrdPlus\Theurgist\Spells\SpellParameters\Noise;
 use DrdPlus\Theurgist\Spells\SpellParameters\NumberOfConditions;
 use DrdPlus\Theurgist\Spells\SpellParameters\DifficultyChange;
 use DrdPlus\Theurgist\Spells\SpellParameters\EpicenterShift;
@@ -149,6 +150,7 @@ class Modifier extends StrictObject
             $this->getNumberOfSituationsWithAddition(),
             $this->getNumberOfWaypointsWithAddition(),
             $this->getPowerWithAddition(),
+            $this->getNoiseWithAddition(),
             $this->getQualityWithAddition(),
             $this->getRadiusWithAddition(),
             $this->getResistanceWithAddition(),
@@ -275,6 +277,32 @@ class Modifier extends StrictObject
     public function getPowerAddition(): int
     {
         return $this->modifierSpellParameterChanges[ModifierMutableSpellParameterCode::POWER];
+    }
+
+    /**
+     * @return Noise|null
+     */
+    public function getBaseNoise()
+    {
+        return $this->modifiersTable->getNoise($this->modifierCode);
+    }
+
+    /**
+     * @return Noise|null
+     */
+    public function getNoiseWithAddition()
+    {
+        $baseNoise = $this->getBaseNoise();
+        if ($baseNoise === null) {
+            return null;
+        }
+
+        return $baseNoise->getWithAddition($this->getNoiseAddition());
+    }
+
+    public function getNoiseAddition(): int
+    {
+        return $this->modifierSpellParameterChanges[ModifierMutableSpellParameterCode::NOISE];
     }
 
     /**
