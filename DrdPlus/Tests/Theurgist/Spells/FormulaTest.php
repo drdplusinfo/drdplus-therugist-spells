@@ -1,16 +1,21 @@
 <?php
 namespace DrdPlus\Tests\Theurgist\Spells;
 
+use DrdPlus\Codes\DistanceUnitCode;
+use DrdPlus\Tables\Measurements\Distance\Distance;
+use DrdPlus\Tables\Measurements\Distance\DistanceBonus;
 use DrdPlus\Tables\Measurements\Distance\DistanceTable;
 use DrdPlus\Theurgist\Codes\AffectionPeriodCode;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\FormulaMutableSpellParameterCode;
+use DrdPlus\Theurgist\Codes\ModifierCode;
 use DrdPlus\Theurgist\Spells\SpellParameters\AdditionByDifficulty;
 use DrdPlus\Theurgist\Spells\SpellParameters\CastingRounds;
 use DrdPlus\Theurgist\Spells\SpellParameters\DifficultyChange;
 use DrdPlus\Theurgist\Spells\SpellParameters\Evocation;
 use DrdPlus\Theurgist\Spells\SpellParameters\FormulaDifficulty;
 use DrdPlus\Theurgist\Spells\SpellParameters\Partials\CastingParameter;
+use DrdPlus\Theurgist\Spells\SpellParameters\Radius;
 use DrdPlus\Theurgist\Spells\SpellParameters\Realm;
 use DrdPlus\Theurgist\Spells\SpellParameters\RealmsAffection;
 use DrdPlus\Theurgist\Spells\SpellParameters\SpellSpeed;
@@ -617,9 +622,95 @@ class FormulaTest extends TestWithMockery
         return $modifier;
     }
 
+    /**
+     * @test
+     */
     public function I_can_get_current_radius()
     {
-        // TODO
+        $formulasTable = $this->createFormulasTable();
+        $formula = new Formula(
+            FormulaCode::getIt(FormulaCode::PORTAL),
+            $formulasTable,
+            $distanceTable = $this->createDistanceTable(),
+            [],
+            [
+                $this->createModifierWithRadius(1, ModifierCode::getIt(ModifierCode::FILTER)),
+                [
+                    $this->createModifierWithRadius(2, ModifierCode::getIt(ModifierCode::MOVEMENT)),
+                    [
+                        $this->createModifierWithRadius(3, ModifierCode::getIt(ModifierCode::COLOR)),
+                        $this->createModifierWithRadius(4, ModifierCode::getIt(ModifierCode::INVISIBILITY)),
+                    ],
+                ],
+            ]
+        );
+        $formulasTable->shouldReceive('getRadius')
+            ->andReturn($radius = $this->createRadius(123));
+        $this->addWithAdditionGetter(0, $radius, $radiusWithAddition = $this->createRadius(456));
+        $this->addToDistance(
+            $distanceTable,
+            [1 => 5, 2 => 11, 3 => 23, 4 => 2]
+        );
+        $this->addToBonus($distanceTable, 5 + 11 + 23 + 2, 556677);
+        $currentRadius = $formula->getCurrentRadius();
+        self::assertInstanceOf(Radius::class, $currentRadius);
+        self::assertSame(456 + 556677, $currentRadius->getValue());
+    }
+
+    private function addToDistance(MockInterface $distanceTable, array $expectedBonusValuesToMeters)
+    {
+        $distanceTable->shouldReceive('toDistance')
+            ->andReturnUsing(function (DistanceBonus $distanceBonus) use ($expectedBonusValuesToMeters) {
+                self::assertTrue(array_key_exists($distanceBonus->getValue(), $expectedBonusValuesToMeters));
+                $distance = $this->mockery(Distance::class);
+                $distance->shouldReceive('getMeters')
+                    ->andReturn($expectedBonusValuesToMeters[$distanceBonus->getValue()]);
+
+                return $distance;
+            });
+    }
+
+    private function addToBonus(MockInterface $distanceTable, float $expectedMeters, int $distanceBonusValue)
+    {
+        $distanceTable->shouldReceive('toBonus')
+            ->andReturnUsing(function (Distance $distance) use ($expectedMeters, $distanceBonusValue) {
+                self::assertSame($expectedMeters, $distance->getValue());
+                self::assertSame(DistanceUnitCode::METER, $distance->getUnit());
+                $distanceBonus = $this->mockery(DistanceBonus::class);
+                $distanceBonus->shouldReceive('getValue')
+                    ->andReturn($distanceBonusValue);
+
+                return $distanceBonus;
+            });
+    }
+
+    /**
+     * @param int $radiusValue
+     * @param ModifierCode $modifierCode
+     * @return MockInterface|Modifier
+     */
+    private function createModifierWithRadius(int $radiusValue, ModifierCode $modifierCode)
+    {
+        $modifier = $this->mockery(Modifier::class);
+        $modifier->shouldReceive('getRadiusWithAddition')
+            ->andReturn($this->createRadius($radiusValue));
+        $modifier->shouldReceive('getModifierCode')
+            ->andReturn($modifierCode);
+
+        return $modifier;
+    }
+
+    /**
+     * @param int $value
+     * @return MockInterface|Radius
+     */
+    private function createRadius(int $value)
+    {
+        $radius = $this->mockery(Radius::class);
+        $radius->shouldReceive('getValue')
+            ->andReturn($value);
+
+        return $radius;
     }
 
     /**
