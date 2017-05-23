@@ -529,18 +529,18 @@ class FormulaTest extends TestWithMockery
     /**
      * @test
      */
-    public function I_ask_it_if_is_colorized()
+    public function I_get_its_color_modifier_if_any()
     {
         $formulaCode = FormulaCode::getIt(FormulaCode::PORTAL);
         $formulasTable = $this->createFormulasTable();
         $formula = new Formula($formulaCode, $formulasTable, $this->createDistanceTable(), [], [$modifier = $this->createModifier(0)]);
         $modifier->shouldReceive('getModifierCode')
             ->andReturn(ModifierCode::getIt(ModifierCode::THUNDER));
-        self::assertFalse($formula->isColorized());
+        self::assertNull($formula->getColor());
         $formula = new Formula($formulaCode, $formulasTable, $this->createDistanceTable(), [], [$modifier = $this->createModifier(0)]);
         $modifier->shouldReceive('getModifierCode')
             ->andReturn(ModifierCode::getIt(ModifierCode::COLOR));
-        self::assertTrue($formula->isColorized());
+        self::assertSame($modifier, $formula->getColor());
     }
 
     /**

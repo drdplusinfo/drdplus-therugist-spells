@@ -743,14 +743,74 @@ class Formula extends StrictObject
         return (string)$this->getFormulaCode()->getValue();
     }
 
-    public function isColorized(): bool
+    /**
+     * @return Modifier|null
+     */
+    public function getColor()
+    {
+        return $this->getModifier(ModifierCode::COLOR);
+    }
+
+    /**
+     * @param string $modifierName
+     * @return Modifier|null
+     */
+    private function getModifier(string $modifierName)
     {
         foreach ($this->modifiers as $modifier) {
-            if ($modifier->getModifierCode()->getValue() === ModifierCode::COLOR) {
-                return true;
+            if ($modifier->getModifierCode()->getValue() === $modifierName) {
+                return $modifier;
             }
         }
 
-        return false;
+        return null;
+    }
+
+    /**
+     * @return Modifier|null
+     */
+    public function getGate()
+    {
+        return $this->getModifier(ModifierCode::GATE);
+    }
+
+    /**
+     * @return Modifier|null
+     */
+    public function getExplosion()
+    {
+        return $this->getModifier(ModifierCode::EXPLOSION);
+    }
+
+    /**
+     * @return Modifier|null
+     */
+    public function getFilter()
+    {
+        return $this->getModifier(ModifierCode::FILTER);
+    }
+
+    /**
+     * @return Modifier|null
+     */
+    public function getInvisibility()
+    {
+        return $this->getModifier(ModifierCode::INVISIBILITY);
+    }
+
+    /**
+     * @return Modifier|null
+     */
+    public function getMovement()
+    {
+        return $this->getModifier(ModifierCode::MOVEMENT);
+    }
+
+    /**
+     * @return Modifier|null
+     */
+    public function getThunder()
+    {
+        return $this->getModifier(ModifierCode::THUNDER);
     }
 }
