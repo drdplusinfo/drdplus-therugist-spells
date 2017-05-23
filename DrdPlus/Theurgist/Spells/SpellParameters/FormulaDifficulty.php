@@ -116,7 +116,7 @@ class FormulaDifficulty extends StrictObject implements PositiveInteger
             return 0;
         }
         $additionalDifficulty = $currentDifficulty - $maximalDifficulty;
-        $steps = $additionalDifficulty / $this->getFormulaDifficultyAddition()->getDifficultyAdditionPerRealm();
+        $steps = $additionalDifficulty / $this->getFormulaDifficultyAddition()->getDifficultyAdditionPerStep();
         $realmsIncrement = $steps * $this->getFormulaDifficultyAddition()->getRealmsChangePerAdditionStep();
 
         return ceil($realmsIncrement); // even a tiny piece of a higher realm means the lower realm is not able to create that formula

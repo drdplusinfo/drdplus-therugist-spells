@@ -16,7 +16,7 @@ class FormulaDifficultyAddition extends StrictObject implements IntegerInterface
     /**
      * @var int
      */
-    private $difficultyAdditionPerRealm;
+    private $difficultyAdditionPerStep;
     /**
      * @var int
      */
@@ -34,10 +34,10 @@ class FormulaDifficultyAddition extends StrictObject implements IntegerInterface
         $parts = $this->parseParts($difficultyAdditionByRealmsNotation);
         if (count($parts) === 1 && array_keys($parts) === [0]) {
             $this->realmsChangePerAdditionStep = 1;
-            $this->difficultyAdditionPerRealm = $this->sanitizeAddition($parts[0]);
+            $this->difficultyAdditionPerStep = $this->sanitizeAddition($parts[0]);
         } else if (count($parts) === 2 && array_keys($parts) === [0, 1]) {
             $this->realmsChangePerAdditionStep = $this->sanitizeRealms($parts[0]);
-            $this->difficultyAdditionPerRealm = $this->sanitizeAddition($parts[1]);
+            $this->difficultyAdditionPerStep = $this->sanitizeAddition($parts[1]);
         } else {
             throw new Exceptions\InvalidFormatOfAdditionByRealmsNotation(
                 "Expected addition by realms in format 'number' or 'number=number', got "
@@ -102,7 +102,7 @@ class FormulaDifficultyAddition extends StrictObject implements IntegerInterface
     }
 
     /**
-     * How is realms increased on addition step, @see getDifficultyAdditionPerRealm.
+     * How is realms increased on addition step, @see getDifficultyAdditionPerStep.
      *
      * @return int
      */
@@ -116,9 +116,9 @@ class FormulaDifficultyAddition extends StrictObject implements IntegerInterface
      *
      * @return int
      */
-    public function getDifficultyAdditionPerRealm(): int
+    public function getDifficultyAdditionPerStep(): int
     {
-        return $this->difficultyAdditionPerRealm;
+        return $this->difficultyAdditionPerStep;
     }
 
     /**
@@ -184,7 +184,7 @@ class FormulaDifficultyAddition extends StrictObject implements IntegerInterface
      */
     public function __toString()
     {
-        return "{$this->getValue()} {{$this->getRealmsChangePerAdditionStep()}=>{$this->getDifficultyAdditionPerRealm()}}";
+        return "{$this->getValue()} {{$this->getRealmsChangePerAdditionStep()}=>{$this->getDifficultyAdditionPerStep()}}";
     }
 
     /**
@@ -192,6 +192,6 @@ class FormulaDifficultyAddition extends StrictObject implements IntegerInterface
      */
     public function getNotation(): string
     {
-        return "{$this->getRealmsChangePerAdditionStep()}={$this->getDifficultyAdditionPerRealm()}";
+        return "{$this->getRealmsChangePerAdditionStep()}={$this->getDifficultyAdditionPerStep()}";
     }
 }
