@@ -3,7 +3,6 @@ namespace DrdPlus\Theurgist\Spells;
 
 use DrdPlus\Tables\Partials\AbstractFileTable;
 use DrdPlus\Tables\Partials\Exceptions\RequiredRowNotFound;
-use DrdPlus\Tables\Tables;
 use DrdPlus\Theurgist\Codes\FormCode;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
@@ -30,19 +29,6 @@ use DrdPlus\Theurgist\Spells\SpellParameters\Threshold;
 class ModifiersTable extends AbstractFileTable
 {
     use ToFlatArrayTrait;
-
-    /**
-     * @var Tables
-     */
-    private $tables;
-
-    /**
-     * @param Tables $tables
-     */
-    public function __construct(Tables $tables)
-    {
-        $this->tables = $tables;
-    }
 
     /**
      * @return string
@@ -174,7 +160,7 @@ class ModifiersTable extends AbstractFileTable
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new Radius($radiusValues, $this->tables->getDistanceTable());
+        return new Radius($radiusValues);
     }
 
     /**
@@ -190,7 +176,7 @@ class ModifiersTable extends AbstractFileTable
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new EpicenterShift($shiftValues, $this->tables->getDistanceTable());
+        return new EpicenterShift($shiftValues);
     }
 
     /**
@@ -254,7 +240,7 @@ class ModifiersTable extends AbstractFileTable
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new SpellSpeed($speedValues, $this->tables->getSpeedTable());
+        return new SpellSpeed($speedValues);
     }
 
     /**

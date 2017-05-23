@@ -2,12 +2,8 @@
 namespace DrdPlus\Tests\Theurgist\Spells;
 
 use DrdPlus\Tables\Partials\AbstractTable;
-use DrdPlus\Tables\Table;
-use DrdPlus\Tables\Tables;
 use DrdPlus\Theurgist\Codes\AbstractTheurgistCode;
 use DrdPlus\Theurgist\Spells\SpellParameters\Attack;
-use DrdPlus\Theurgist\Spells\SpellTraitsTable;
-use DrdPlus\Theurgist\Spells\ModifiersTable;
 use Granam\String\StringTools;
 use Granam\Tests\Tools\TestWithMockery;
 
@@ -49,39 +45,13 @@ abstract class AbstractTheurgistTableTest extends TestWithMockery
         $getMandatoryParameter = StringTools::assembleGetterForName($mandatoryParameter);
         $parameterClass = $this->assembleParameterClassName($mandatoryParameter);
         $sutClass = self::getSutClass();
-        $sut = new $sutClass(Tables::getIt(), $this->createModifiersTableShell(), $this->createSpellTraitsTableShell());
-        $tableArgument = $this->findOutTableArgument($parameterClass);
+        $sut = new $sutClass();
         foreach ($codeClass::getPossibleValues() as $codeValue) {
             $expectedParameterValue = $this->getValueFromTable($sut, $codeValue, $mandatoryParameter);
-            if ($tableArgument) {
-                $parameterObject = $sut->$getMandatoryParameter($codeClass::getIt($codeValue), $tableArgument);
-                $expectedParameterObject = new $parameterClass($expectedParameterValue, $tableArgument);
-            } else {
-                $parameterObject = $sut->$getMandatoryParameter($codeClass::getIt($codeValue));
-                $expectedParameterObject = new $parameterClass($expectedParameterValue);
-            }
+            $parameterObject = $sut->$getMandatoryParameter($codeClass::getIt($codeValue));
+            $expectedParameterObject = new $parameterClass($expectedParameterValue);
             self::assertEquals($expectedParameterObject, $parameterObject);
         }
-    }
-
-    /**
-     * Just a placeholder - intentionally no methods are expected to be called
-     *
-     * @return \Mockery\MockInterface|ModifiersTable
-     */
-    protected function createModifiersTableShell()
-    {
-        return $this->mockery(ModifiersTable::class);
-    }
-
-    /**
-     * Just a placeholder - intentionally no methods are expected to be called
-     *
-     * @return \Mockery\MockInterface|SpellTraitsTable
-     */
-    protected function createSpellTraitsTableShell()
-    {
-        return $this->mockery(SpellTraitsTable::class);
     }
 
     /**
@@ -111,52 +81,14 @@ abstract class AbstractTheurgistTableTest extends TestWithMockery
         $getOptionalParameter = StringTools::assembleGetterForName($optionalParameter);
         $parameterClass = $this->assembleParameterClassName($optionalParameter);
         $sutClass = self::getSutClass();
-        $sut = new $sutClass(Tables::getIt(), $this->createModifiersTableShell(), $this->createSpellTraitsTableShell());
-        $tableArgument = $this->findOutTableArgument($parameterClass);
+        $sut = new $sutClass();
         foreach ($codeClass::getPossibleValues() as $codeValue) {
             $expectedParameterValue = $this->getValueFromTable($sut, $codeValue, $optionalParameter);
-            if ($tableArgument) {
-                $parameterObject = $sut->$getOptionalParameter(
-                    $codeClass::getIt($codeValue),
-                    $tableArgument
-                );
-                $expectedParameterObject = count($expectedParameterValue) !== 0
-                    ? new $parameterClass($expectedParameterValue, $tableArgument)
-                    : null;
-            } else {
-                $parameterObject = $sut->$getOptionalParameter($codeClass::getIt($codeValue));
-                $expectedParameterObject = count($expectedParameterValue) !== 0
-                    ? new $parameterClass($expectedParameterValue)
-                    : null;
-            }
+            $parameterObject = $sut->$getOptionalParameter($codeClass::getIt($codeValue));
+            $expectedParameterObject = count($expectedParameterValue) !== 0
+                ? new $parameterClass($expectedParameterValue)
+                : null;
             self::assertEquals($expectedParameterObject, $parameterObject);
         }
-    }
-
-    /**
-     * @param string $parameterClass
-     * @return bool|Table
-     */
-    private function findOutTableArgument(string $parameterClass)
-    {
-        $reflectionClass = new \ReflectionClass($parameterClass);
-        $constructorReflection = $reflectionClass->getMethod('__construct');
-        $parameters = $constructorReflection->getParameters();
-        if (count($parameters) === 1) {
-            return false;
-        }
-        $tableParameter = $parameters[1];
-        $tableParameterClassReflection = $tableParameter->getClass();
-        if (!$tableParameterClassReflection) {
-            return null;
-        }
-        $tableClass = $tableParameter->getClass()->getName();
-        self::assertTrue(is_a($tableClass, Table::class, true));
-
-        /** @var Table $table */
-        $table = new $tableClass;
-        $table->getIndexedValues(); // to load them to provide save result on comparisons of used and unused table
-
-        return $table;
     }
 }

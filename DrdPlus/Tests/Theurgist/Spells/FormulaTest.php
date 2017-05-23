@@ -1,9 +1,6 @@
 <?php
 namespace DrdPlus\Tests\Theurgist\Spells;
 
-use DrdPlus\Codes\DistanceUnitCode;
-use DrdPlus\Tables\Measurements\Distance\Distance;
-use DrdPlus\Tables\Measurements\Distance\DistanceBonus;
 use DrdPlus\Tables\Measurements\Distance\DistanceTable;
 use DrdPlus\Theurgist\Codes\AffectionPeriodCode;
 use DrdPlus\Theurgist\Codes\FormulaCode;
@@ -61,6 +58,7 @@ class FormulaTest extends TestWithMockery
                 $currentParameter = $formula->$getCurrentParameter();
                 self::assertInstanceOf($this->getParameterClass($mutableParameterName), $currentParameter);
                 self::assertSame(123, $currentParameter->getValue());
+                /** @noinspection DisconnectedForeachInstructionInspection */
                 self::assertSame($formulaValue, (string)$formulaCode);
             }
         }
@@ -592,43 +590,11 @@ class FormulaTest extends TestWithMockery
             ]
         );
         $formulasTable->shouldReceive('getRadius')
-            ->andReturn($radius = $this->createRadius(123));
+            ->andReturn($radius = $this->createRadius(123 /* whatever */));
         $this->addWithAdditionGetter(0, $radius, $radiusWithAddition = $this->createRadius(456));
-        $this->addToDistance(
-            $distanceTable,
-            [1 => 5, 2 => 11, 3 => 23, 4 => 2]
-        );
-        $this->addToBonus($distanceTable, 5 + 11 + 23 + 2, 556677);
         $currentRadius = $formula->getCurrentRadius();
         self::assertInstanceOf(Radius::class, $currentRadius);
-        self::assertSame(456 + 556677, $currentRadius->getValue());
-    }
-
-    private function addToDistance(MockInterface $distanceTable, array $expectedBonusValuesToMeters)
-    {
-        $distanceTable->shouldReceive('toDistance')
-            ->andReturnUsing(function (DistanceBonus $distanceBonus) use ($expectedBonusValuesToMeters) {
-                self::assertTrue(array_key_exists($distanceBonus->getValue(), $expectedBonusValuesToMeters));
-                $distance = $this->mockery(Distance::class);
-                $distance->shouldReceive('getMeters')
-                    ->andReturn($expectedBonusValuesToMeters[$distanceBonus->getValue()]);
-
-                return $distance;
-            });
-    }
-
-    private function addToBonus(MockInterface $distanceTable, float $expectedMeters, int $distanceBonusValue)
-    {
-        $distanceTable->shouldReceive('toBonus')
-            ->andReturnUsing(function (Distance $distance) use ($expectedMeters, $distanceBonusValue) {
-                self::assertSame($expectedMeters, $distance->getValue());
-                self::assertSame(DistanceUnitCode::METER, $distance->getUnit());
-                $distanceBonus = $this->mockery(DistanceBonus::class);
-                $distanceBonus->shouldReceive('getValue')
-                    ->andReturn($distanceBonusValue);
-
-                return $distanceBonus;
-            });
+        self::assertSame(456 + 1 + 2 + 3 + 4, $currentRadius->getValue());
     }
 
     /**

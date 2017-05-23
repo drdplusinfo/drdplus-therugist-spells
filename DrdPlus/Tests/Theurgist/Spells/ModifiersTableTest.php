@@ -1,7 +1,6 @@
 <?php
 namespace DrdPlus\Tests\Theurgist\Spells;
 
-use DrdPlus\Tables\Tables;
 use DrdPlus\Theurgist\Codes\FormCode;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
@@ -61,7 +60,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_get_forms()
     {
-        $modifiersTable = new ModifiersTable(Tables::getIt());
+        $modifiersTable = new ModifiersTable();
         foreach (ModifierCode::getPossibleValues() as $modifierValue) {
             $forms = $modifiersTable->getForms(ModifierCode::getIt($modifierValue));
             $formValues = [];
@@ -114,7 +113,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_get_spell_trait_codes()
     {
-        $modifiersTable = new ModifiersTable(Tables::getIt());
+        $modifiersTable = new ModifiersTable();
         foreach (ModifierCode::getPossibleValues() as $modifierValue) {
             $spellTraitCodes = $modifiersTable->getSpellTraitCodes(ModifierCode::getIt($modifierValue));
             /** @var array|string[] $expectedTraitValues */
@@ -175,7 +174,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_get_formulas_for_modifier()
     {
-        $modifiersTable = new ModifiersTable(Tables::getIt());
+        $modifiersTable = new ModifiersTable();
         foreach (ModifierCode::getPossibleValues() as $modifierValue) {
             $formulaCodes = $modifiersTable->getFormulaCodes(ModifierCode::getIt($modifierValue));
             self::assertTrue(is_array($formulaCodes));
@@ -215,11 +214,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
     private function getExpectedFormulaValues(string $modifierValue): array
     {
         $expectedFormulaValues = [];
-        $formulasTable = new FormulasTable(
-            $this->createTablesShell(),
-            $this->createModifiersTableShell(),
-            $this->createSpellTraitsTableShell()
-        );
+        $formulasTable = new FormulasTable();
         foreach (FormulaCode::getPossibleValues() as $formulaValue) {
             $modifierCodes = $formulasTable->getModifierCodes(FormulaCode::getIt($formulaValue));
             foreach ($modifierCodes as $modifierCode) {
@@ -234,23 +229,13 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
     }
 
     /**
-     * Just a placeholder - intentionally no methods are expected to be called
-     *
-     * @return \Mockery\MockInterface|Tables
-     */
-    private function createTablesShell()
-    {
-        return $this->mockery(Tables::class);
-    }
-
-    /**
      * @test
      * @expectedException \DrdPlus\Theurgist\Spells\Exceptions\UnknownModifierToGetFormulasFor
      * @expectedExceptionMessageRegExp ~black and white~
      */
     public function I_can_not_get_formulas_to_unknown_modifier()
     {
-        (new ModifiersTable(Tables::getIt()))->getFormulaCodes($this->createModifierCode('black and white'));
+        (new ModifiersTable())->getFormulaCodes($this->createModifierCode('black and white'));
     }
 
     /**
@@ -273,7 +258,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_get_profiles_to_modifier()
     {
-        $modifiersTable = new ModifiersTable(Tables::getIt());
+        $modifiersTable = new ModifiersTable();
         foreach (ModifierCode::getPossibleValues() as $modifierValue) {
             $profileCodes = $modifiersTable->getProfiles(ModifierCode::getIt($modifierValue));
             self::assertTrue(is_array($profileCodes));
@@ -366,7 +351,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_not_get_profiles_to_unknown_modifiers()
     {
-        (new ModifiersTable(Tables::getIt()))->getProfiles($this->createModifierCode('magnified'));
+        (new ModifiersTable())->getProfiles($this->createModifierCode('magnified'));
     }
 
     /**
@@ -374,7 +359,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_get_parent_modifiers()
     {
-        $modifiersTable = new ModifiersTable(Tables::getIt());
+        $modifiersTable = new ModifiersTable();
         $fromParentMatchingProfiles = [];
         foreach (ModifierCode::getPossibleValues() as $modifierValue) {
             $profileValues = $this->getExpectedProfileValues($modifierValue);
@@ -430,7 +415,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_get_child_modifiers()
     {
-        $modifiersTable = new ModifiersTable(Tables::getIt());
+        $modifiersTable = new ModifiersTable();
         $fromChildrenMatchingProfiles = [];
         foreach (ModifierCode::getPossibleValues() as $modifierValue) {
             $profileValues = $this->getExpectedProfileValues($modifierValue);
@@ -488,7 +473,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_not_get_parent_modifiers_for_unknown_modifier()
     {
-        $modifiersTable = new ModifiersTable(Tables::getIt());
+        $modifiersTable = new ModifiersTable();
         $modifiersTable->getParentModifierCodes($this->createModifierCode('dancing'));
     }
 
@@ -499,7 +484,7 @@ class ModifiersTableTest extends AbstractTheurgistTableTest
      */
     public function I_can_not_get_child_modifiers_for_unknown_modifier()
     {
-        $modifiersTable = new ModifiersTable(Tables::getIt());
+        $modifiersTable = new ModifiersTable();
         $modifiersTable->getChildModifiers($this->createModifierCode('lazy'));
     }
 

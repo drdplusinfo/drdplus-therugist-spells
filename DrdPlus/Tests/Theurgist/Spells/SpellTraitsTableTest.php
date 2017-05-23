@@ -197,11 +197,7 @@ class SpellTraitsTableTest extends AbstractTheurgistTableTest
     private function getFormulaValuesFromFormulasTable(string $spellTraitValue): array
     {
         $matchingFormulaValues = [];
-        $formulasTable = new FormulasTable(
-            Tables::getIt(),
-            new ModifiersTable(Tables::getIt()),
-            $this->createSpellTraitsTableShell()
-        );
+        $formulasTable = new FormulasTable();
         foreach (FormulaCode::getPossibleValues() as $formulaValue) {
             $spellTraitCodes = $formulasTable->getSpellTraitCodes(FormulaCode::getIt($formulaValue));
             foreach ($spellTraitCodes as $spellTrait) {

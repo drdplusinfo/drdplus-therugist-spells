@@ -3,7 +3,6 @@ namespace DrdPlus\Theurgist\Spells;
 
 use DrdPlus\Tables\Partials\AbstractFileTable;
 use DrdPlus\Tables\Partials\Exceptions\RequiredRowNotFound;
-use DrdPlus\Tables\Tables;
 use DrdPlus\Theurgist\Codes\FormCode;
 use DrdPlus\Theurgist\Codes\FormulaCode;
 use DrdPlus\Theurgist\Codes\ModifierCode;
@@ -26,19 +25,6 @@ use DrdPlus\Theurgist\Spells\SpellParameters\SpellSpeed;
 
 class FormulasTable extends AbstractFileTable
 {
-    /**
-     * @var Tables
-     */
-    private $tables;
-
-    /**
-     * @param Tables $tables
-     */
-    public function __construct(Tables $tables)
-    {
-        $this->tables = $tables;
-    }
-
     protected function getDataFileName(): string
     {
         return __DIR__ . '/data/formulas.csv';
@@ -123,7 +109,7 @@ class FormulasTable extends AbstractFileTable
     public function getEvocation(FormulaCode $formulaCode): Evocation
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new Evocation($this->getValue($formulaCode, self::EVOCATION), $this->tables->getTimeTable());
+        return new Evocation($this->getValue($formulaCode, self::EVOCATION));
     }
 
     /**
@@ -163,7 +149,7 @@ class FormulasTable extends AbstractFileTable
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new Radius($radiusValues, $this->tables->getDistanceTable());
+        return new Radius($radiusValues);
     }
 
     /**
@@ -173,7 +159,7 @@ class FormulasTable extends AbstractFileTable
     public function getDuration(FormulaCode $formulaCode): Duration
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new Duration($this->getValue($formulaCode, self::DURATION), $this->tables->getTimeTable());
+        return new Duration($this->getValue($formulaCode, self::DURATION));
     }
 
     /**
@@ -269,7 +255,7 @@ class FormulasTable extends AbstractFileTable
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new SpellSpeed($speedValues, $this->tables->getSpeedTable());
+        return new SpellSpeed($speedValues);
     }
 
     /**
@@ -285,7 +271,7 @@ class FormulasTable extends AbstractFileTable
         }
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new EpicenterShift($epicenterShift, $this->tables->getDistanceTable());
+        return new EpicenterShift($epicenterShift);
     }
 
     /**

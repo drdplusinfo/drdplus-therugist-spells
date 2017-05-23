@@ -362,20 +362,23 @@ class Formula extends StrictObject
             }
 
             /** @noinspection ExceptionsAnnotatingAndHandlingInspection epicenter can be always shifted, even if formula itself is not */
-            return new EpicenterShift([$epicenterShiftByModifiers, 0 /* no added difficulty*/]);
+            return new EpicenterShift(
+                [$epicenterShiftByModifiers['bonus'], 0 /* no added difficulty*/],
+                new Distance($epicenterShiftByModifiers['meters'], DistanceUnitCode::METER, $this->distanceTable)
+            );
         }
         if ($epicenterShiftByModifiers === false) {
             return $epicenterShiftWithAddition;
         }
         $meters = $epicenterShiftWithAddition->getDistance($this->distanceTable)->getMeters();
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        $meters += (new EpicenterShift([$epicenterShiftByModifiers, 0]))->getDistance($this->distanceTable)->getMeters();
+        $meters += $epicenterShiftByModifiers['meters'];
 
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return new EpicenterShift([
-            (new Distance($meters, DistanceUnitCode::METER, $this->distanceTable))->getBonus(),
-            0 /* no added difficulty */
-        ]);
+        $distance = new Distance($meters, DistanceUnitCode::METER, $this->distanceTable);
+
+        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
+        return new EpicenterShift([$distance->getBonus(), 0 /* no added difficulty */], $distance);
     }
 
     /**
@@ -462,7 +465,7 @@ class Formula extends StrictObject
 
     /**
      * @param string $parameterName
-     * @return bool|int
+     * @return bool|int|array|int[]
      */
     private function getParameterBonusFromModifiers(string $parameterName)
     {
@@ -490,7 +493,7 @@ class Formula extends StrictObject
         }
 
         // transpositions are chained in sequence and their values (distances) have to be summed, not bonuses
-        if (ModifierMutableSpellParameterCode::EPICENTER_SHIFT) {
+        if ($parameterName === ModifierMutableSpellParameterCode::EPICENTER_SHIFT) {
             $meters = 0;
             foreach ($bonusParts as $bonusPart) {
                 /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
@@ -498,7 +501,10 @@ class Formula extends StrictObject
             }
 
             /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-            return (new Distance($meters, DistanceUnitCode::METER, $this->distanceTable))->getBonus()->getValue();
+            return [
+                'bonus' => (new Distance($meters, DistanceUnitCode::METER, $this->distanceTable))->getBonus()->getValue(),
+                'meters' => $meters,
+            ];
         }
 
         return (int)array_sum($bonusParts);
