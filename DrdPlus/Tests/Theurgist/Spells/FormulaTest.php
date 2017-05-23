@@ -57,10 +57,6 @@ class FormulaTest extends TestWithMockery
                 $getParameterWithAddition = StringTools::assembleGetterForName($mutableParameterName . '_with_addition');
                 $this->addWithAdditionGetter(0, $baseParameter, $baseParameter);
                 self::assertSame($baseParameter, $formula->$getParameterWithAddition());
-
-                /** like @see Formula::getRadiusAddition */
-                $getParameterAddition = StringTools::assembleGetterForName($mutableParameterName) . 'Addition';
-                self::assertSame(0, $formula->$getParameterAddition());
             }
         }
     }
@@ -144,10 +140,6 @@ class FormulaTest extends TestWithMockery
                 /** like @see Formula::getCurrentRadius() */
                 $getParameterWithAddition = StringTools::assembleGetterForName($mutableParameterName . '_with_addition');
                 self::assertNull($formula->$getParameterWithAddition());
-
-                /** like @see Formula::getRadiusAddition */
-                $getParameterAddition = StringTools::assembleGetterForName($mutableParameterName) . 'Addition';
-                self::assertSame(0, $formula->$getParameterAddition());
             }
         }
     }
@@ -198,10 +190,6 @@ class FormulaTest extends TestWithMockery
                 } catch (NoMatchingExpectationException $expectationException) {
                     self::fail("Parameter {$mutableParameterName} uses wrong change: " . $expectationException->getMessage());
                 }
-
-                /** like @see Formula::getRadiusAddition */
-                $getParameterAddition = StringTools::assembleGetterForName($mutableParameterName) . 'Addition';
-                self::assertSame($change, $formula->$getParameterAddition());
             }
         }
     }

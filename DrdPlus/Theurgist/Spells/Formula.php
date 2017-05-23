@@ -323,12 +323,7 @@ class Formula extends StrictObject
             return null;
         }
 
-        return $baseRadius->getWithAddition($this->getRadiusAddition());
-    }
-
-    public function getRadiusAddition(): int
-    {
-        return $this->formulaSpellParameterChanges[FormulaMutableSpellParameterCode::RADIUS];
+        return $baseRadius->getWithAddition($this->formulaSpellParameterChanges[FormulaMutableSpellParameterCode::RADIUS]);
     }
 
     /**
@@ -361,12 +356,7 @@ class Formula extends StrictObject
             return null;
         }
 
-        return $baseEpicenterShift->getWithAddition($this->getEpicenterShiftAddition());
-    }
-
-    public function getEpicenterShiftAddition(): int
-    {
-        return $this->formulaSpellParameterChanges[FormulaMutableSpellParameterCode::EPICENTER_SHIFT];
+        return $baseEpicenterShift->getWithAddition($this->formulaSpellParameterChanges[FormulaMutableSpellParameterCode::EPICENTER_SHIFT]);
     }
 
     /**
@@ -410,12 +400,7 @@ class Formula extends StrictObject
             return null;
         }
 
-        return $basePower->getWithAddition($this->getPowerAddition());
-    }
-
-    public function getPowerAddition(): int
-    {
-        return $this->formulaSpellParameterChanges[FormulaMutableSpellParameterCode::POWER];
+        return $basePower->getWithAddition($this->formulaSpellParameterChanges[FormulaMutableSpellParameterCode::POWER]);
     }
 
     /**
@@ -449,12 +434,7 @@ class Formula extends StrictObject
             return null;
         }
 
-        return $baseAttack->getWithAddition($this->getAttackAddition());
-    }
-
-    public function getAttackAddition(): int
-    {
-        return $this->formulaSpellParameterChanges[FormulaMutableSpellParameterCode::ATTACK];
+        return $baseAttack->getWithAddition($this->formulaSpellParameterChanges[FormulaMutableSpellParameterCode::ATTACK]);
     }
 
     /**
@@ -529,12 +509,7 @@ class Formula extends StrictObject
             return null;
         }
 
-        return $baseSpellSpeed->getWithAddition($this->getSpellSpeedAddition());
-    }
-
-    public function getSpellSpeedAddition(): int
-    {
-        return $this->formulaSpellParameterChanges[FormulaMutableSpellParameterCode::SPELL_SPEED];
+        return $baseSpellSpeed->getWithAddition($this->formulaSpellParameterChanges[FormulaMutableSpellParameterCode::SPELL_SPEED]);
     }
 
     /**
@@ -570,12 +545,7 @@ class Formula extends StrictObject
             return null;
         }
 
-        return $baseDetailLevel->getWithAddition($this->getDetailLevelAddition());
-    }
-
-    public function getDetailLevelAddition(): int
-    {
-        return $this->formulaSpellParameterChanges[FormulaMutableSpellParameterCode::DETAIL_LEVEL];
+        return $baseDetailLevel->getWithAddition($this->formulaSpellParameterChanges[FormulaMutableSpellParameterCode::DETAIL_LEVEL]);
     }
 
     /**
@@ -596,12 +566,7 @@ class Formula extends StrictObject
             return null;
         }
 
-        return $baseBrightness->getWithAddition($this->getBrightnessAddition());
-    }
-
-    public function getBrightnessAddition(): int
-    {
-        return $this->formulaSpellParameterChanges[FormulaMutableSpellParameterCode::BRIGHTNESS];
+        return $baseBrightness->getWithAddition($this->formulaSpellParameterChanges[FormulaMutableSpellParameterCode::BRIGHTNESS]);
     }
 
     /**
@@ -619,12 +584,7 @@ class Formula extends StrictObject
     {
         $baseDuration = $this->formulasTable->getDuration($this->formulaCode);
 
-        return $baseDuration->getWithAddition($this->getDurationAddition());
-    }
-
-    public function getDurationAddition(): int
-    {
-        return $this->formulaSpellParameterChanges[FormulaMutableSpellParameterCode::DURATION];
+        return $baseDuration->getWithAddition($this->formulaSpellParameterChanges[FormulaMutableSpellParameterCode::DURATION]);
     }
 
     public function getCurrentDuration(): Duration
@@ -642,12 +602,7 @@ class Formula extends StrictObject
             return null;
         }
 
-        return $baseSizeChange->getWithAddition($this->getSizeChangeAddition());
-    }
-
-    public function getSizeChangeAddition(): int
-    {
-        return $this->formulaSpellParameterChanges[FormulaMutableSpellParameterCode::SIZE_CHANGE];
+        return $baseSizeChange->getWithAddition($this->formulaSpellParameterChanges[FormulaMutableSpellParameterCode::SIZE_CHANGE]);
     }
 
     /**
