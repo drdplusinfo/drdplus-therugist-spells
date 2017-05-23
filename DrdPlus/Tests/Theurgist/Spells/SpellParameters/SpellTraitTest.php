@@ -138,4 +138,19 @@ class SpellTraitTest extends TestWithMockery
         $additionByDifficulty->shouldReceive('getCurrentDifficultyIncrement')
             ->andReturn($currentDifficultyIncrement);
     }
+
+    /**
+     * @test
+     * @expectedException \DrdPlus\Theurgist\Spells\Exceptions\CanNotChangeNotExistingTrap
+     * @expectedExceptionMessageRegExp ~345~
+     */
+    public function I_can_not_create_spell_trait_without_trap_with_trap_change()
+    {
+        $spellTraitCode = SpellTraitCode::getIt(SpellTraitCode::INVISIBLE);
+        $spellTraitsTable = $this->createSpellTraitsTable(
+            $spellTraitCode,
+            null // no trap
+        );
+        new SpellTrait($spellTraitCode, $spellTraitsTable, 345);
+    }
 }

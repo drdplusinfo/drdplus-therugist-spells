@@ -53,12 +53,23 @@ class FormulaTest extends TestWithMockery
                 $baseParameter = $this->createExpectedParameter($mutableParameterName);
                 $this->addBaseParameterGetter($mutableParameterName, $formulaCode, $formulasTable, $baseParameter);
 
-                /** like @see Formula::getCurrentRadius() */
-                $getParameterWithAddition = StringTools::assembleGetterForName($mutableParameterName . '_with_addition');
                 $this->addWithAdditionGetter(0, $baseParameter, $baseParameter);
-                self::assertSame($baseParameter, $formula->$getParameterWithAddition());
+                $this->addValueGetter($baseParameter, 123);
+                /** like @see Formula::getCurrentRadius() */
+                $getCurrentParameter = StringTools::assembleGetterForName('current' . $mutableParameterName);
+                /** @var CastingParameter $currentParameter */
+                $currentParameter = $formula->$getCurrentParameter();
+                self::assertInstanceOf($this->getParameterClass($mutableParameterName), $currentParameter);
+                self::assertSame(123, $currentParameter->getValue());
+                self::assertSame($formulaValue, (string)$formulaCode);
             }
         }
+    }
+
+    private function addValueGetter(MockInterface $object, $value)
+    {
+        $object->shouldReceive('getValue')
+            ->andReturn($value);
     }
 
     /**
@@ -138,8 +149,8 @@ class FormulaTest extends TestWithMockery
                 $this->addBaseParameterGetter($mutableParameterName, $formulaCode, $formulasTable, null);
 
                 /** like @see Formula::getCurrentRadius() */
-                $getParameterWithAddition = StringTools::assembleGetterForName($mutableParameterName . '_with_addition');
-                self::assertNull($formula->$getParameterWithAddition());
+                $getCurrentParameter = StringTools::assembleGetterForName('current' . $mutableParameterName);
+                self::assertNull($formula->$getCurrentParameter());
             }
         }
     }
@@ -178,18 +189,18 @@ class FormulaTest extends TestWithMockery
             foreach (FormulaMutableSpellParameterCode::getPossibleValues() as $mutableParameterName) {
                 $baseParameter = $baseParameters[$mutableParameterName];
                 $change = $parameterChanges[$mutableParameterName];
-                /** like @see Formula::getCurrentRadius() */
-                $getParameterWithAddition = StringTools::assembleGetterForName($mutableParameterName . '_with_addition');
                 $this->addWithAdditionGetter(
                     $change,
                     $baseParameter,
                     $changedParameter = $this->createExpectedParameter($mutableParameterName)
                 );
-                try {
-                    self::assertSame($changedParameter, $formula->$getParameterWithAddition());
-                } catch (NoMatchingExpectationException $expectationException) {
-                    self::fail("Parameter {$mutableParameterName} uses wrong change: " . $expectationException->getMessage());
-                }
+                $this->addValueGetter($changedParameter, 123);
+                /** like @see Formula::getCurrentRadius() */
+                $getCurrentParameter = StringTools::assembleGetterForName('current' . $mutableParameterName);
+                /** @var CastingParameter $currentParameter */
+                $currentParameter = $formula->$getCurrentParameter();
+                self::assertInstanceOf($this->getParameterClass($mutableParameterName), $currentParameter);
+                self::assertSame(123, $currentParameter->getValue());
             }
         }
     }
@@ -375,7 +386,7 @@ class FormulaTest extends TestWithMockery
     /**
      * @test
      */
-    public function I_can_get_evocation()
+    public function I_can_get_current_evocation()
     {
         $formulasTable = $this->createFormulasTable();
         $formula = new Formula($formulaCode = FormulaCode::getIt(FormulaCode::DISCHARGE), $formulasTable, $this->createDistanceTable());
