@@ -1,7 +1,7 @@
 <?php
 namespace DrdPlus\Theurgist\Spells\SpellParameters;
 
-use DrdPlus\Codes\TimeUnitCode;
+use DrdPlus\Codes\Units\TimeUnitCode;
 use DrdPlus\Tables\Measurements\Time\Time;
 use DrdPlus\Tables\Measurements\Time\TimeTable;
 use DrdPlus\Theurgist\Spells\SpellParameters\Partials\PositiveCastingParameter;

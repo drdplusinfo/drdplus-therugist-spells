@@ -140,7 +140,7 @@ class FormulasTable extends AbstractFileTable
      * @param FormulaCode $formulaCode
      * @return Radius|null
      */
-    public function getRadius(FormulaCode $formulaCode)
+    public function getRadius(FormulaCode $formulaCode):? Radius
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         $radiusValues = $this->getValue($formulaCode, self::RADIUS);
@@ -166,7 +166,7 @@ class FormulasTable extends AbstractFileTable
      * @param FormulaCode $formulaCode
      * @return Power|null
      */
-    public function getPower(FormulaCode $formulaCode)
+    public function getPower(FormulaCode $formulaCode):? Power
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         $powerValues = $this->getValue($formulaCode, self::POWER);
@@ -182,7 +182,7 @@ class FormulasTable extends AbstractFileTable
      * @param FormulaCode $formulaCode
      * @return Attack|null
      */
-    public function getAttack(FormulaCode $formulaCode)
+    public function getAttack(FormulaCode $formulaCode):? Attack
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         $attackValues = $this->getValue($formulaCode, self::ATTACK);
@@ -198,7 +198,7 @@ class FormulasTable extends AbstractFileTable
      * @param FormulaCode $formulaCode
      * @return SizeChange|null
      */
-    public function getSizeChange(FormulaCode $formulaCode)
+    public function getSizeChange(FormulaCode $formulaCode):? SizeChange
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         $sizeChangeValues = $this->getValue($formulaCode, self::SIZE_CHANGE);
@@ -214,7 +214,7 @@ class FormulasTable extends AbstractFileTable
      * @param FormulaCode $formulaCode
      * @return DetailLevel|null
      */
-    public function getDetailLevel(FormulaCode $formulaCode)
+    public function getDetailLevel(FormulaCode $formulaCode):? DetailLevel
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         $detailLevelValues = $this->getValue($formulaCode, self::DETAIL_LEVEL);
@@ -230,7 +230,7 @@ class FormulasTable extends AbstractFileTable
      * @param FormulaCode $formulaCode
      * @return Brightness|null
      */
-    public function getBrightness(FormulaCode $formulaCode)
+    public function getBrightness(FormulaCode $formulaCode):? Brightness
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         $brightnessValues = $this->getValue($formulaCode, self::BRIGHTNESS);
@@ -246,7 +246,7 @@ class FormulasTable extends AbstractFileTable
      * @param FormulaCode $formulaCode
      * @return SpellSpeed|null
      */
-    public function getSpellSpeed(FormulaCode $formulaCode)
+    public function getSpellSpeed(FormulaCode $formulaCode):? SpellSpeed
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         $speedValues = $this->getValue($formulaCode, self::SPELL_SPEED);
@@ -262,7 +262,7 @@ class FormulasTable extends AbstractFileTable
      * @param FormulaCode $formulaCode
      * @return EpicenterShift|null
      */
-    public function getEpicenterShift(FormulaCode $formulaCode)
+    public function getEpicenterShift(FormulaCode $formulaCode):? EpicenterShift
     {
         /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         $epicenterShift = $this->getValue($formulaCode, self::EPICENTER_SHIFT);

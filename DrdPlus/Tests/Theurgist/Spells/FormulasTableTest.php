@@ -1,7 +1,7 @@
 <?php
 namespace DrdPlus\Tests\Theurgist\Spells;
 
-use DrdPlus\Codes\TimeUnitCode;
+use DrdPlus\Codes\Units\TimeUnitCode;
 use DrdPlus\Tables\Measurements\Time\Time;
 use DrdPlus\Tables\Tables;
 use DrdPlus\Theurgist\Codes\FormCode;
@@ -21,7 +21,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
      */
     private $modifiersTable;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->modifiersTable = new ModifiersTable(Tables::getIt());
     }
@@ -29,7 +29,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
     /**
      * @test
      */
-    public function I_can_get_every_mandatory_parameter()
+    public function I_can_get_every_mandatory_parameter(): void
     {
         /**
          * @see FormulasTable::getRealm()
@@ -47,7 +47,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
     /**
      * @test
      */
-    public function I_can_get_every_optional_parameter()
+    public function I_can_get_every_optional_parameter(): void
     {
         /**
          * @see FormulasTable::getRadius()
@@ -70,7 +70,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
     /**
      * @test
      */
-    public function I_can_get_casting()
+    public function I_can_get_casting(): void
     {
         $formulasTable = new FormulasTable();
         foreach (FormulaCode::getPossibleValues() as $formulaValue) {
@@ -86,7 +86,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
     /**
      * @test
      */
-    public function I_can_get_forms()
+    public function I_can_get_forms(): void
     {
         $formulasTable = new FormulasTable();
         foreach (FormulaCode::getPossibleValues() as $formulaValue) {
@@ -130,7 +130,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
     /**
      * @test
      */
-    public function I_can_get_spell_trait_codes()
+    public function I_can_get_spell_trait_codes(): void
     {
         $formulasTable = new FormulasTable();
         foreach (FormulaCode::getPossibleValues() as $formulaValue) {
@@ -182,7 +182,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
     /**
      * @test
      */
-    public function I_can_get_modifiers_for_formula()
+    public function I_can_get_modifiers_for_formula(): void
     {
         $formulasTable = new FormulasTable();
         foreach (FormulaCode::getPossibleValues() as $formulaValue) {
@@ -288,7 +288,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
      * @expectedException \DrdPlus\Theurgist\Spells\Exceptions\UnknownFormulaToGetModifiersFor
      * @expectedExceptionMessageRegExp ~Abraka dabra~
      */
-    public function I_can_not_get_modifiers_to_unknown_formula()
+    public function I_can_not_get_modifiers_to_unknown_formula(): void
     {
         (new FormulasTable())
             ->getModifierCodes($this->createFormulaCode('Abraka dabra'));
@@ -298,7 +298,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
      * @param string $value
      * @return \Mockery\MockInterface|FormulaCode
      */
-    private function createFormulaCode(string $value)
+    private function createFormulaCode(string $value): FormulaCode
     {
         $formulaCode = $this->mockery(FormulaCode::class);
         $formulaCode->shouldReceive('getValue')
@@ -312,7 +312,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
     /**
      * @test
      */
-    public function I_can_get_profiles_for_formula()
+    public function I_can_get_profiles_for_formula(): void
     {
         $formulasTable = new FormulasTable();
         foreach (FormulaCode::getPossibleValues() as $formulaValue) {
@@ -410,7 +410,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
      * @expectedException \DrdPlus\Theurgist\Spells\Exceptions\UnknownFormulaToGetProfilesFor
      * @expectedExceptionMessageRegExp ~Charge!~
      */
-    public function I_can_not_get_profiles_to_unknown_formula()
+    public function I_can_not_get_profiles_to_unknown_formula(): void
     {
         (new FormulasTable())->getProfiles($this->createFormulaCode('Charge!'));
     }

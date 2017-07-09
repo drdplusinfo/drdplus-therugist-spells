@@ -196,7 +196,7 @@ class Modifier extends StrictObject
     /**
      * @return RealmsAffection|null
      */
-    public function getRealmsAffection()
+    public function getRealmsAffection():? RealmsAffection
     {
         return $this->modifiersTable->getRealmsAffection($this->getModifierCode());
     }
@@ -204,7 +204,7 @@ class Modifier extends StrictObject
     /**
      * @return Radius|null
      */
-    public function getBaseRadius()
+    public function getBaseRadius():? Radius
     {
         return $this->modifiersTable->getRadius($this->modifierCode);
     }
@@ -212,7 +212,7 @@ class Modifier extends StrictObject
     /**
      * @return Radius|null
      */
-    public function getRadiusWithAddition()
+    public function getRadiusWithAddition():? Radius
     {
         $baseRadius = $this->getBaseRadius();
         if ($baseRadius === null) {
@@ -230,7 +230,7 @@ class Modifier extends StrictObject
     /**
      * @return EpicenterShift|null
      */
-    public function getBaseEpicenterShift()
+    public function getBaseEpicenterShift():? EpicenterShift
     {
         return $this->modifiersTable->getEpicenterShift($this->modifierCode);
     }
@@ -238,7 +238,7 @@ class Modifier extends StrictObject
     /**
      * @return EpicenterShift|null
      */
-    public function getEpicenterShiftWithAddition()
+    public function getEpicenterShiftWithAddition():? EpicenterShift
     {
         $baseEpicenterShift = $this->getBaseEpicenterShift();
         if ($baseEpicenterShift === null) {
@@ -256,7 +256,7 @@ class Modifier extends StrictObject
     /**
      * @return Power|null
      */
-    public function getBasePower()
+    public function getBasePower():? Power
     {
         return $this->modifiersTable->getPower($this->modifierCode);
     }
@@ -264,7 +264,7 @@ class Modifier extends StrictObject
     /**
      * @return Power|null
      */
-    public function getPowerWithAddition()
+    public function getPowerWithAddition():? Power
     {
         $basePower = $this->getBasePower();
         if ($basePower === null) {
@@ -282,7 +282,7 @@ class Modifier extends StrictObject
     /**
      * @return Noise|null
      */
-    public function getBaseNoise()
+    public function getBaseNoise():? Noise
     {
         return $this->modifiersTable->getNoise($this->modifierCode);
     }
@@ -290,7 +290,7 @@ class Modifier extends StrictObject
     /**
      * @return Noise|null
      */
-    public function getNoiseWithAddition()
+    public function getNoiseWithAddition():? Noise
     {
         $baseNoise = $this->getBaseNoise();
         if ($baseNoise === null) {
@@ -308,7 +308,7 @@ class Modifier extends StrictObject
     /**
      * @return Attack|null
      */
-    public function getBaseAttack()
+    public function getBaseAttack():? Attack
     {
         return $this->modifiersTable->getAttack($this->modifierCode);
     }
@@ -316,7 +316,7 @@ class Modifier extends StrictObject
     /**
      * @return Attack|null
      */
-    public function getAttackWithAddition()
+    public function getAttackWithAddition():? Attack
     {
         $baseAttack = $this->getBaseAttack();
         if ($baseAttack === null) {
@@ -334,7 +334,7 @@ class Modifier extends StrictObject
     /**
      * @return Grafts|null
      */
-    public function getBaseGrafts()
+    public function getBaseGrafts():? Grafts
     {
         return $this->modifiersTable->getGrafts($this->modifierCode);
     }
@@ -342,7 +342,7 @@ class Modifier extends StrictObject
     /**
      * @return Grafts|null
      */
-    public function getGraftsWithAddition()
+    public function getGraftsWithAddition():? Grafts
     {
         $baseGrafts = $this->getBaseGrafts();
         if ($baseGrafts === null) {
@@ -360,7 +360,7 @@ class Modifier extends StrictObject
     /**
      * @return SpellSpeed|null
      */
-    public function getBaseSpellSpeed()
+    public function getBaseSpellSpeed():? SpellSpeed
     {
         return $this->modifiersTable->getSpellSpeed($this->modifierCode);
     }
@@ -368,7 +368,7 @@ class Modifier extends StrictObject
     /**
      * @return SpellSpeed|null
      */
-    public function getSpellSpeedWithAddition()
+    public function getSpellSpeedWithAddition():? SpellSpeed
     {
         $baseSpellSpeed = $this->getBaseSpellSpeed();
         if ($baseSpellSpeed === null) {
@@ -386,7 +386,7 @@ class Modifier extends StrictObject
     /**
      * @return Invisibility|null
      */
-    public function getBaseInvisibility()
+    public function getBaseInvisibility():? Invisibility
     {
         return $this->modifiersTable->getInvisibility($this->modifierCode);
     }
@@ -394,7 +394,7 @@ class Modifier extends StrictObject
     /**
      * @return Invisibility|null
      */
-    public function getInvisibilityWithAddition()
+    public function getInvisibilityWithAddition():? Invisibility
     {
         $baseInvisibility = $this->getBaseInvisibility();
         if ($baseInvisibility === null) {

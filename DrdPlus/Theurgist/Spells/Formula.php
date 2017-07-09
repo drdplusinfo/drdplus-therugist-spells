@@ -1,7 +1,7 @@
 <?php
 namespace DrdPlus\Theurgist\Spells;
 
-use DrdPlus\Codes\DistanceUnitCode;
+use DrdPlus\Codes\Units\DistanceUnitCode;
 use DrdPlus\Tables\Measurements\Distance\Distance;
 use DrdPlus\Tables\Measurements\Distance\DistanceBonus;
 use DrdPlus\Tables\Measurements\Distance\DistanceTable;
