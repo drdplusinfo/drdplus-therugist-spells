@@ -412,7 +412,7 @@ class Modifier extends StrictObject
     /**
      * @return Quality|null
      */
-    public function getBaseQuality()
+    public function getBaseQuality():? Quality
     {
         return $this->modifiersTable->getQuality($this->modifierCode);
     }
@@ -420,7 +420,7 @@ class Modifier extends StrictObject
     /**
      * @return Quality|null
      */
-    public function getQualityWithAddition()
+    public function getQualityWithAddition():? Quality
     {
         $baseQuality = $this->getBaseQuality();
         if ($baseQuality === null) {
@@ -438,7 +438,7 @@ class Modifier extends StrictObject
     /**
      * @return NumberOfConditions|null
      */
-    public function getBaseNumberOfConditions()
+    public function getBaseNumberOfConditions():? NumberOfConditions
     {
         return $this->modifiersTable->getNumberOfConditions($this->modifierCode);
     }
@@ -446,7 +446,7 @@ class Modifier extends StrictObject
     /**
      * @return NumberOfConditions|null
      */
-    public function getNumberOfConditionsWithAddition()
+    public function getNumberOfConditionsWithAddition():? NumberOfConditions
     {
         $baseConditions = $this->getBaseNumberOfConditions();
         if ($baseConditions === null) {
@@ -464,7 +464,7 @@ class Modifier extends StrictObject
     /**
      * @return Resistance|null
      */
-    public function getBaseResistance()
+    public function getBaseResistance():? Resistance
     {
         return $this->modifiersTable->getResistance($this->modifierCode);
     }
@@ -472,7 +472,7 @@ class Modifier extends StrictObject
     /**
      * @return Resistance|null
      */
-    public function getResistanceWithAddition()
+    public function getResistanceWithAddition():? Resistance
     {
         $baseResistance = $this->getBaseResistance();
         if ($baseResistance === null) {
@@ -490,7 +490,7 @@ class Modifier extends StrictObject
     /**
      * @return NumberOfSituations|null
      */
-    public function getBaseNumberOfSituations()
+    public function getBaseNumberOfSituations():? NumberOfSituations
     {
         return $this->modifiersTable->getNumberOfSituations($this->modifierCode);
     }
@@ -498,7 +498,7 @@ class Modifier extends StrictObject
     /**
      * @return NumberOfSituations|null
      */
-    public function getNumberOfSituationsWithAddition()
+    public function getNumberOfSituationsWithAddition():? NumberOfSituations
     {
         $baseNumberOfSituations = $this->getBaseNumberOfSituations();
         if ($baseNumberOfSituations === null) {
@@ -516,7 +516,7 @@ class Modifier extends StrictObject
     /**
      * @return Threshold|null
      */
-    public function getBaseThreshold()
+    public function getBaseThreshold():? Threshold
     {
         return $this->modifiersTable->getThreshold($this->modifierCode);
     }
@@ -524,7 +524,7 @@ class Modifier extends StrictObject
     /**
      * @return Threshold|null
      */
-    public function getThresholdWithAddition()
+    public function getThresholdWithAddition():? Threshold
     {
         $baseThreshold = $this->getBaseThreshold();
         if ($baseThreshold === null) {
@@ -542,7 +542,7 @@ class Modifier extends StrictObject
     /**
      * @return NumberOfWaypoints|null
      */
-    public function getBaseNumberOfWaypoints()
+    public function getBaseNumberOfWaypoints():? NumberOfWaypoints
     {
         return $this->modifiersTable->getNumberOfWaypoints($this->modifierCode);
     }
@@ -550,7 +550,7 @@ class Modifier extends StrictObject
     /**
      * @return NumberOfWaypoints|null
      */
-    public function getNumberOfWaypointsWithAddition()
+    public function getNumberOfWaypointsWithAddition():? NumberOfWaypoints
     {
         $baseNumberOfWaypoints = $this->getBaseNumberOfWaypoints();
         if ($baseNumberOfWaypoints === null) {
