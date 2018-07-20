@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace DrdPlus\Theurgist\Spells\SpellParameters\Partials;
 
 use DrdPlus\Theurgist\Spells\SpellParameters\AdditionByDifficulty;
@@ -85,14 +87,13 @@ abstract class CastingParameter extends StrictObject implements IntegerInterface
      * @return CastingParameter
      * @throws \Granam\Integer\Tools\Exceptions\Exception
      */
-    public function getWithAddition($additionValue)
+    public function getWithAddition($additionValue): CastingParameter
     {
         $additionValue = ToInteger::toInteger($additionValue);
         if ($additionValue === $this->getAdditionByDifficulty()->getCurrentAddition()) {
             return $this;
         }
 
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new static(
             [$this->getDefaultValue(), $this->getAdditionByDifficulty()->getNotation(), $additionValue /* current addition */]
         );

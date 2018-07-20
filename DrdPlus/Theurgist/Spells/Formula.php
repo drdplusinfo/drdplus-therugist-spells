@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace DrdPlus\Theurgist\Spells;
 
 use DrdPlus\Codes\Units\DistanceUnitCode;
@@ -89,7 +91,7 @@ class Formula extends StrictObject
     {
         $sanitizedChanges = [];
         foreach (FormulaMutableSpellParameterCode::getPossibleValues() as $mutableSpellParameter) {
-            if (!array_key_exists($mutableSpellParameter, $spellParameterValues)) {
+            if (!\array_key_exists($mutableSpellParameter, $spellParameterValues)) {
                 $sanitizedChanges[$mutableSpellParameter] = 0;
                 continue;
             }
@@ -117,10 +119,10 @@ class Formula extends StrictObject
 
             unset($spellParameterValues[$mutableSpellParameter]);
         }
-        if (count($spellParameterValues) > 0) { // there are some remains
+        if (\count($spellParameterValues) > 0) { // there are some remains
             throw new Exceptions\UnknownFormulaParameter(
-                'Unexpected mutable spells parameter(s) [' . implode(', ', array_keys($spellParameterValues)) . ']. Expected only '
-                . implode(', ', FormulaMutableSpellParameterCode::getPossibleValues())
+                'Unexpected mutable spells parameter(s) [' . \implode(', ', array_keys($spellParameterValues)) . ']. Expected only '
+                . \implode(', ', FormulaMutableSpellParameterCode::getPossibleValues())
             );
         }
 
@@ -173,6 +175,10 @@ class Formula extends StrictObject
         return $this->modifiers;
     }
 
+    /**
+     * @return FormulaDifficulty
+     * @throws \Granam\Integer\Tools\Exceptions\Exception
+     */
     public function getCurrentDifficulty(): FormulaDifficulty
     {
         $formulaParameters = [
@@ -225,7 +231,6 @@ class Formula extends StrictObject
         }
         $castingRoundsSum += $this->formulasTable->getCastingRounds($this->getFormulaCode())->getValue();
 
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new CastingRounds([$castingRoundsSum]);
     }
 
@@ -248,7 +253,6 @@ class Formula extends StrictObject
     {
         $realmsAffections = [];
         foreach ($this->getRealmsAffectionsSum() as $periodName => $periodSum) {
-            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
             $realmsAffections[$periodName] = new RealmsAffection([$periodSum, $periodName]);
         }
 
@@ -284,6 +288,7 @@ class Formula extends StrictObject
      * Gives the highest required realm (by difficulty, by formula itself or by one of its modifiers)
      *
      * @return Realm
+     * @throws \Granam\Integer\Tools\Exceptions\Exception
      */
     public function getRequiredRealm(): Realm
     {
@@ -314,8 +319,9 @@ class Formula extends StrictObject
      * Final radius including direct formula change and all its active traits and modifiers.
      *
      * @return Radius|null
+     * @throws \Granam\Integer\Tools\Exceptions\Exception
      */
-    public function getCurrentRadius()
+    public function getCurrentRadius(): ?Radius
     {
         $radiusWithAddition = $this->getRadiusWithAddition();
         if (!$radiusWithAddition) {
@@ -324,11 +330,9 @@ class Formula extends StrictObject
 
         $radiusModifiersChange = $this->getParameterBonusFromModifiers(ModifierMutableSpellParameterCode::RADIUS);
         if (!$radiusModifiersChange) {
-            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
             return new Radius([$radiusWithAddition->getValue(), 0]);
         }
 
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new Radius([$radiusWithAddition->getValue() + $radiusModifiersChange, 0]);
     }
 
@@ -336,8 +340,9 @@ class Formula extends StrictObject
      * Formula radius extended by direct formula change
      *
      * @return Radius|null
+     * @throws \Granam\Integer\Tools\Exceptions\Exception
      */
-    private function getRadiusWithAddition()
+    private function getRadiusWithAddition(): ?Radius
     {
         $baseRadius = $this->formulasTable->getRadius($this->formulaCode);
         if ($baseRadius === null) {
@@ -351,8 +356,9 @@ class Formula extends StrictObject
      * Any formula (spell) can be shifted
      *
      * @return EpicenterShift|null
+     * @throws \Granam\Integer\Tools\Exceptions\Exception
      */
-    public function getCurrentEpicenterShift()
+    public function getCurrentEpicenterShift(): ?EpicenterShift
     {
         $epicenterShiftWithAddition = $this->getEpicenterShiftWithAddition();
         $epicenterShiftByModifiers = $this->getParameterBonusFromModifiers(ModifierMutableSpellParameterCode::EPICENTER_SHIFT);
@@ -361,7 +367,6 @@ class Formula extends StrictObject
                 return null;
             }
 
-            /** @noinspection ExceptionsAnnotatingAndHandlingInspection epicenter can be always shifted, even if formula itself is not */
             return new EpicenterShift(
                 [$epicenterShiftByModifiers['bonus'], 0 /* no added difficulty*/],
                 new Distance($epicenterShiftByModifiers['meters'], DistanceUnitCode::METER, $this->distanceTable)
@@ -371,20 +376,18 @@ class Formula extends StrictObject
             return $epicenterShiftWithAddition;
         }
         $meters = $epicenterShiftWithAddition->getDistance($this->distanceTable)->getMeters();
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         $meters += $epicenterShiftByModifiers['meters'];
 
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         $distance = new Distance($meters, DistanceUnitCode::METER, $this->distanceTable);
 
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new EpicenterShift([$distance->getBonus(), 0 /* no added difficulty */], $distance);
     }
 
     /**
      * @return EpicenterShift|null
+     * @throws \Granam\Integer\Tools\Exceptions\Exception
      */
-    private function getEpicenterShiftWithAddition()
+    private function getEpicenterShiftWithAddition(): ?EpicenterShift
     {
         $baseEpicenterShift = $this->formulasTable->getEpicenterShift($this->formulaCode);
         if ($baseEpicenterShift === null) {
@@ -398,8 +401,9 @@ class Formula extends StrictObject
      * Any formula (spell) can get a power, even if was passive and not harming before
      *
      * @return Power|null
+     * @throws \Granam\Integer\Tools\Exceptions\Exception
      */
-    public function getCurrentPower()
+    public function getCurrentPower(): ?Power
     {
         $powerWithAddition = $this->getPowerWithAddition();
         $powerBonus = $this->getParameterBonusFromModifiers(ModifierMutableSpellParameterCode::POWER);
@@ -407,7 +411,6 @@ class Formula extends StrictObject
             return null;
         }
 
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new Power([
             ($powerWithAddition
                 ? $powerWithAddition->getValue()
@@ -419,8 +422,9 @@ class Formula extends StrictObject
 
     /**
      * @return Power|null
+     * @throws \Granam\Integer\Tools\Exceptions\Exception
      */
-    private function getPowerWithAddition()
+    private function getPowerWithAddition(): ?Power
     {
         $basePower = $this->formulasTable->getPower($this->formulaCode);
         if ($basePower === null) {
@@ -434,15 +438,15 @@ class Formula extends StrictObject
      * Attack can be only increased, not added.
      *
      * @return Attack|null
+     * @throws \Granam\Integer\Tools\Exceptions\Exception
      */
-    public function getCurrentAttack()
+    public function getCurrentAttack(): ?Attack
     {
         $attackWithAddition = $this->getAttackWithAddition();
         if (!$attackWithAddition) {
             return null;
         }
 
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new Attack([
             $attackWithAddition->getValue()
             + (int)$this->getParameterBonusFromModifiers(ModifierMutableSpellParameterCode::ATTACK),
@@ -452,8 +456,9 @@ class Formula extends StrictObject
 
     /**
      * @return Attack|null
+     * @throws \Granam\Integer\Tools\Exceptions\Exception
      */
-    private function getAttackWithAddition()
+    private function getAttackWithAddition(): ?Attack
     {
         $baseAttack = $this->formulasTable->getAttack($this->formulaCode);
         if ($baseAttack === null) {
@@ -488,7 +493,7 @@ class Formula extends StrictObject
             /** @var CastingParameter $parameter */
             $bonusParts[] = $parameter->getValue();
         }
-        if (count($bonusParts) === 0) {
+        if (\count($bonusParts) === 0) {
             return false;
         }
 
@@ -496,26 +501,25 @@ class Formula extends StrictObject
         if ($parameterName === ModifierMutableSpellParameterCode::EPICENTER_SHIFT) {
             $meters = 0;
             foreach ($bonusParts as $bonusPart) {
-                /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
                 $meters += (new DistanceBonus($bonusPart, $this->distanceTable))->getDistance()->getMeters();
             }
 
-            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
             return [
                 'bonus' => (new Distance($meters, DistanceUnitCode::METER, $this->distanceTable))->getBonus()->getValue(),
                 'meters' => $meters,
             ];
         }
 
-        return (int)array_sum($bonusParts);
+        return (int)\array_sum($bonusParts);
     }
 
     /**
      * Any formula (spell) can get a speed, even if was static before
      *
      * @return SpellSpeed|null
+     * @throws \Granam\Integer\Tools\Exceptions\Exception
      */
-    public function getCurrentSpellSpeed()
+    public function getCurrentSpellSpeed(): ?SpellSpeed
     {
         $spellSpeedWithAddition = $this->getSpellSpeedWithAddition();
         $spellSpeedBonus = $this->getParameterBonusFromModifiers(ModifierMutableSpellParameterCode::SPELL_SPEED);
@@ -523,7 +527,6 @@ class Formula extends StrictObject
             return null;
         }
 
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new SpellSpeed([
             ($spellSpeedWithAddition
                 ? $spellSpeedWithAddition->getValue()
@@ -535,8 +538,9 @@ class Formula extends StrictObject
 
     /**
      * @return SpellSpeed|null
+     * @throws \Granam\Integer\Tools\Exceptions\Exception
      */
-    private function getSpellSpeedWithAddition()
+    private function getSpellSpeedWithAddition(): ?SpellSpeed
     {
         $baseSpellSpeed = $this->formulasTable->getSpellSpeed($this->formulaCode);
         if ($baseSpellSpeed === null) {
@@ -548,16 +552,18 @@ class Formula extends StrictObject
 
     /**
      * @return DetailLevel|null
+     * @throws \Granam\Integer\Tools\Exceptions\Exception
      */
-    public function getCurrentDetailLevel()
+    public function getCurrentDetailLevel(): ?DetailLevel
     {
         return $this->getDetailLevelWithAddition();
     }
 
     /**
      * @return DetailLevel|null
+     * @throws \Granam\Integer\Tools\Exceptions\Exception
      */
-    private function getDetailLevelWithAddition()
+    private function getDetailLevelWithAddition(): ?DetailLevel
     {
         $baseDetailLevel = $this->formulasTable->getDetailLevel($this->formulaCode);
         if ($baseDetailLevel === null) {
@@ -569,16 +575,18 @@ class Formula extends StrictObject
 
     /**
      * @return Brightness|null
+     * @throws \Granam\Integer\Tools\Exceptions\Exception
      */
-    public function getCurrentBrightness()
+    public function getCurrentBrightness(): ?Brightness
     {
         return $this->getBrightnessWithAddition();
     }
 
     /**
      * @return Brightness|null
+     * @throws \Granam\Integer\Tools\Exceptions\Exception
      */
-    private function getBrightnessWithAddition()
+    private function getBrightnessWithAddition(): ?Brightness
     {
         $baseBrightness = $this->formulasTable->getBrightness($this->formulaCode);
         if ($baseBrightness === null) {
@@ -588,6 +596,10 @@ class Formula extends StrictObject
         return $baseBrightness->getWithAddition($this->formulaSpellParameterChanges[FormulaMutableSpellParameterCode::BRIGHTNESS]);
     }
 
+    /**
+     * @return Duration
+     * @throws \Granam\Integer\Tools\Exceptions\Exception
+     */
     public function getCurrentDuration(): Duration
     {
         return $this->getDurationWithAddition();
@@ -595,6 +607,7 @@ class Formula extends StrictObject
 
     /**
      * @return Duration
+     * @throws \Granam\Integer\Tools\Exceptions\Exception
      */
     private function getDurationWithAddition(): Duration
     {
@@ -605,16 +618,18 @@ class Formula extends StrictObject
 
     /**
      * @return SizeChange|null
+     * @throws \Granam\Integer\Tools\Exceptions\Exception
      */
-    public function getCurrentSizeChange()
+    public function getCurrentSizeChange(): ?SizeChange
     {
         return $this->getSizeChangeWithAddition();
     }
 
     /**
      * @return SizeChange|null
+     * @throws \Granam\Integer\Tools\Exceptions\Exception
      */
-    private function getSizeChangeWithAddition()
+    private function getSizeChangeWithAddition(): ?SizeChange
     {
         $baseSizeChange = $this->formulasTable->getSizeChange($this->formulaCode);
         if ($baseSizeChange === null) {
@@ -626,7 +641,7 @@ class Formula extends StrictObject
 
     public function __toString()
     {
-        return (string)$this->getFormulaCode()->getValue();
+        return $this->getFormulaCode()->getValue();
     }
 
 }

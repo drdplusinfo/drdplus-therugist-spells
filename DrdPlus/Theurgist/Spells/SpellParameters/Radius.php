@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace DrdPlus\Theurgist\Spells\SpellParameters;
 
 use DrdPlus\Tables\Measurements\Distance\Distance;
@@ -17,7 +19,6 @@ class Radius extends CastingParameter
      */
     public function getDistance(DistanceTable $distanceTable): Distance
     {
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return (new DistanceBonus($this->getValue(), $distanceTable))->getDistance();
     }
 }

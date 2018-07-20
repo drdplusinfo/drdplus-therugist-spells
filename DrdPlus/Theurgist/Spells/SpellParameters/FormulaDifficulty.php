@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace DrdPlus\Theurgist\Spells\SpellParameters;
 
 use Granam\Integer\PositiveInteger;
@@ -119,7 +121,7 @@ class FormulaDifficulty extends StrictObject implements PositiveInteger
         $steps = $additionalDifficulty / $this->getFormulaDifficultyAddition()->getDifficultyAdditionPerStep();
         $realmsIncrement = $steps * $this->getFormulaDifficultyAddition()->getRealmsChangePerAdditionStep();
 
-        return ceil($realmsIncrement); // even a tiny piece of a higher realm means the lower realm is not able to create that formula
+        return (int)\ceil($realmsIncrement); // even a tiny piece of a higher realm means the lower realm is not able to create that formula
     }
 
     /**
@@ -134,7 +136,6 @@ class FormulaDifficulty extends StrictObject implements PositiveInteger
             return $this;
         }
 
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new static(
             [
                 $this->getMinimal(),

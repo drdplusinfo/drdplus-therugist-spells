@@ -1,4 +1,6 @@
 <?php
+declare(strict_types = 1);
+
 namespace DrdPlus\Tests\Theurgist\Spells\SpellParameters;
 
 use DrdPlus\Theurgist\Spells\SpellParameters\FormulaDifficultyAddition;
@@ -9,7 +11,7 @@ class FormulaDifficultyAdditionTest extends TestWithMockery
     /**
      * @test
      */
-    public function I_can_create_it_with_just_an_addition()
+    public function I_can_create_it_with_just_an_addition(): void
     {
         $additionByRealms = new FormulaDifficultyAddition('123');
         self::assertSame(123, $additionByRealms->getDifficultyAdditionPerStep());
@@ -27,7 +29,7 @@ class FormulaDifficultyAdditionTest extends TestWithMockery
     /**
      * @test
      */
-    public function I_can_create_it_with_realms_price()
+    public function I_can_create_it_with_realms_price(): void
     {
         $additionByRealms = new FormulaDifficultyAddition('456=789');
         self::assertSame(789, $additionByRealms->getDifficultyAdditionPerStep());
@@ -39,7 +41,7 @@ class FormulaDifficultyAdditionTest extends TestWithMockery
     /**
      * @test
      */
-    public function I_can_create_it_with_custom_current_addition()
+    public function I_can_create_it_with_custom_current_addition(): void
     {
         $additionByRealms = new FormulaDifficultyAddition('2=3', 7);
         self::assertSame(3, $additionByRealms->getDifficultyAdditionPerStep());
@@ -51,7 +53,7 @@ class FormulaDifficultyAdditionTest extends TestWithMockery
     /**
      * @test
      */
-    public function I_can_increase_current_addition()
+    public function I_can_increase_current_addition(): void
     {
         $additionByRealms = new FormulaDifficultyAddition(5);
         self::assertSame(5, $additionByRealms->getDifficultyAdditionPerStep());

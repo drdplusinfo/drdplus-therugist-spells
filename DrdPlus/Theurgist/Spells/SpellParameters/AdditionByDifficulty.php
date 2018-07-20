@@ -1,10 +1,14 @@
 <?php
+declare(strict_types=1);
+
 namespace DrdPlus\Theurgist\Spells\SpellParameters;
 
 use Granam\Integer\IntegerInterface;
 use Granam\Integer\Tools\ToInteger;
 use Granam\Number\NumberInterface;
+use Granam\Scalar\Tools\ToString;
 use Granam\Strict\Object\StrictObject;
+use Granam\String\StringInterface;
 use Granam\Tools\ValueDescriber;
 
 /**
@@ -12,33 +16,27 @@ use Granam\Tools\ValueDescriber;
  */
 class AdditionByDifficulty extends StrictObject implements IntegerInterface
 {
-    /**
-     * @var int
-     */
+    /** @var int */
     private $difficultyPerAdditionStep;
-    /**
-     * @var int
-     */
+    /** @var int */
     private $additionStep;
-    /**
-     * @var int
-     */
+    /** @var int */
     private $currentAddition;
 
     /**
-     * @param string $additionByDifficultyNotation in format 'number' or 'number=number'
+     * @param string|int|StringInterface|IntegerInterface $additionByDifficultyNotation in format 'number' or 'number=number'
      * @param int|null $currentAddition How much is currently active addition
      * @throws \DrdPlus\Theurgist\Spells\SpellParameters\Exceptions\InvalidFormatOfDifficultyIncrement
      * @throws \DrdPlus\Theurgist\Spells\SpellParameters\Exceptions\InvalidFormatOfAdditionByDifficultyValue
      * @throws \DrdPlus\Theurgist\Spells\SpellParameters\Exceptions\InvalidFormatOfAdditionByDifficultyNotation
      */
-    public function __construct(string $additionByDifficultyNotation, int $currentAddition = null)
+    public function __construct($additionByDifficultyNotation, int $currentAddition = null)
     {
-        $parts = $this->parseParts($additionByDifficultyNotation);
-        if (count($parts) === 1 && array_keys($parts) === [0]) {
+        $parts = $this->parseParts(ToString::toString($additionByDifficultyNotation));
+        if (\count($parts) === 1 && \array_keys($parts) === [0]) {
             $this->difficultyPerAdditionStep = 1;
             $this->additionStep = $this->sanitizeAddition($parts[0]);
-        } else if (count($parts) === 2 && array_keys($parts) === [0, 1]) {
+        } elseif (\count($parts) === 2 && \array_keys($parts) === [0, 1]) {
             $this->difficultyPerAdditionStep = $this->sanitizeDifficulty($parts[0]);
             $this->additionStep = $this->sanitizeAddition($parts[1]);
         } else {
@@ -56,11 +54,11 @@ class AdditionByDifficulty extends StrictObject implements IntegerInterface
      */
     private function parseParts(string $additionByDifficultyNotation): array
     {
-        $parts = array_map(
+        $parts = \array_map(
             function (string $part) {
-                return trim($part);
+                return \trim($part);
             },
-            explode('=', $additionByDifficultyNotation)
+            \explode('=', $additionByDifficultyNotation)
         );
 
         foreach ($parts as $part) {
@@ -73,7 +71,7 @@ class AdditionByDifficulty extends StrictObject implements IntegerInterface
     }
 
     /**
-     * @param $difficultyChange
+     * @param int|IntegerInterface $difficultyChange
      * @return int
      * @throws \DrdPlus\Theurgist\Spells\SpellParameters\Exceptions\InvalidFormatOfDifficultyIncrement
      */
@@ -89,7 +87,7 @@ class AdditionByDifficulty extends StrictObject implements IntegerInterface
     }
 
     /**
-     * @param $addition
+     * @param int|IntegerInterface $addition
      * @return int
      * @throws \DrdPlus\Theurgist\Spells\SpellParameters\Exceptions\InvalidFormatOfAdditionByDifficultyValue
      */
@@ -145,7 +143,7 @@ class AdditionByDifficulty extends StrictObject implements IntegerInterface
             return 0;
         }
 
-        return ceil($this->getCurrentAddition() / $this->getAdditionStep() * $this->getDifficultyPerAdditionStep());
+        return ToInteger::toInteger(\ceil($this->getCurrentAddition() / $this->getAdditionStep() * $this->getDifficultyPerAdditionStep()));
     }
 
     /**
@@ -177,7 +175,6 @@ class AdditionByDifficulty extends StrictObject implements IntegerInterface
             );
         }
 
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new static(
             $this->getNotation(),
             $this->getValue() + ToInteger::toInteger($value) // current addition is injected as second parameter
@@ -202,7 +199,6 @@ class AdditionByDifficulty extends StrictObject implements IntegerInterface
             );
         }
 
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new static(
             $this->getNotation(),
             $this->getValue() - ToInteger::toInteger($value) // current addition is injected as second parameter

@@ -1,10 +1,14 @@
 <?php
+declare(strict_types=1);
+
 namespace DrdPlus\Theurgist\Spells\SpellParameters;
 
 use Granam\Integer\IntegerInterface;
 use Granam\Integer\Tools\ToInteger;
 use Granam\Number\NumberInterface;
+use Granam\Scalar\Tools\ToString;
 use Granam\Strict\Object\StrictObject;
+use Granam\String\StringInterface;
 use Granam\Tools\ValueDescriber;
 
 class FormulaDifficultyAddition extends StrictObject implements IntegerInterface
@@ -23,19 +27,19 @@ class FormulaDifficultyAddition extends StrictObject implements IntegerInterface
     private $currentAddition;
 
     /**
-     * @param string $difficultyAdditionByRealmsNotation in format 'difficulty per realm' or 'realms=difficulty per realms'
+     * @param string|int|StringInterface|IntegerInterface $difficultyAdditionByRealmsNotation in format 'difficulty per realm' or 'realms=difficulty per realms'
      * @param int|null $currentAddition How much is currently active addition
      * @throws \DrdPlus\Theurgist\Spells\SpellParameters\Exceptions\InvalidFormatOfAdditionByRealmsNotation
      * @throws \DrdPlus\Theurgist\Spells\SpellParameters\Exceptions\InvalidFormatOfRealmsIncrement
      * @throws \DrdPlus\Theurgist\Spells\SpellParameters\Exceptions\InvalidFormatOfAdditionByRealmsValue
      */
-    public function __construct(string $difficultyAdditionByRealmsNotation, int $currentAddition = null)
+    public function __construct($difficultyAdditionByRealmsNotation, int $currentAddition = null)
     {
-        $parts = $this->parseParts($difficultyAdditionByRealmsNotation);
-        if (count($parts) === 1 && array_keys($parts) === [0]) {
+        $parts = $this->parseParts(ToString::toString($difficultyAdditionByRealmsNotation));
+        if (\count($parts) === 1 && \array_keys($parts) === [0]) {
             $this->realmsChangePerAdditionStep = 1;
             $this->difficultyAdditionPerStep = $this->sanitizeAddition($parts[0]);
-        } else if (count($parts) === 2 && array_keys($parts) === [0, 1]) {
+        } elseif (\count($parts) === 2 && \array_keys($parts) === [0, 1]) {
             $this->realmsChangePerAdditionStep = $this->sanitizeRealms($parts[0]);
             $this->difficultyAdditionPerStep = $this->sanitizeAddition($parts[1]);
         } else {
@@ -53,11 +57,11 @@ class FormulaDifficultyAddition extends StrictObject implements IntegerInterface
      */
     private function parseParts(string $additionByRealmNotation): array
     {
-        $parts = array_map(
+        $parts = \array_map(
             function (string $part) {
-                return trim($part);
+                return \trim($part);
             },
-            explode('=', $additionByRealmNotation)
+            \explode('=', $additionByRealmNotation)
         );
 
         foreach ($parts as $part) {

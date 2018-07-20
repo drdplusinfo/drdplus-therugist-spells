@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace DrdPlus\Theurgist\Spells\SpellParameters;
 
 use DrdPlus\Codes\Properties\PropertyCode;
@@ -9,9 +11,7 @@ use Granam\Tools\ValueDescriber;
 
 class Trap extends CastingParameter
 {
-    /**
-     * @var PropertyCode
-     */
+    /** @var PropertyCode */
     private $propertyCode;
 
     /**
@@ -26,18 +26,18 @@ class Trap extends CastingParameter
     public function __construct(array $values)
     {
         $trapProperty = [];
-        if (array_key_exists(2, $values)) { // it SHOULD exists
+        if (\array_key_exists(2, $values)) { // it SHOULD exists
             $trapProperty[] = $values[2];
             unset($values[2]);
-            $values = array_values($values); // reindexing
+            $values = \array_values($values); // reindexing
         }
         parent::__construct($values);
         try {
-            $this->propertyCode = PropertyCode::getIt($trapProperty[0] ?? 0);
+            $this->propertyCode = PropertyCode::getIt($trapProperty[0] ?? '0');
         } catch (\DrdPlus\Codes\Partials\Exceptions\UnknownValueForCode $unknownValueForCode) {
             throw new Exceptions\InvalidFormatOfPropertyUsedForTrap(
                 'Expected valid property code, got '
-                . (array_key_exists(0, $trapProperty) ? ValueDescriber::describe($trapProperty[0]) : 'nothing')
+                . (\array_key_exists(0, $trapProperty) ? ValueDescriber::describe($trapProperty[0]) : 'nothing')
             );
         }
     }
@@ -52,17 +52,16 @@ class Trap extends CastingParameter
 
     /**
      * @param int|float|NumberInterface $additionValue
-     * @return Trap
+     * @return Trap|CastingParameter
      * @throws \Granam\Integer\Tools\Exceptions\Exception
      */
-    public function getWithAddition($additionValue): Trap
+    public function getWithAddition($additionValue): CastingParameter
     {
         $additionValue = ToInteger::toInteger($additionValue);
         if ($additionValue === $this->getAdditionByDifficulty()->getCurrentAddition()) {
             return $this;
         }
 
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new static([
             $this->getDefaultValue(),
             $this->getAdditionByDifficulty()->getNotation(),

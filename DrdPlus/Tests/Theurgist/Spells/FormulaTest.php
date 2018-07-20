@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace DrdPlus\Tests\Theurgist\Spells;
 
 use DrdPlus\Tables\Measurements\Distance\DistanceTable;
@@ -29,7 +31,10 @@ class FormulaTest extends TestWithMockery
 {
     private $parameterNamespace;
 
-    protected function setUp()
+    /**
+     * @throws \ReflectionException
+     */
+    protected function setUp(): void
     {
         $this->parameterNamespace = (new \ReflectionClass(SpellSpeed::class))->getNamespaceName();
     }
@@ -37,7 +42,7 @@ class FormulaTest extends TestWithMockery
     /**
      * @test
      */
-    public function I_can_create_it_without_any_change_for_every_formula()
+    public function I_can_create_it_without_any_change_for_every_formula(): void
     {
         foreach (FormulaCode::getPossibleValues() as $formulaValue) {
             $formulaCode = FormulaCode::getIt($formulaValue);
@@ -64,7 +69,7 @@ class FormulaTest extends TestWithMockery
         }
     }
 
-    private function addValueGetter(MockInterface $object, $value)
+    private function addValueGetter(MockInterface $object, $value): void
     {
         $object->shouldReceive('getValue')
             ->andReturn($value);
@@ -104,7 +109,7 @@ class FormulaTest extends TestWithMockery
         FormulaCode $formulaCode,
         MockInterface $formulasTable,
         CastingParameter $property = null
-    )
+    ): void
     {
         $getProperty = StringTools::assembleGetterForName($parameterName);
         $formulasTable->shouldReceive($getProperty)
@@ -112,7 +117,7 @@ class FormulaTest extends TestWithMockery
             ->andReturn($property);
     }
 
-    private function addDefaultValueGetter(MockInterface $property, int $defaultValue = 0)
+    private function addDefaultValueGetter(MockInterface $property, int $defaultValue = 0): void
     {
         $property->shouldReceive('getDefaultValue')
             ->andReturn($defaultValue);
@@ -120,9 +125,9 @@ class FormulaTest extends TestWithMockery
 
     private function addWithAdditionGetter(
         int $addition,
-        \Mockery\MockInterface $parameter,
+        MockInterface $parameter,
         CastingParameter $modifiedParameter
-    )
+    ): void
     {
         $parameter->shouldReceive('getWithAddition')
             ->with($addition)
@@ -132,7 +137,7 @@ class FormulaTest extends TestWithMockery
     /**
      * @test
      */
-    public function I_get_null_for_unused_modifiers_for_every_formula()
+    public function I_get_null_for_unused_modifiers_for_every_formula(): void
     {
         foreach (FormulaCode::getPossibleValues() as $formulaValue) {
             $formulaCode = FormulaCode::getIt($formulaValue);
@@ -155,8 +160,9 @@ class FormulaTest extends TestWithMockery
 
     /**
      * @test
+     * @throws \Exception
      */
-    public function I_can_create_it_with_addition_for_every_formula()
+    public function I_can_create_it_with_addition_for_every_formula(): void
     {
         $parameterValues = [
             FormulaMutableSpellParameterCode::RADIUS => 1,
@@ -178,7 +184,7 @@ class FormulaTest extends TestWithMockery
                 /** like instance of @see SpellSpeed */
                 $baseParameter = $this->createExpectedParameter($mutableParameterName);
                 $this->addBaseParameterGetter($mutableParameterName, $formulaCode, $formulasTable, $baseParameter);
-                $this->addDefaultValueGetter($baseParameter, $defaultValue = random_int(-5, 5));
+                $this->addDefaultValueGetter($baseParameter, $defaultValue = \random_int(-5, 5));
                 $baseParameters[$mutableParameterName] = $baseParameter;
                 $parameterChanges[$mutableParameterName] = $parameterValues[$mutableParameterName] - $defaultValue;
             }
@@ -206,15 +212,16 @@ class FormulaTest extends TestWithMockery
     /**
      * @return MockInterface|DistanceTable
      */
-    private function createDistanceTable()
+    private function createDistanceTable(): DistanceTable
     {
         return $this->mockery(DistanceTable::class);
     }
 
     /**
      * @test
+     * @throws \Granam\Integer\Tools\Exceptions\Exception
      */
-    public function I_get_basic_difficulty_change_without_any_parameter()
+    public function I_get_basic_difficulty_change_without_any_parameter(): void
     {
         foreach (FormulaCode::getPossibleValues() as $formulaValue) {
             $formulaCode = FormulaCode::getIt($formulaValue);

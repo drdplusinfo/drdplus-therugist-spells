@@ -1,4 +1,6 @@
 <?php
+declare(strict_types = 1);
+
 namespace DrdPlus\Tests\Theurgist\Spells\SpellParameters;
 
 use DrdPlus\Theurgist\Spells\SpellParameters\AdditionByDifficulty;
@@ -73,7 +75,7 @@ class AdditionByDifficultyTest extends TestWithMockery
     /**
      * @test
      */
-    public function I_can_decrease_current_addition()
+    public function I_can_decrease_current_addition(): void
     {
         $additionByDifficulty = new AdditionByDifficulty(5);
         self::assertSame(5, $additionByDifficulty->getAdditionStep());

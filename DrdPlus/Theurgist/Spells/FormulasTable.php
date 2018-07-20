@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace DrdPlus\Theurgist\Spells;
 
 use DrdPlus\Tables\Partials\AbstractFileTable;
@@ -30,23 +32,23 @@ class FormulasTable extends AbstractFileTable
         return __DIR__ . '/data/formulas.csv';
     }
 
-    const REALM = 'realm';
-    const REALMS_AFFECTION = 'realms_affection';
-    const EVOCATION = 'evocation';
-    const FORMULA_DIFFICULTY = 'formula_difficulty';
-    const RADIUS = 'radius';
-    const DURATION = 'duration';
-    const POWER = 'power';
-    const ATTACK = 'attack';
-    const SIZE_CHANGE = 'size_change';
-    const DETAIL_LEVEL = 'detail_level';
-    const BRIGHTNESS = 'brightness';
-    const SPELL_SPEED = 'spell_speed';
-    const EPICENTER_SHIFT = 'epicenter_shift';
-    const FORMS = 'forms';
-    const SPELL_TRAITS = 'spell_traits';
-    const PROFILES = 'profiles';
-    const MODIFIERS = 'modifiers';
+    public const REALM = 'realm';
+    public const REALMS_AFFECTION = 'realms_affection';
+    public const EVOCATION = 'evocation';
+    public const FORMULA_DIFFICULTY = 'formula_difficulty';
+    public const RADIUS = 'radius';
+    public const DURATION = 'duration';
+    public const POWER = 'power';
+    public const ATTACK = 'attack';
+    public const SIZE_CHANGE = 'size_change';
+    public const DETAIL_LEVEL = 'detail_level';
+    public const BRIGHTNESS = 'brightness';
+    public const SPELL_SPEED = 'spell_speed';
+    public const EPICENTER_SHIFT = 'epicenter_shift';
+    public const FORMS = 'forms';
+    public const SPELL_TRAITS = 'spell_traits';
+    public const PROFILES = 'profiles';
+    public const MODIFIERS = 'modifiers';
 
     protected function getExpectedDataHeaderNamesToTypes(): array
     {
@@ -71,7 +73,7 @@ class FormulasTable extends AbstractFileTable
         ];
     }
 
-    const FORMULA = 'formula';
+    public const FORMULA = 'formula';
 
     protected function getRowsHeader(): array
     {
@@ -86,7 +88,6 @@ class FormulasTable extends AbstractFileTable
      */
     public function getRealm(FormulaCode $formulaCode): Realm
     {
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new Realm($this->getValue($formulaCode, self::REALM));
     }
 
@@ -96,7 +97,6 @@ class FormulasTable extends AbstractFileTable
      */
     public function getRealmsAffection(FormulaCode $formulaCode): RealmsAffection
     {
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new RealmsAffection($this->getValue($formulaCode, self::REALMS_AFFECTION));
     }
 
@@ -108,7 +108,6 @@ class FormulasTable extends AbstractFileTable
      */
     public function getEvocation(FormulaCode $formulaCode): Evocation
     {
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new Evocation($this->getValue($formulaCode, self::EVOCATION));
     }
 
@@ -122,7 +121,6 @@ class FormulasTable extends AbstractFileTable
     public function getCastingRounds(/** @noinspection PhpUnusedParameterInspection to keep same interface with others */
         FormulaCode $formulaCode): CastingRounds
     {
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new CastingRounds([1]);
     }
 
@@ -132,7 +130,6 @@ class FormulasTable extends AbstractFileTable
      */
     public function getFormulaDifficulty(FormulaCode $formulaCode): FormulaDifficulty
     {
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new FormulaDifficulty($this->getValue($formulaCode, self::FORMULA_DIFFICULTY));
     }
 
@@ -140,15 +137,13 @@ class FormulasTable extends AbstractFileTable
      * @param FormulaCode $formulaCode
      * @return Radius|null
      */
-    public function getRadius(FormulaCode $formulaCode):? Radius
+    public function getRadius(FormulaCode $formulaCode): ?Radius
     {
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         $radiusValues = $this->getValue($formulaCode, self::RADIUS);
         if (!$radiusValues) {
             return null;
         }
 
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new Radius($radiusValues);
     }
 
@@ -158,7 +153,6 @@ class FormulasTable extends AbstractFileTable
      */
     public function getDuration(FormulaCode $formulaCode): Duration
     {
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new Duration($this->getValue($formulaCode, self::DURATION));
     }
 
@@ -166,15 +160,13 @@ class FormulasTable extends AbstractFileTable
      * @param FormulaCode $formulaCode
      * @return Power|null
      */
-    public function getPower(FormulaCode $formulaCode):? Power
+    public function getPower(FormulaCode $formulaCode): ?Power
     {
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         $powerValues = $this->getValue($formulaCode, self::POWER);
         if (!$powerValues) {
             return null;
         }
 
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new Power($powerValues);
     }
 
@@ -182,15 +174,13 @@ class FormulasTable extends AbstractFileTable
      * @param FormulaCode $formulaCode
      * @return Attack|null
      */
-    public function getAttack(FormulaCode $formulaCode):? Attack
+    public function getAttack(FormulaCode $formulaCode): ?Attack
     {
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         $attackValues = $this->getValue($formulaCode, self::ATTACK);
         if (!$attackValues) {
             return null;
         }
 
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new Attack($attackValues);
     }
 
@@ -198,15 +188,13 @@ class FormulasTable extends AbstractFileTable
      * @param FormulaCode $formulaCode
      * @return SizeChange|null
      */
-    public function getSizeChange(FormulaCode $formulaCode):? SizeChange
+    public function getSizeChange(FormulaCode $formulaCode): ?SizeChange
     {
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         $sizeChangeValues = $this->getValue($formulaCode, self::SIZE_CHANGE);
         if (!$sizeChangeValues) {
             return null;
         }
 
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new SizeChange($sizeChangeValues);
     }
 
@@ -214,15 +202,13 @@ class FormulasTable extends AbstractFileTable
      * @param FormulaCode $formulaCode
      * @return DetailLevel|null
      */
-    public function getDetailLevel(FormulaCode $formulaCode):? DetailLevel
+    public function getDetailLevel(FormulaCode $formulaCode): ?DetailLevel
     {
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         $detailLevelValues = $this->getValue($formulaCode, self::DETAIL_LEVEL);
         if (!$detailLevelValues) {
             return null;
         }
 
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new DetailLevel($detailLevelValues);
     }
 
@@ -230,15 +216,13 @@ class FormulasTable extends AbstractFileTable
      * @param FormulaCode $formulaCode
      * @return Brightness|null
      */
-    public function getBrightness(FormulaCode $formulaCode):? Brightness
+    public function getBrightness(FormulaCode $formulaCode): ?Brightness
     {
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         $brightnessValues = $this->getValue($formulaCode, self::BRIGHTNESS);
         if (!$brightnessValues) {
             return null;
         }
 
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new Brightness($brightnessValues);
     }
 
@@ -246,15 +230,13 @@ class FormulasTable extends AbstractFileTable
      * @param FormulaCode $formulaCode
      * @return SpellSpeed|null
      */
-    public function getSpellSpeed(FormulaCode $formulaCode):? SpellSpeed
+    public function getSpellSpeed(FormulaCode $formulaCode): ?SpellSpeed
     {
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         $speedValues = $this->getValue($formulaCode, self::SPELL_SPEED);
         if (!$speedValues) {
             return null;
         }
 
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new SpellSpeed($speedValues);
     }
 
@@ -262,15 +244,13 @@ class FormulasTable extends AbstractFileTable
      * @param FormulaCode $formulaCode
      * @return EpicenterShift|null
      */
-    public function getEpicenterShift(FormulaCode $formulaCode):? EpicenterShift
+    public function getEpicenterShift(FormulaCode $formulaCode): ?EpicenterShift
     {
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         $epicenterShift = $this->getValue($formulaCode, self::EPICENTER_SHIFT);
         if (!$epicenterShift) {
             return null;
         }
 
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new EpicenterShift($epicenterShift);
     }
 
@@ -280,7 +260,6 @@ class FormulasTable extends AbstractFileTable
      */
     public function getForms(FormulaCode $formulaCode): array
     {
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return array_map(
             function (string $formValue) {
                 return FormCode::getIt($formValue);
@@ -295,10 +274,8 @@ class FormulasTable extends AbstractFileTable
      */
     public function getSpellTraitCodes(FormulaCode $formulaCode): array
     {
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return array_map(
             function (string $spellTraitValue) {
-                /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
                 return SpellTraitCode::getIt($spellTraitValue);
             },
             $this->getValue($formulaCode, self::SPELL_TRAITS)
@@ -313,7 +290,6 @@ class FormulasTable extends AbstractFileTable
     public function getProfiles(FormulaCode $formulaCode): array
     {
         try {
-            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
             return array_map(
                 function (string $profileValue) {
                     return ProfileCode::getIt($profileValue);
@@ -333,7 +309,6 @@ class FormulasTable extends AbstractFileTable
     public function getModifierCodes(FormulaCode $formulaCode): array
     {
         try {
-            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
             return array_map(
                 function (string $modifierValue) {
                     return ModifierCode::getIt($modifierValue);

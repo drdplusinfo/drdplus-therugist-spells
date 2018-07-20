@@ -1,4 +1,6 @@
 <?php
+declare(strict_types = 1);
+
 namespace DrdPlus\Tests\Theurgist\Spells\SpellParameters\Partials;
 
 /**
@@ -10,8 +12,9 @@ trait CastingParameterSetAdditionTrait
 
     /**
      * @test
+     * @throws \ReflectionException
      */
-    public function I_get_whispered_current_class_as_return_value_of_set_addition()
+    public function I_get_whispered_current_class_as_return_value_of_set_addition(): void
     {
         $reflectionClass = new \ReflectionClass(self::getSutClass());
         $classBaseName = preg_replace('~^.*[\\\](\w+)$~', '$1', self::getSutClass());
@@ -20,7 +23,7 @@ trait CastingParameterSetAdditionTrait
             self::assertSame($phpDoc = <<<PHPDOC
 /**
  * @param int|float|NumberInterface \$additionValue
- * @return {$classBaseName}
+ * @return {$classBaseName}|CastingParameter
  * @throws \Granam\Integer\Tools\Exceptions\Exception
  */
 PHPDOC

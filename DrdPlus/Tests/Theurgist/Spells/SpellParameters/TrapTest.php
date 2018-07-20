@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace DrdPlus\Tests\Theurgist\Spells\SpellParameters;
 
 use DrdPlus\Codes\Properties\PropertyCode;
@@ -9,7 +11,7 @@ use DrdPlus\Theurgist\Spells\SpellParameters\Trap;
 class TrapTest extends CastingParameterTest
 {
 
-    protected function I_can_create_it_negative()
+    protected function I_can_create_it_negative(): void
     {
         $trap = new Trap(['-456', '4=6', PropertyCode::INTELLIGENCE]);
         self::assertSame(-456, $trap->getValue());
@@ -18,7 +20,7 @@ class TrapTest extends CastingParameterTest
         self::assertSame('-456 intelligence (0 {4=>6})', (string)$trap);
     }
 
-    protected function I_can_create_it_with_zero()
+    protected function I_can_create_it_with_zero(): void
     {
         $trap = new Trap(['0', '78=321', PropertyCode::CHARISMA]);
         self::assertSame(0, $trap->getValue());
@@ -27,7 +29,7 @@ class TrapTest extends CastingParameterTest
         self::assertSame('0 charisma (0 {78=>321})', (string)$trap);
     }
 
-    protected function I_can_create_it_positive()
+    protected function I_can_create_it_positive(): void
     {
         $trap = new Trap(['35689', '332211', PropertyCode::ENDURANCE]);
         self::assertSame(35689, $trap->getValue());
@@ -41,7 +43,7 @@ class TrapTest extends CastingParameterTest
      * @expectedException \DrdPlus\Theurgist\Spells\SpellParameters\Exceptions\InvalidFormatOfPropertyUsedForTrap
      * @expectedExceptionMessageRegExp ~goodness~
      */
-    public function I_can_not_create_it_with_unknown_property()
+    public function I_can_not_create_it_with_unknown_property(): void
     {
         new Trap(['35689', '332211', 'goodness']);
     }
@@ -51,7 +53,7 @@ class TrapTest extends CastingParameterTest
      * @expectedException \DrdPlus\Theurgist\Spells\SpellParameters\Exceptions\InvalidFormatOfPropertyUsedForTrap
      * @expectedExceptionMessageRegExp ~nothing~
      */
-    public function I_can_not_create_it_without_property()
+    public function I_can_not_create_it_without_property(): void
     {
         new Trap(['35689', '332211']);
     }
@@ -59,7 +61,7 @@ class TrapTest extends CastingParameterTest
     /**
      * @test
      */
-    public function I_can_get_its_clone_changed_by_addition()
+    public function I_can_get_its_clone_changed_by_addition(): void
     {
         $sutClass = self::getSutClass();
         /** @var Trap $original */
