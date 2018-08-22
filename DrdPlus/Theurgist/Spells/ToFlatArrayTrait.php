@@ -1,5 +1,5 @@
 <?php
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace DrdPlus\Theurgist\Spells;
 
@@ -13,7 +13,7 @@ trait ToFlatArrayTrait
     {
         $flat = [];
         foreach ($items as $item) {
-            if (is_array($item)) {
+            if (\is_array($item)) {
                 foreach ($this->toFlatArray($item) as $subItem) {
                     $flat[] = $subItem;
                 }

@@ -1,9 +1,9 @@
 <?php
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace DrdPlus\Theurgist\Spells;
 
-use DrdPlus\Theurgist\Codes\SpellTraitCode;
+use DrdPlus\Codes\Theurgist\SpellTraitCode;
 use DrdPlus\Theurgist\Spells\SpellParameters\DifficultyChange;
 use DrdPlus\Theurgist\Spells\SpellParameters\Trap;
 use Granam\Strict\Object\StrictObject;
@@ -56,6 +56,10 @@ class SpellTrait extends StrictObject
         return $spellTraitTrapPropertyValue - $baseTrap->getDefaultValue();
     }
 
+    /**
+     * @return DifficultyChange
+     * @throws \Granam\Integer\Tools\Exceptions\Exception
+     */
     public function getDifficultyChange(): DifficultyChange
     {
         $difficultyChange = $this->spellTraitsTable->getDifficultyChange($this->getSpellTraitCode());
@@ -78,27 +82,27 @@ class SpellTrait extends StrictObject
     /**
      * @return Trap|null
      */
-    public function getBaseTrap()
+    public function getBaseTrap(): ?Trap
     {
         return $this->spellTraitsTable->getTrap($this->getSpellTraitCode());
     }
 
     /**
      * @return Trap|null
+     * @throws \Granam\Integer\Tools\Exceptions\Exception
      */
-    public function getCurrentTrap()
+    public function getCurrentTrap(): ?Trap
     {
         $trap = $this->getBaseTrap();
         if (!$trap) {
             return null;
         }
 
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return $trap->getWithAddition($this->trapPropertyChange);
     }
 
     public function __toString()
     {
-        return (string)$this->getSpellTraitCode()->getValue();
+        return $this->getSpellTraitCode()->getValue();
     }
 }

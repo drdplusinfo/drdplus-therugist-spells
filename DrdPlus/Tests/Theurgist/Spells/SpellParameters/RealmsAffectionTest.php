@@ -3,7 +3,7 @@ declare(strict_types = 1);
 
 namespace DrdPlus\Tests\Theurgist\Spells\SpellParameters;
 
-use DrdPlus\Theurgist\Codes\AffectionPeriodCode;
+use DrdPlus\Codes\Theurgist\AffectionPeriodCode;
 use DrdPlus\Theurgist\Spells\SpellParameters\RealmsAffection;
 use Granam\Tests\Tools\TestWithMockery;
 

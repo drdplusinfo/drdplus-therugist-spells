@@ -12,7 +12,7 @@
     "php": ">=7.1",
     "granam/strict-object": "^3.0",
     "drdplus/tables": "^1.0",
-    "drdplus/theurgist-codes": "^1.0"
+    "drdplus/codes": "^1.1"
   },
   "require-dev": {
     "roave/security-advisories": "dev-master",

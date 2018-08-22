@@ -4,7 +4,7 @@ declare(strict_types = 1);
 namespace DrdPlus\Tests\Theurgist\Spells;
 
 use DrdPlus\Tables\Partials\AbstractTable;
-use DrdPlus\Theurgist\Codes\AbstractTheurgistCode;
+use DrdPlus\Codes\Theurgist\AbstractTheurgistCode;
 use DrdPlus\Theurgist\Spells\SpellParameters\Attack;
 use Granam\String\StringTools;
 use Granam\Tests\Tools\TestWithMockery;

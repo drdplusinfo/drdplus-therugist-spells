@@ -3,7 +3,7 @@ declare(strict_types = 1);
 
 namespace DrdPlus\Theurgist\Spells\SpellParameters;
 
-use DrdPlus\Theurgist\Codes\AffectionPeriodCode;
+use DrdPlus\Codes\Theurgist\AffectionPeriodCode;
 use DrdPlus\Theurgist\Spells\SpellParameters\Partials\GetParameterNameTrait;
 use Granam\Integer\NegativeInteger;
 use Granam\Integer\Tools\ToInteger;

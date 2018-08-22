@@ -1,12 +1,12 @@
 <?php
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace DrdPlus\Theurgist\Spells;
 
 use DrdPlus\Tables\Partials\AbstractFileTable;
-use DrdPlus\Theurgist\Codes\FormulaCode;
-use DrdPlus\Theurgist\Codes\ModifierCode;
-use DrdPlus\Theurgist\Codes\SpellTraitCode;
+use DrdPlus\Codes\Theurgist\FormulaCode;
+use DrdPlus\Codes\Theurgist\ModifierCode;
+use DrdPlus\Codes\Theurgist\SpellTraitCode;
 use DrdPlus\Theurgist\Spells\SpellParameters\DifficultyChange;
 use DrdPlus\Theurgist\Spells\SpellParameters\Trap;
 
@@ -19,10 +19,10 @@ class SpellTraitsTable extends AbstractFileTable
         return __DIR__ . '/data/spell_traits.csv';
     }
 
-    const FORMULAS = 'formulas';
-    const MODIFIERS = 'modifiers';
-    const DIFFICULTY_CHANGE = 'difficulty_change';
-    const TRAP = 'trap';
+    public const FORMULAS = 'formulas';
+    public const MODIFIERS = 'modifiers';
+    public const DIFFICULTY_CHANGE = 'difficulty_change';
+    public const TRAP = 'trap';
 
     protected function getExpectedDataHeaderNamesToTypes(): array
     {
@@ -34,7 +34,7 @@ class SpellTraitsTable extends AbstractFileTable
         ];
     }
 
-    const TRAIT = 'trait';
+    public const TRAIT = 'trait';
 
     protected function getRowsHeader(): array
     {
@@ -47,8 +47,7 @@ class SpellTraitsTable extends AbstractFileTable
      */
     public function getFormulas(SpellTraitCode $traitCode): array
     {
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return array_map(
+        return \array_map(
             function (string $formulaValue) {
                 return FormulaCode::getIt($formulaValue);
             },
@@ -62,8 +61,7 @@ class SpellTraitsTable extends AbstractFileTable
      */
     public function getModifiers(SpellTraitCode $traitCode): array
     {
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-        return array_map(
+        return \array_map(
             function (string $modifierValue) {
                 return ModifierCode::getIt($modifierValue);
             },
@@ -77,7 +75,6 @@ class SpellTraitsTable extends AbstractFileTable
      */
     public function getDifficultyChange(SpellTraitCode $spellTraitCode): DifficultyChange
     {
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new DifficultyChange($this->getValue($spellTraitCode, self::DIFFICULTY_CHANGE));
     }
 
@@ -92,7 +89,6 @@ class SpellTraitsTable extends AbstractFileTable
             $sumOfDifficultyChange += $this->getDifficultyChange($spellTraitCode)->getValue();
         }
 
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new DifficultyChange($sumOfDifficultyChange);
     }
 
@@ -100,15 +96,13 @@ class SpellTraitsTable extends AbstractFileTable
      * @param SpellTraitCode $traitCode
      * @return Trap|null
      */
-    public function getTrap(SpellTraitCode $traitCode)
+    public function getTrap(SpellTraitCode $traitCode): ?Trap
     {
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         $trapValues = $this->getValue($traitCode, self::TRAP);
-        if (count($trapValues) === 0) {
+        if (\count($trapValues) === 0) {
             return null;
         }
 
-        /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
         return new Trap($trapValues);
     }
 

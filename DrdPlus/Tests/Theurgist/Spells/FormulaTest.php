@@ -4,10 +4,10 @@ declare(strict_types=1);
 namespace DrdPlus\Tests\Theurgist\Spells;
 
 use DrdPlus\Tables\Measurements\Distance\DistanceTable;
-use DrdPlus\Theurgist\Codes\AffectionPeriodCode;
-use DrdPlus\Theurgist\Codes\FormulaCode;
-use DrdPlus\Theurgist\Codes\FormulaMutableSpellParameterCode;
-use DrdPlus\Theurgist\Codes\ModifierCode;
+use DrdPlus\Codes\Theurgist\AffectionPeriodCode;
+use DrdPlus\Codes\Theurgist\FormulaCode;
+use DrdPlus\Codes\Theurgist\FormulaMutableSpellParameterCode;
+use DrdPlus\Codes\Theurgist\ModifierCode;
 use DrdPlus\Theurgist\Spells\SpellParameters\AdditionByDifficulty;
 use DrdPlus\Theurgist\Spells\SpellParameters\CastingRounds;
 use DrdPlus\Theurgist\Spells\SpellParameters\DifficultyChange;

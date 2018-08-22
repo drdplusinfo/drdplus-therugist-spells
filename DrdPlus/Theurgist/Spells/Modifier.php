@@ -1,10 +1,10 @@
 <?php
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace DrdPlus\Theurgist\Spells;
 
-use DrdPlus\Theurgist\Codes\ModifierCode;
-use DrdPlus\Theurgist\Codes\ModifierMutableSpellParameterCode;
+use DrdPlus\Codes\Theurgist\ModifierCode;
+use DrdPlus\Codes\Theurgist\ModifierMutableSpellParameterCode;
 use DrdPlus\Theurgist\Spells\SpellParameters\Attack;
 use DrdPlus\Theurgist\Spells\SpellParameters\CastingRounds;
 use DrdPlus\Theurgist\Spells\SpellParameters\Noise;
@@ -105,7 +105,7 @@ class Modifier extends StrictObject
 
             unset($spellParameterValues[$mutableSpellParameter]);
         }
-        if (count($spellParameterValues) > 0) { // there are some remains
+        if (\count($spellParameterValues) > 0) { // there are some remains
             throw new Exceptions\UnknownModifierParameter(
                 'Unexpected mutable spell parameter(s) [' . implode(', ', array_keys($spellParameterValues)) . ']. Expected only '
                 . implode(', ', ModifierMutableSpellParameterCode::getPossibleValues())
@@ -125,7 +125,7 @@ class Modifier extends StrictObject
         foreach ($spellTraits as $spellTrait) {
             if (!is_a($spellTrait, SpellTrait::class)) {
                 throw new Exceptions\InvalidSpellTrait(
-                    'Expected instance of ' . Modifier::class . ', got ' . ValueDescriber::describe($spellTrait)
+                    'Expected instance of ' . static::class . ', got ' . ValueDescriber::describe($spellTrait)
                 );
             }
         }
@@ -198,7 +198,7 @@ class Modifier extends StrictObject
     /**
      * @return RealmsAffection|null
      */
-    public function getRealmsAffection():? RealmsAffection
+    public function getRealmsAffection(): ?RealmsAffection
     {
         return $this->modifiersTable->getRealmsAffection($this->getModifierCode());
     }
@@ -206,7 +206,7 @@ class Modifier extends StrictObject
     /**
      * @return Radius|null
      */
-    public function getBaseRadius():? Radius
+    public function getBaseRadius(): ?Radius
     {
         return $this->modifiersTable->getRadius($this->modifierCode);
     }
@@ -214,7 +214,7 @@ class Modifier extends StrictObject
     /**
      * @return Radius|null
      */
-    public function getRadiusWithAddition():? Radius
+    public function getRadiusWithAddition(): ?Radius
     {
         $baseRadius = $this->getBaseRadius();
         if ($baseRadius === null) {
@@ -232,7 +232,7 @@ class Modifier extends StrictObject
     /**
      * @return EpicenterShift|null
      */
-    public function getBaseEpicenterShift():? EpicenterShift
+    public function getBaseEpicenterShift(): ?EpicenterShift
     {
         return $this->modifiersTable->getEpicenterShift($this->modifierCode);
     }
@@ -240,7 +240,7 @@ class Modifier extends StrictObject
     /**
      * @return EpicenterShift|null
      */
-    public function getEpicenterShiftWithAddition():? EpicenterShift
+    public function getEpicenterShiftWithAddition(): ?EpicenterShift
     {
         $baseEpicenterShift = $this->getBaseEpicenterShift();
         if ($baseEpicenterShift === null) {
@@ -258,7 +258,7 @@ class Modifier extends StrictObject
     /**
      * @return Power|null
      */
-    public function getBasePower():? Power
+    public function getBasePower(): ?Power
     {
         return $this->modifiersTable->getPower($this->modifierCode);
     }
@@ -266,7 +266,7 @@ class Modifier extends StrictObject
     /**
      * @return Power|null
      */
-    public function getPowerWithAddition():? Power
+    public function getPowerWithAddition(): ?Power
     {
         $basePower = $this->getBasePower();
         if ($basePower === null) {
@@ -284,7 +284,7 @@ class Modifier extends StrictObject
     /**
      * @return Noise|null
      */
-    public function getBaseNoise():? Noise
+    public function getBaseNoise(): ?Noise
     {
         return $this->modifiersTable->getNoise($this->modifierCode);
     }
@@ -292,7 +292,7 @@ class Modifier extends StrictObject
     /**
      * @return Noise|null
      */
-    public function getNoiseWithAddition():? Noise
+    public function getNoiseWithAddition(): ?Noise
     {
         $baseNoise = $this->getBaseNoise();
         if ($baseNoise === null) {
@@ -310,7 +310,7 @@ class Modifier extends StrictObject
     /**
      * @return Attack|null
      */
-    public function getBaseAttack():? Attack
+    public function getBaseAttack(): ?Attack
     {
         return $this->modifiersTable->getAttack($this->modifierCode);
     }
@@ -318,7 +318,7 @@ class Modifier extends StrictObject
     /**
      * @return Attack|null
      */
-    public function getAttackWithAddition():? Attack
+    public function getAttackWithAddition(): ?Attack
     {
         $baseAttack = $this->getBaseAttack();
         if ($baseAttack === null) {
@@ -336,7 +336,7 @@ class Modifier extends StrictObject
     /**
      * @return Grafts|null
      */
-    public function getBaseGrafts():? Grafts
+    public function getBaseGrafts(): ?Grafts
     {
         return $this->modifiersTable->getGrafts($this->modifierCode);
     }
@@ -344,7 +344,7 @@ class Modifier extends StrictObject
     /**
      * @return Grafts|null
      */
-    public function getGraftsWithAddition():? Grafts
+    public function getGraftsWithAddition(): ?Grafts
     {
         $baseGrafts = $this->getBaseGrafts();
         if ($baseGrafts === null) {
@@ -362,7 +362,7 @@ class Modifier extends StrictObject
     /**
      * @return SpellSpeed|null
      */
-    public function getBaseSpellSpeed():? SpellSpeed
+    public function getBaseSpellSpeed(): ?SpellSpeed
     {
         return $this->modifiersTable->getSpellSpeed($this->modifierCode);
     }
@@ -370,7 +370,7 @@ class Modifier extends StrictObject
     /**
      * @return SpellSpeed|null
      */
-    public function getSpellSpeedWithAddition():? SpellSpeed
+    public function getSpellSpeedWithAddition(): ?SpellSpeed
     {
         $baseSpellSpeed = $this->getBaseSpellSpeed();
         if ($baseSpellSpeed === null) {
@@ -388,7 +388,7 @@ class Modifier extends StrictObject
     /**
      * @return Invisibility|null
      */
-    public function getBaseInvisibility():? Invisibility
+    public function getBaseInvisibility(): ?Invisibility
     {
         return $this->modifiersTable->getInvisibility($this->modifierCode);
     }
@@ -396,7 +396,7 @@ class Modifier extends StrictObject
     /**
      * @return Invisibility|null
      */
-    public function getInvisibilityWithAddition():? Invisibility
+    public function getInvisibilityWithAddition(): ?Invisibility
     {
         $baseInvisibility = $this->getBaseInvisibility();
         if ($baseInvisibility === null) {
@@ -414,7 +414,7 @@ class Modifier extends StrictObject
     /**
      * @return Quality|null
      */
-    public function getBaseQuality():? Quality
+    public function getBaseQuality(): ?Quality
     {
         return $this->modifiersTable->getQuality($this->modifierCode);
     }
@@ -422,7 +422,7 @@ class Modifier extends StrictObject
     /**
      * @return Quality|null
      */
-    public function getQualityWithAddition():? Quality
+    public function getQualityWithAddition(): ?Quality
     {
         $baseQuality = $this->getBaseQuality();
         if ($baseQuality === null) {
@@ -440,7 +440,7 @@ class Modifier extends StrictObject
     /**
      * @return NumberOfConditions|null
      */
-    public function getBaseNumberOfConditions():? NumberOfConditions
+    public function getBaseNumberOfConditions(): ?NumberOfConditions
     {
         return $this->modifiersTable->getNumberOfConditions($this->modifierCode);
     }
@@ -448,7 +448,7 @@ class Modifier extends StrictObject
     /**
      * @return NumberOfConditions|null
      */
-    public function getNumberOfConditionsWithAddition():? NumberOfConditions
+    public function getNumberOfConditionsWithAddition(): ?NumberOfConditions
     {
         $baseConditions = $this->getBaseNumberOfConditions();
         if ($baseConditions === null) {
@@ -466,7 +466,7 @@ class Modifier extends StrictObject
     /**
      * @return Resistance|null
      */
-    public function getBaseResistance():? Resistance
+    public function getBaseResistance(): ?Resistance
     {
         return $this->modifiersTable->getResistance($this->modifierCode);
     }
@@ -474,7 +474,7 @@ class Modifier extends StrictObject
     /**
      * @return Resistance|null
      */
-    public function getResistanceWithAddition():? Resistance
+    public function getResistanceWithAddition(): ?Resistance
     {
         $baseResistance = $this->getBaseResistance();
         if ($baseResistance === null) {
@@ -492,7 +492,7 @@ class Modifier extends StrictObject
     /**
      * @return NumberOfSituations|null
      */
-    public function getBaseNumberOfSituations():? NumberOfSituations
+    public function getBaseNumberOfSituations(): ?NumberOfSituations
     {
         return $this->modifiersTable->getNumberOfSituations($this->modifierCode);
     }
@@ -500,7 +500,7 @@ class Modifier extends StrictObject
     /**
      * @return NumberOfSituations|null
      */
-    public function getNumberOfSituationsWithAddition():? NumberOfSituations
+    public function getNumberOfSituationsWithAddition(): ?NumberOfSituations
     {
         $baseNumberOfSituations = $this->getBaseNumberOfSituations();
         if ($baseNumberOfSituations === null) {
@@ -518,7 +518,7 @@ class Modifier extends StrictObject
     /**
      * @return Threshold|null
      */
-    public function getBaseThreshold():? Threshold
+    public function getBaseThreshold(): ?Threshold
     {
         return $this->modifiersTable->getThreshold($this->modifierCode);
     }
@@ -526,7 +526,7 @@ class Modifier extends StrictObject
     /**
      * @return Threshold|null
      */
-    public function getThresholdWithAddition():? Threshold
+    public function getThresholdWithAddition(): ?Threshold
     {
         $baseThreshold = $this->getBaseThreshold();
         if ($baseThreshold === null) {
@@ -544,7 +544,7 @@ class Modifier extends StrictObject
     /**
      * @return NumberOfWaypoints|null
      */
-    public function getBaseNumberOfWaypoints():? NumberOfWaypoints
+    public function getBaseNumberOfWaypoints(): ?NumberOfWaypoints
     {
         return $this->modifiersTable->getNumberOfWaypoints($this->modifierCode);
     }
@@ -552,7 +552,7 @@ class Modifier extends StrictObject
     /**
      * @return NumberOfWaypoints|null
      */
-    public function getNumberOfWaypointsWithAddition():? NumberOfWaypoints
+    public function getNumberOfWaypointsWithAddition(): ?NumberOfWaypoints
     {
         $baseNumberOfWaypoints = $this->getBaseNumberOfWaypoints();
         if ($baseNumberOfWaypoints === null) {
@@ -569,6 +569,6 @@ class Modifier extends StrictObject
 
     public function __toString()
     {
-        return (string)$this->getModifierCode()->getValue();
+        return $this->getModifierCode()->getValue();
     }
 }

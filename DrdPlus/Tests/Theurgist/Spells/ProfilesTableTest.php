@@ -4,9 +4,9 @@ declare(strict_types = 1);
 namespace DrdPlus\Tests\Theurgist\Spells;
 
 use DrdPlus\Tables\Tables;
-use DrdPlus\Theurgist\Codes\FormulaCode;
-use DrdPlus\Theurgist\Codes\ModifierCode;
-use DrdPlus\Theurgist\Codes\ProfileCode;
+use DrdPlus\Codes\Theurgist\FormulaCode;
+use DrdPlus\Codes\Theurgist\ModifierCode;
+use DrdPlus\Codes\Theurgist\ProfileCode;
 use DrdPlus\Theurgist\Spells\SpellTraitsTable;
 use DrdPlus\Theurgist\Spells\FormulasTable;
 use DrdPlus\Theurgist\Spells\ModifiersTable;

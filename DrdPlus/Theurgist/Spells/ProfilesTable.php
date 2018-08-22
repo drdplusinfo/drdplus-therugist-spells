@@ -1,13 +1,13 @@
 <?php
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace DrdPlus\Theurgist\Spells;
 
 use DrdPlus\Tables\Partials\AbstractFileTable;
 use DrdPlus\Tables\Partials\Exceptions\RequiredRowNotFound;
-use DrdPlus\Theurgist\Codes\FormulaCode;
-use DrdPlus\Theurgist\Codes\ModifierCode;
-use DrdPlus\Theurgist\Codes\ProfileCode;
+use DrdPlus\Codes\Theurgist\FormulaCode;
+use DrdPlus\Codes\Theurgist\ModifierCode;
+use DrdPlus\Codes\Theurgist\ProfileCode;
 
 class ProfilesTable extends AbstractFileTable
 {
@@ -16,8 +16,8 @@ class ProfilesTable extends AbstractFileTable
         return __DIR__ . '/data/profiles.csv';
     }
 
-    const MODIFIERS = 'modifiers';
-    const FORMULAS = 'formulas';
+    public const MODIFIERS = 'modifiers';
+    public const FORMULAS = 'formulas';
 
     protected function getExpectedDataHeaderNamesToTypes(): array
     {
@@ -27,7 +27,7 @@ class ProfilesTable extends AbstractFileTable
         ];
     }
 
-    const PROFILE = 'profile';
+    public const PROFILE = 'profile';
 
     protected function getRowsHeader(): array
     {
@@ -44,8 +44,7 @@ class ProfilesTable extends AbstractFileTable
     public function getModifiersForProfile(ProfileCode $profileCode): array
     {
         try {
-            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-            return array_map(
+            return \array_map(
                 function (string $modifierValue) {
                     return ModifierCode::getIt($modifierValue);
                 },
@@ -64,8 +63,7 @@ class ProfilesTable extends AbstractFileTable
     public function getFormulasForProfile(ProfileCode $profileCode): array
     {
         try {
-            /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-            return array_map(
+            return \array_map(
                 function (string $formulaValue) {
                     return FormulaCode::getIt($formulaValue);
                 },

@@ -3,7 +3,7 @@ declare(strict_types = 1);
 
 namespace DrdPlus\Tests\Theurgist\Spells;
 
-use DrdPlus\Theurgist\Codes\SpellTraitCode;
+use DrdPlus\Codes\Theurgist\SpellTraitCode;
 use DrdPlus\Theurgist\Spells\SpellParameters\AdditionByDifficulty;
 use DrdPlus\Theurgist\Spells\SpellParameters\DifficultyChange;
 use DrdPlus\Theurgist\Spells\SpellParameters\Trap;

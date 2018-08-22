@@ -1,16 +1,16 @@
 <?php
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace DrdPlus\Tests\Theurgist\Spells;
 
 use DrdPlus\Codes\Units\TimeUnitCode;
 use DrdPlus\Tables\Measurements\Time\Time;
 use DrdPlus\Tables\Tables;
-use DrdPlus\Theurgist\Codes\FormCode;
-use DrdPlus\Theurgist\Codes\FormulaCode;
-use DrdPlus\Theurgist\Codes\ModifierCode;
-use DrdPlus\Theurgist\Codes\ProfileCode;
-use DrdPlus\Theurgist\Codes\SpellTraitCode;
+use DrdPlus\Codes\Theurgist\FormCode;
+use DrdPlus\Codes\Theurgist\FormulaCode;
+use DrdPlus\Codes\Theurgist\ModifierCode;
+use DrdPlus\Codes\Theurgist\ProfileCode;
+use DrdPlus\Codes\Theurgist\SpellTraitCode;
 use DrdPlus\Theurgist\Spells\SpellParameters\CastingRounds;
 use DrdPlus\Theurgist\Spells\FormulasTable;
 use DrdPlus\Theurgist\Spells\ModifiersTable;
@@ -18,6 +18,7 @@ use DrdPlus\Theurgist\Spells\ProfilesTable;
 
 class FormulasTableTest extends AbstractTheurgistTableTest
 {
+
     /**
      * @var ModifiersTable
      */
@@ -25,7 +26,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
 
     protected function setUp(): void
     {
-        $this->modifiersTable = new ModifiersTable(Tables::getIt());
+        $this->modifiersTable = new ModifiersTable();
     }
 
     /**
@@ -189,7 +190,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $formulasTable = new FormulasTable();
         foreach (FormulaCode::getPossibleValues() as $formulaValue) {
             $modifierCodes = $formulasTable->getModifierCodes(FormulaCode::getIt($formulaValue));
-            self::assertTrue(is_array($modifierCodes));
+            self::assertInternalType('array', $modifierCodes);
             self::assertNotEmpty($modifierCodes);
             $collectedModifierValues = [];
             /** @var ModifierCode $modifierCode */
@@ -319,7 +320,7 @@ class FormulasTableTest extends AbstractTheurgistTableTest
         $formulasTable = new FormulasTable();
         foreach (FormulaCode::getPossibleValues() as $formulaValue) {
             $profileCodes = $formulasTable->getProfiles(FormulaCode::getIt($formulaValue));
-            self::assertTrue(is_array($profileCodes));
+            self::assertInternalType('array', $profileCodes);
             self::assertNotEmpty($profileCodes);
             $profileValues = [];
             foreach ($profileCodes as $profileCode) {

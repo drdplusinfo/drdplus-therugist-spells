@@ -4,8 +4,8 @@ declare(strict_types = 1);
 namespace DrdPlus\Tests\Theurgist\Spells;
 
 use DrdPlus\Tables\Tables;
-use DrdPlus\Theurgist\Codes\ModifierCode;
-use DrdPlus\Theurgist\Codes\ModifierMutableSpellParameterCode;
+use DrdPlus\Codes\Theurgist\ModifierCode;
+use DrdPlus\Codes\Theurgist\ModifierMutableSpellParameterCode;
 use DrdPlus\Theurgist\Spells\SpellParameters\AdditionByDifficulty;
 use DrdPlus\Theurgist\Spells\SpellParameters\CastingRounds;
 use DrdPlus\Theurgist\Spells\SpellParameters\DifficultyChange;

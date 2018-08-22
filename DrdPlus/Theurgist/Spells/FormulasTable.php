@@ -5,11 +5,11 @@ namespace DrdPlus\Theurgist\Spells;
 
 use DrdPlus\Tables\Partials\AbstractFileTable;
 use DrdPlus\Tables\Partials\Exceptions\RequiredRowNotFound;
-use DrdPlus\Theurgist\Codes\FormCode;
-use DrdPlus\Theurgist\Codes\FormulaCode;
-use DrdPlus\Theurgist\Codes\ModifierCode;
-use DrdPlus\Theurgist\Codes\ProfileCode;
-use DrdPlus\Theurgist\Codes\SpellTraitCode;
+use DrdPlus\Codes\Theurgist\FormCode;
+use DrdPlus\Codes\Theurgist\FormulaCode;
+use DrdPlus\Codes\Theurgist\ModifierCode;
+use DrdPlus\Codes\Theurgist\ProfileCode;
+use DrdPlus\Codes\Theurgist\SpellTraitCode;
 use DrdPlus\Theurgist\Spells\SpellParameters\CastingRounds;
 use DrdPlus\Theurgist\Spells\SpellParameters\RealmsAffection;
 use DrdPlus\Theurgist\Spells\SpellParameters\Attack;
